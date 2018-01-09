@@ -114,7 +114,7 @@ class LmdPdf(object):
     
         dim: int, number of orbital scaling parameters considered
         
-        n: int, number of gridpoints used. 
+        n_points: int, number of gridpoints used. 
         
         oned_vals: double, dim-length list of one dimensional grids, one 
             for each lambda. 
@@ -169,7 +169,7 @@ class LmdPdf(object):
         self.tags = tags
         self.resolution = resolution
         self.dim = len(resolution)  
-        self.n = np.prod(resolution)
+        self.n_points = np.prod(resolution)
         self.range = rng
         oned_grids = []
         for i in range(self.dim):
@@ -182,19 +182,50 @@ class LmdPdf(object):
         self.qois = output_qois
     
         
-    def construct_gridfunctions(self):
+    def construct_interpolants(self):
         """
         """
-        pass
-
-
-    def compute_outputs(self, point, qoi_list):
+        #
+        # Compute Qoi's at all grid points.
+        # 
+        n_qois = len(self.qois)
+        qoi_vals = np.empty((self.n_points, n_qois))
+        for i in range(self.n):
+            point = self.vals[i,:]
+            qoi_vals[i,:] = self.map_to_qois(point)
+        # Store values
+        self.qoi_vals = qoi_vals
+        
+        interpolants = []
+        grid_functions = []
+        for j in range(n_qois):
+            #
+            # Interpolate j'th output for quantity of interest
+            #
+            qoi_vals_grid = np.reshape(qoi_vals[:,j], self.resolution)
+            f = RegularGridInterpolator(tuple(self.oned_grids), qoi_vals_grid, 
+                                        bounds_error=False)
+            interpolants.append(f)
+            
+            #
+            # Estimate Grid Functions
+            # 
+            n_intervals = tuple([i-1 for i in self.resolution])
+            bnd = self.range
+            g = GridFunction(bnd, n_intervals, f)
+            grid_functions.append(g)
+            
+        self.interpolants = interpolants
+        self.grid_functions = grid_functions
+           
+        
+    def map_to_qois(self, point):
         """
         Returns the 
         
         Input:
             
-            point: double, (dim,) array specifying the sample point
+            point: double, (dim,) array specifying a single sample point
         
             qoi_list: Qoi, list of quantities of interest to be computed
             
@@ -206,7 +237,7 @@ class LmdPdf(object):
         """
         tags = self.tags.copy()
         point = list(point)
-        n_qois = len(qoi_list)
+        n_qois = len(self.qois)
         #
         # Modify lambda parameters in autostructure input file
         #     
@@ -237,25 +268,26 @@ class LmdPdf(object):
         #
         with open('born/adf04ic','r') as infile:
             # Initialize temporary storage
-            qoi_data = [None]*n_qois
-            
+            qoi_vals = [None]*n_qois
+            qoi_extracted = [False]*n_qois
             for line in infile:
-                while len(qoi_list) > 0: 
+                while not all(qoi_extracted): 
                     #
                     # Extract computed qoi
                     #
                     for i in range(n_qois):
-                        if qoi_list[i].search_label in line:
+                        if self.qois[i].search_label in line:
                             #
                             # Found Qoi in file
                             # 
-                            qoi = qoi_list.pop(i)
+                            qoi = self.qois[i]
                             words = line.split() 
                             if qoi.category == 'Energy':
                                 #
                                 # Energy
                                 #
-                                qoi_data[i] = float(words[-1])
+                                qoi_vals[i] = float(words[-1])
+                                qoi_extracted[i] = True
                                 break 
                             elif qoi.category == 'A-value':
                                 #
@@ -268,7 +300,8 @@ class LmdPdf(object):
                                 aval = words[2]
                                 dec_pos = aval.find('.')
                                 a = float(aval[:dec_pos+3] + 'e' + aval[dec_pos+3:])
-                                qoi_data[i] = a
+                                qoi_vals[i] = a
+                                qoi_extracted[i] = True
                                 break        
                      
         
