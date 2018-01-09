@@ -305,7 +305,7 @@ class LmdPdf(object):
                                 break        
                      
         
-    def sample(self):
+    def get_qoi_index(self):
         """
         """
         pass
