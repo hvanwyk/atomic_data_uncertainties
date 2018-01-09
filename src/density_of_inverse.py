@@ -16,7 +16,7 @@ import math
 from itertools import chain, combinations, product
 from numbers import Number 
 import scipy.sparse as sp
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D # @UnresolvedImport
 
 # ============================================================================
 # Classes
@@ -194,9 +194,11 @@ class BlockFunction:
             x_min = xv[i_min] if self.__is_1d else xv[:,i_min]
             x_max = xv[i_max] if self.__is_1d else xv[:,i_max]
             return x_min, Lv[i_min], x_max, Lv[i_max]
+        elif min_or_max == 'range':
+            return Lv[i_min], Lv[i_max]
         else: 
             raise Exception('Variable min_or_max can be "min", ' + \
-                            '"max", or "both".')
+                            '"max", "range", or "both".')
                
         
     def evaluate(self, x):
@@ -567,9 +569,11 @@ class GridFunction():
         
         Input:
             
-            min_or_max: str, 'min', 'max' or 'both' if min/max/or both extrema
-                are sought. Note, all quantities are computed regardless of 
-                this string. 
+            min_or_max: str, 'min', 'max', 'both', or 'range' 
+                Note: If 'min', 'max', or 'both', the function returns the 
+                    location, function value, and block containing the global
+                    extrem(um/a). If 'range', the function only returns the
+                    minimum and maximum function values.
                 
         
         Output:
@@ -619,9 +623,11 @@ class GridFunction():
             return x_max, f_max, b_max
         elif min_or_max == 'both':
             return x_min, f_min, b_min, x_max, f_max, b_max
+        elif min_or_max == 'range':
+            return f_min, f_max
         else:
-            raise Exception('Use either "min", "max", or "both" for ' + \
-                            'input "min_or_max".')
+            raise Exception('Use either "min", "max", "range", or ' + \
+                            '"both" for input "min_or_max".')
 
 
     def monotone_path(self, x, address, direction='up'):
@@ -962,7 +968,6 @@ def test_01():
 def test_02():
     """
     Test the computation of volumes of slabs
-    FIXME: vol_halfspace_unitcube is now a BlockFunction method.
     """    
     # ------------------------------------------------------------------------
     # Test: vol_halfspace_unitcube
