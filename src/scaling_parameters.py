@@ -30,6 +30,8 @@ from scipy.stats import norm
 # Density estimation
 from density_of_inverse import GridFunction
 
+import matplotlib.pyplot as plt
+
 
 class Qoi(object):
     """
@@ -109,43 +111,167 @@ class LmdPdf(object):
 
 
     Attributes:
+    
+        dim: int, number of orbital scaling parameters considered
+        
+        n: int, number of gridpoints used. 
+        
+        oned_vals: double, dim-length list of one dimensional grids, one 
+            for each lambda. 
+        
+        path_to_input: str, path to input file used to call the perl script
+            samples the adas code.
 
+        qois: Qoi, list of quantities of interest (energies and A-values) 
+            dependent on lambda. 
+        
+        range: double, (dim,2) array, the ith row of which contains the
+            endpoints for the ith component of lambda
+        
+        resolution: int, dim-tuple specifying the number of cells in grid
+            for each direction
 
+        tags: str/int, list of dim names used to identify scaling parameters.
+        
+        vals: double, (n,dim) array of lambda values on the grid.
+        
+        
     Methods: 
 
+        compute_output_qois: 
 
+        construct_grid_functions:
+        
+        
     
     """
-    def __init__(self, lmd_tag, lmd_range, lmd_resolution, 
-                 path_to_input_file, output_qoi):
+    def __init__(self, tags, rng, resolution, 
+                 path_to_input_file, output_qois):
         """
         Constructor: 
 
 
         Inputs:
             
-            lmd_tag: str/int, list of dim names used to identify scaling 
-                parameter.
+            tags: str/int, list of dim names used to identify scaling parameters.
 
-            lmd_range: double, (dim,2) array the ith row of which specifies the
-                range of the ith lambda parameter. 
+            rng: double, (dim,2) array the ith row of which specifies the range
+                of the ith lambda parameter. 
 
-            lmd_resolution: int, dim-tuple specifying the number of subintervals
+            resolution: int, dim-tuple specifying the number of subintervals
                 for each lambda parameter. 
             
             path_to_input_file: str, path to input file used by the adas code.
 
-            output_qoi: Qoi, list of quantities of interest
+            output_qois: Qoi, list of quantities of interest 
             
         """
+        self.tags = tags
+        self.resolution = resolution
+        self.dim = len(resolution)  
+        self.n = np.prod(resolution)
+        self.range = rng
+        oned_grids = []
+        for i in range(self.dim):
+            oned_grids.append(np.linspace(self.range[i,0], self.range[i,1],\
+                             self.resolution[i]))
+        self.oned_vals = oned_grids
+        L = np.meshgrid(*oned_grids)
+        self.vals = np.array([L[i].ravel() for i in range(self.dim)]).T
+        self.path_to_input = path_to_input_file
+        self.qois = output_qois
+    
         
-
-    def gridfunction(self):
+    def construct_gridfunctions(self):
         """
         """
         pass
 
 
+    def compute_outputs(self, point, qoi_list):
+        """
+        Returns the 
+        
+        Input:
+            
+            point: double, (dim,) array specifying the sample point
+        
+            qoi_list: Qoi, list of quantities of interest to be computed
+            
+            
+        Output:
+        
+            qoi_vals: double, length-n list of quantities of interests
+                computed.
+        """
+        tags = self.tags.copy()
+        point = list(point)
+        n_qois = len(qoi_list)
+        #
+        # Modify lambda parameters in autostructure input file
+        #     
+        with open(self.path_to_input,'r+') as infile:
+            lines = infile.readlines()
+            infile.seek(0)
+            infile.truncate()
+            for line in lines:
+                modified = False
+                if len(tags)>0 and not modified:
+                    for j in range(len(tags)):
+                        if tags[j] + ' = ' in line:
+                            tag, l = tags.pop(j), point.pop(j)
+                            line = tag + ' = ' + str(l) + '\n'
+                            modified = True
+                            break
+                infile.write(line)
+        # 
+        # Call autostructure function
+        # 
+        # TODO: Suppress autostructure stdout
+        # TODO: Fix folder
+        subprocess.call(['../adas803.testern.pl', '--proc=pp ', 
+                         '--inp', '--born', 'input.dat', '8'])
+    
+        #
+        # Search output files for energies and A-values
+        #
+        with open('born/adf04ic','r') as infile:
+            # Initialize temporary storage
+            qoi_data = [None]*n_qois
+            
+            for line in infile:
+                while len(qoi_list) > 0: 
+                    #
+                    # Extract computed qoi
+                    #
+                    for i in range(n_qois):
+                        if qoi_list[i].search_label in line:
+                            #
+                            # Found Qoi in file
+                            # 
+                            qoi = qoi_list.pop(i)
+                            words = line.split() 
+                            if qoi.category == 'Energy':
+                                #
+                                # Energy
+                                #
+                                qoi_data[i] = float(words[-1])
+                                break 
+                            elif qoi.category == 'A-value':
+                                #
+                                # A-value
+                                #
+                                
+                                # To convert data to floats, we use the fact 
+                                # that A-values are stored to 2 decimals. This
+                                # may have to be changed in the generic case. 
+                                aval = words[2]
+                                dec_pos = aval.find('.')
+                                a = float(aval[:dec_pos+3] + 'e' + aval[dec_pos+3:])
+                                qoi_data[i] = a
+                                break        
+                     
+        
     def sample(self):
         """
         """
@@ -154,7 +280,7 @@ class LmdPdf(object):
     
 
 
-
+'''
 
 # =============================================================================
 # Import Libraries
@@ -483,5 +609,5 @@ for i in range(n_energies):
                          nist_energy_range[i,1], n_partition+1)                         
     g_energy[i].set_output_histogram(f_grid, f_prob)    
     g_energy[i].compute_histogram()
-
+'''
 
