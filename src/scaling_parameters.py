@@ -1,5 +1,9 @@
 """
+This module is used to estimate and sample from the joint density function
+of the atomic orbital scaling parameters. 
 
+The density function
+ 
 - specify lambda range and resolution
 - loop over lambda space
 - change the input data in "input.dat"
@@ -8,10 +12,153 @@
    
 - store a-values and energies in variables. 
 """
-# Change a comment
-# ------------------------------------------------------------------------------
+# =============================================================================
 # Import Libraries
-# ------------------------------------------------------------------------------
+# =============================================================================
+# System tools
+import os
+import sys
+import subprocess
+
+# Scientific Comptuting
+import numpy as np
+from scipy import linalg as la
+from scipy.interpolate import RegularGridInterpolator
+from itertools import product
+from scipy.stats import norm
+
+# Density estimation
+from density_of_inverse import GridFunction
+
+
+class Qoi(object):
+    """
+    Quantity of interest (such as an energy or A-value)
+
+
+    Attributes
+
+        category: 
+        
+        tag:
+        
+        search_label:
+        
+        nist_data:
+        
+        nist_rating:
+        
+
+    Methods
+    
+        compute_histogram: 
+        
+        
+    """
+    def __init__(self, category, tag, search_label, nist_data, nist_rating):
+        """
+        Constructor
+
+        Inputs:
+
+            category: str, 'A-value' or 'Energy'
+
+            tag: str/int used to identify specific qoi for user
+
+            search_label: str, used to search for qoi in adf04ic file
+
+            nist_data: double, nominal NIST value (from database)
+
+            nist_rating: str, rating for the estimated measurement error
+
+               'AAA': 0.003
+               'AA' : 0.01 
+               'A+' : 0.02 
+               'A'  : 0.03 
+               'B+' : 0.07 
+               'B'  : 0.1 
+               'C+' : 0.18
+               'C'  : 0.25
+               'D+' : 0.4 
+               'D'  : 0.5 
+               'E'  : 0.5
+        """
+        self.category = category
+        self.tag = tag
+        self.search_label = search_label
+        self.nist_data = nist_data
+        self.nist_rating = nist_rating
+
+
+    def set_histogram(self, density):
+        """
+        Compute the histogram
+        """
+        pass
+    
+    def sample(self, n):
+        """
+        Sample from density function associated with quantity
+        """
+        pass
+
+
+class LmdPdf(object):
+    """
+    Class for storing the joint distribution of orbital scaling parameters
+
+
+    Attributes:
+
+
+    Methods: 
+
+
+    
+    """
+    def __init__(self, lmd_tag, lmd_range, lmd_resolution, 
+                 path_to_input_file, output_qoi):
+        """
+        Constructor: 
+
+
+        Inputs:
+            
+            lmd_tag: str/int, list of dim names used to identify scaling 
+                parameter.
+
+            lmd_range: double, (dim,2) array the ith row of which specifies the
+                range of the ith lambda parameter. 
+
+            lmd_resolution: int, dim-tuple specifying the number of subintervals
+                for each lambda parameter. 
+            
+            path_to_input_file: str, path to input file used by the adas code.
+
+            output_qoi: Qoi, list of quantities of interest
+            
+        """
+        
+
+    def gridfunction(self):
+        """
+        """
+        pass
+
+
+    def sample(self):
+        """
+        """
+        pass
+    
+    
+
+
+
+
+# =============================================================================
+# Import Libraries
+# =============================================================================
 # System tools
 import os
 import sys
@@ -30,19 +177,19 @@ from itertools import product
 # Calibration
 sys.path.insert(0, '/home/hans-werner/Dropbox/work/projects/'+
                     'atomic_data_uncertainty/code/src/')
-from calibrate_density import GridFunction
+from density_of_inverse import GridFunction
 
 # Plotting tools
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
-# ==============================================================================
+# =============================================================================
 # Initialize
-# ==============================================================================
+# =============================================================================
 
-# ------------------------------------------------------------------------------
+# .............................................................................
 #  Scaling Parameters
-# ------------------------------------------------------------------------------
+# .............................................................................
 #
 # Initialize lambda dictionary
 #
@@ -92,9 +239,9 @@ energies['search_labels'] = ["1S1 2S1           (3)0( 1.0)",
                              "1S1 2S1           (1)0( 0.0)",
                              "1S1 2P1           (1)1( 1.0)"]
 
-# ------------------------------------------------------------------------------
+# ..............................................................................
 # A-Values
-# ------------------------------------------------------------------------------
+# ..............................................................................
 avalues = dict.fromkeys(['computed', 'dim', 'grid_functions', 'interpolants', 
                          'n', 'nist_data', 'nist_ratings', 'tags', 
                          'search_labels'])
@@ -117,9 +264,9 @@ avalues['search_labels'] = ["   2   1",
 # ==============================================================================
 path_to_input = 'input.dat'
 for i in range(lmd['n']):
-    # --------------------------------------------------------------------------
+    # ..........................................................................
     # Loop over lambda samples
-    # --------------------------------------------------------------------------
+    # ..........................................................................
     tags = lmd['tags'].copy()    
     lmd_sample = list(lmd['vals'][i,:])
     
