@@ -142,7 +142,8 @@ class LmdPdf(object):
 
         construct_grid_functions:
         
-        
+        get_qoi_index: Determine the position of a qoi in the "qois" list, based on
+            its category and tag. 
     
     """
     def __init__(self, tags, rng, resolution, 
@@ -303,6 +304,18 @@ class LmdPdf(object):
                                 qoi_vals[i] = a
                                 qoi_extracted[i] = True
                                 break        
+    
+    
+    def interpolate(self, points):
+        """
+        Use the interpolants constructed via "construct_interpolants" to 
+        interpolate the mapping from lambda parameters to qois.
+        
+        Inputs:
+        
+            points: double, (n, dim) array of points
+        """
+        pass
                      
         
     def get_qoi_index(self):
