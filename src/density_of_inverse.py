@@ -24,6 +24,13 @@ from mpl_toolkits.mplot3d import Axes3D # @UnresolvedImport
 class BlockFunction:
     """
     Function defined on a single Rectangular block
+    
+    Attributes:
+    
+     
+    
+    Methods:
+    
     """
     def __init__(self, x_bnd, f, dfdx, address=None):
         """
