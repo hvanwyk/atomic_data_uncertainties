@@ -45,17 +45,19 @@ class TestScalingParameters(unittest.TestCase):
             
         #
         # LmdPdf
-        # 
-        tags = ['1s', '2s', '2p']
-        rng = np.array([[0.8, 1.2], [0.8, 1.2], [0.8, 1.2]])
-        resolution = (2,2,2)
-        path_to_input = '/home/hans-werner/Dropbox/work/projects'+\
-                        '/atomic_data_uncertainty/code/icft/o_6/'
+        #
+        lmd_saved = False
+        if not lmd_saved:
+            tags = ['1s', '2s', '2p']
+            rng = np.array([[0.8, 1.2], [0.8, 1.2], [0.8, 1.2]])
+            resolution = (2,2,2)
+            path_to_input = '/home/hans-werner/Dropbox/work/projects'+\
+                            '/atomic_data_uncertainty/code/icft/o_6/'
          
-        lmd = LmdPdf(tags, rng, resolution, path_to_input, output_qois)
+            lmd = LmdPdf(tags, rng, resolution, path_to_input, output_qois)
         
         #
-        # Interpolants/gridfunctions
+        # Construct interpolants/grid_
         #
         # Constuct
         lmd.construct_interpolants()
