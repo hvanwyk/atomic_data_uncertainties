@@ -20,12 +20,17 @@ import os
 import sys
 import subprocess
 
+# Useful for debugging
+import logging
+logging.basicConfig(filename='debug.log', level=logging.DEBUG)
+
 # Scientific Comptuting
 import numpy as np
 from scipy import linalg as la
 from scipy.interpolate import RegularGridInterpolator
 from itertools import product
 from scipy.stats import norm
+import numbers
 
 # Density estimation
 from density_of_inverse import GridFunction
@@ -40,16 +45,27 @@ class Qoi(object):
 
     Attributes
 
-        category: 
+        category: str, 'A-value' or 'Energy' 
         
-        tag:
-        
-        search_label:
-        
-        nist_data:
-        
-        nist_rating:
-        
+        tag: str/int used to identify specific qoi for user
+
+        search_label: str, used to search for qoi in adf04ic file
+
+        nist_data: double, nominal NIST value (from database)
+
+        nist_rating: str, rating for the estimated measurement error
+
+           'AAA': 0.003
+           'AA' : 0.01 
+           'A+' : 0.02 
+           'A'  : 0.03 
+           'B+' : 0.07 
+           'B'  : 0.1 
+           'C+' : 0.18
+           'C'  : 0.25
+           'D+' : 0.4 
+           'D'  : 0.5 
+           'E'  : 0.5
 
     Methods
     
@@ -57,7 +73,8 @@ class Qoi(object):
         
         
     """
-    def __init__(self, category, tag, search_label, nist_data, nist_rating):
+    def __init__(self, category=None, tag=None, search_label=None, 
+                 nist_value=None, nist_rating=None):
         """
         Constructor
 
@@ -69,7 +86,7 @@ class Qoi(object):
 
             search_label: str, used to search for qoi in adf04ic file
 
-            nist_data: double, nominal NIST value (from database)
+            nist_value: double, nominal NIST value (from database)
 
             nist_rating: str, rating for the estimated measurement error
 
@@ -88,15 +105,16 @@ class Qoi(object):
         self.category = category
         self.tag = tag
         self.search_label = search_label
-        self.nist_data = nist_data
+        self.nist_value = nist_value
         self.nist_rating = nist_rating
 
 
     def set_histogram(self, density):
         """
-        Compute the histogram
+        Compute the histogram 
         """
         pass
+    
     
     def sample(self, n):
         """
@@ -138,12 +156,15 @@ class LmdPdf(object):
         
     Methods: 
 
-        compute_output_qois: 
+        compute_output_qois: Run the ADAS script to compute the quantities of
+            interest corresponding to a given value of lambda.
 
-        construct_grid_functions:
+        construct_grid_functions: Construct (linear) interpolants for 
+            the mappings from the lambda parameters to the quantities of
+            interest. 
         
-        get_qoi_index: Determine the position of a qoi in the "qois" list, based on
-            its category and tag. 
+        get_qoi_index: Returns the list index of a qoi for a given category 
+            and tag.
     
     """
     def __init__(self, tags, rng, resolution, 
@@ -162,8 +183,11 @@ class LmdPdf(object):
             resolution: int, dim-tuple specifying the number of subintervals
                 for each lambda parameter. 
             
-            path_to_input_file: str, path to input file used by the adas code.
+            path_to_input_file: str, path to the folder that contains the input
+                file used by the adas code.
 
+            path_adas_script: str, path file 
+            
             output_qois: Qoi, list of quantities of interest 
             
         """
@@ -172,6 +196,7 @@ class LmdPdf(object):
         self.dim = len(resolution)  
         self.n_points = np.prod(resolution)
         self.range = rng
+        
         oned_grids = []
         for i in range(self.dim):
             oned_grids.append(np.linspace(self.range[i,0], self.range[i,1],\
@@ -179,19 +204,24 @@ class LmdPdf(object):
         self.oned_vals = oned_grids
         L = np.meshgrid(*oned_grids)
         self.vals = np.array([L[i].ravel() for i in range(self.dim)]).T
+        
+        assert 'input.dat' in os.listdir(path_to_input_file), \
+            'The file "input.dat" should be contained in the directory.'
         self.path_to_input = path_to_input_file
+        
         self.qois = output_qois
     
         
     def construct_interpolants(self):
         """
+        Construct interpolating functions on the lambda grid
         """
         #
         # Compute Qoi's at all grid points.
         # 
         n_qois = len(self.qois)
         qoi_vals = np.empty((self.n_points, n_qois))
-        for i in range(self.n):
+        for i in range(self.n_points):
             point = self.vals[i,:]
             qoi_vals[i,:] = self.map_to_qois(point)
         # Store values
@@ -204,7 +234,7 @@ class LmdPdf(object):
             # Interpolate j'th output for quantity of interest
             #
             qoi_vals_grid = np.reshape(qoi_vals[:,j], self.resolution)
-            f = RegularGridInterpolator(tuple(self.oned_grids), qoi_vals_grid, 
+            f = RegularGridInterpolator(tuple(self.oned_vals), qoi_vals_grid, 
                                         bounds_error=False)
             interpolants.append(f)
             
@@ -218,8 +248,8 @@ class LmdPdf(object):
             
         self.interpolants = interpolants
         self.grid_functions = grid_functions
-           
         
+    
     def map_to_qois(self, point):
         """
         Returns the 
@@ -239,10 +269,11 @@ class LmdPdf(object):
         tags = self.tags.copy()
         point = list(point)
         n_qois = len(self.qois)
+        
         #
         # Modify lambda parameters in autostructure input file
         #     
-        with open(self.path_to_input,'r+') as infile:
+        with open(self.path_to_input+'input.dat','r+') as infile:
             lines = infile.readlines()
             infile.seek(0)
             infile.truncate()
@@ -256,31 +287,39 @@ class LmdPdf(object):
                             modified = True
                             break
                 infile.write(line)
+        logging.info('Modified "input.dat" file.')
         # 
         # Call autostructure function
         # 
         # TODO: Suppress autostructure stdout
-        # TODO: Fix folder
+        logging.info('Calling adas script.')
+        os.chdir(self.path_to_input)
         subprocess.call(['../adas803.testern.pl', '--proc=pp ', 
                          '--inp', '--born', 'input.dat', '8'])
-    
+        
         #
         # Search output files for energies and A-values
         #
+        logging.info('Opening adf04ic file')
         with open('born/adf04ic','r') as infile:
             # Initialize temporary storage
             qoi_vals = [None]*n_qois
             qoi_extracted = [False]*n_qois
             for line in infile:
-                while not all(qoi_extracted): 
+                if not all(qoi_extracted):
+                    logging.info('#Qois remaining: %d',\
+                                 n_qois-np.sum(qoi_extracted))
                     #
                     # Extract computed qoi
                     #
                     for i in range(n_qois):
+                        logging.info('Looking for %s', self.qois[i].search_label)
+                        logging.info('In line %s', line)
                         if self.qois[i].search_label in line:
                             #
                             # Found Qoi in file
                             # 
+                            logging.info('Found qoi in file.')
                             qoi = self.qois[i]
                             words = line.split() 
                             if qoi.category == 'Energy':
@@ -317,6 +356,8 @@ class LmdPdf(object):
         """
         pass
                      
+    
+    
         
     def get_qoi_index(self):
         """
