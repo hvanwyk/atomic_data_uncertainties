@@ -109,6 +109,12 @@ class Qoi(object):
         self.nist_rating = nist_rating
 
 
+    def get_stdev(self):
+        """
+        Returns the standard deviation, based on the NIST rating
+        """
+        return 1
+        
     def set_histogram(self, density):
         """
         Compute the histogram 
@@ -293,6 +299,7 @@ class LmdPdf(object):
         # 
         # TODO: Suppress autostructure stdout
         logging.info('Calling adas script.')
+        source_directory = os.getcwd()
         os.chdir(self.path_to_input)
         subprocess.call(['../adas803.testern.pl', '--proc=pp ', 
                          '--inp', '--born', 'input.dat', '8'])
@@ -343,8 +350,9 @@ class LmdPdf(object):
                                 qoi_vals[i] = a
                                 qoi_extracted[i] = True
                                 break        
-    
-    
+        os.chdir(source_directory)
+        return qoi_vals
+        
     def interpolate(self, points):
         """
         Use the interpolants constructed via "construct_interpolants" to 
@@ -359,10 +367,30 @@ class LmdPdf(object):
     
     
         
-    def get_qoi_index(self):
+    def get_qoi_index(self, category=None, tag=None, qoi=None):
         """
+        Return the index of the quantity of interest, based on its category and tag. 
+        
+        Input:
+        
+            category: str, 'A-value' or 'Energy'
+            
+            tag: str/int, marker used to identify specific energy or A-value 
+            
+            qoi: Qoi, object whose index is to be determined
         """
-        pass
+        if category is None or tag is None:
+            assert qoi is not None, \
+            'Either specify category and tag or Qoi object'
+            category = qoi.category
+            tag = qoi.tag
+            
+        n_qois = len(self.qois)
+        for i in range(n_qois):
+            qoi = self.qois[i]
+            if qoi.category==category and qoi.tag==tag:
+                return i
+        return None
     
     
 
