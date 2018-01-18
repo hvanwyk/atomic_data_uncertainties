@@ -82,14 +82,14 @@ output_qois = [e2, e3, e4, e5, e6, e7, a2, a5, a7]
 #
 # LmdPdf
 #
-lmd_saved = False
+lmd_saved = True
 if not lmd_saved:
     #
     # Initialize
     #
     tags = ['1s', '2s', '2p']
     rng = np.array([[0.8, 1.2], [0.8, 1.2], [0.8, 1.2]])
-    resolution = (2,2,2)
+    resolution = (20,20,20)
     path_to_input = '/home/hans-werner/Dropbox/work/projects'+\
                     '/atomic_data_uncertainty/code/icft/o_6/'
     lmd = LmdPdf(tags, rng, resolution, path_to_input, output_qois)
