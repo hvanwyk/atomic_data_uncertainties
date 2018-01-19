@@ -9,6 +9,6 @@ Systematic treatment of uncertainties in atomic structure.
 
 ## Third Party Software Packages
 
-[] Add detail
+[ ] Add detail
 
 We use the Bayesian analysis package ```emcee``` to estimate the distribution of the input parameters.
