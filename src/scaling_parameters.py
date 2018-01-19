@@ -109,6 +109,24 @@ class Qoi(object):
         self.nist_rating = nist_rating
 
 
+    def get_relerror(self):
+        """
+        Returns the NIST relative error or None if not available
+        """
+        rating_table = {'AAA': 0.003,
+                        'AA' : 0.01, 
+                        'A+' : 0.02, 
+                        'A'  : 0.03, 
+                        'B+' : 0.07, 
+                        'B'  : 0.1, 
+                        'C+' : 0.18,
+                        'C'  : 0.25,
+                        'D+' : 0.4, 
+                        'D'  : 0.5, 
+                        'E'  : 0.5}
+        return rating_table(self.nist_rating)
+
+
     def get_stdev(self):
         """
         Returns the standard deviation, based on the NIST rating
