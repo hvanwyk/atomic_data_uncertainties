@@ -34,6 +34,7 @@ import numbers
 
 # Density estimation
 from density_of_inverse import GridFunction
+import emcee
 
 import matplotlib.pyplot as plt
 
@@ -124,27 +125,37 @@ class Qoi(object):
                         'D+' : 0.4, 
                         'D'  : 0.5, 
                         'E'  : 0.5}
-        return rating_table(self.nist_rating)
+        return rating_table[self.nist_rating]
 
 
-    def get_stdev(self):
+    def get_stdev(self, stdev_per_halfwidth=3):
         """
         Returns the standard deviation, based on the NIST rating
-        """
-        return 1
         
-    def set_histogram(self, density):
+        Inputs:
+        
+            stdev_per_halfwidth: double, the number of standard deviations
+                constituting the half-width of the absolute error.
+                
+        Output:
+        
+            sgm: double, standard deviation
         """
-        Compute the histogram 
-        """
-        pass
+        r = self.get_relerror()
+        halfwidth = r*self.nist_value
+        sgm = halfwidth/stdev_per_halfwidth
+        return sgm
+        
     
+    def get_range(self):
+        """
+        Returns the NIST range for the given qoi
+        """
+        r = self.get_relerror()
+        y = self.nist_value
+        return np.array([(1-r)*y, (1+r)*y])
+        
     
-    def sample(self, n):
-        """
-        Sample from density function associated with quantity
-        """
-        pass
 
 
 class LmdPdf(object):
@@ -234,47 +245,37 @@ class LmdPdf(object):
         self.path_to_input = path_to_input_file
         
         self.qois = output_qois
+        self.n_qois = len(self.qois)
     
+    
+    def get_qoi_index(self, category=None, tag=None, qoi=None):
+        """
+        Return the index of the quantity of interest, based on its category and tag. 
         
-    def construct_interpolants(self):
+        Input:
+        
+            category: str, 'A-value' or 'Energy'
+            
+            tag: str/int, marker used to identify specific energy or A-value 
+            
+            qoi: Qoi, object whose index is to be determined
         """
-        Construct interpolating functions on the lambda grid
-        """
-        #
-        # Compute Qoi's at all grid points.
-        # 
+        if category is None or tag is None:
+            assert qoi is not None, \
+            'Either specify category and tag or Qoi object'
+            category = qoi.category
+            tag = qoi.tag
+            
         n_qois = len(self.qois)
-        qoi_vals = np.empty((self.n_points, n_qois))
-        for i in range(self.n_points):
-            point = self.vals[i,:]
-            qoi_vals[i,:] = self.map_to_qois(point)
-        # Store values
-        self.qoi_vals = qoi_vals
-        
-        interpolants = []
-        grid_functions = []
-        for j in range(n_qois):
-            #
-            # Interpolate j'th output for quantity of interest
-            #
-            qoi_vals_grid = np.reshape(qoi_vals[:,j], self.resolution)
-            f = RegularGridInterpolator(tuple(self.oned_vals), qoi_vals_grid, 
-                                        bounds_error=False)
-            interpolants.append(f)
-            
-            #
-            # Estimate Grid Functions
-            # 
-            n_intervals = tuple([i-1 for i in self.resolution])
-            bnd = self.range
-            g = GridFunction(bnd, n_intervals, f)
-            grid_functions.append(g)
-            
-        self.interpolants = interpolants
-        self.grid_functions = grid_functions
-        
+        for i in range(n_qois):
+            qoi = self.qois[i]
+            if qoi.category==category and qoi.tag==tag:
+                return i
+        return None
     
-    def map_to_qois(self, point):
+
+    
+    def map_lmd_to_qois(self, point):
         """
         Returns the 
         
@@ -290,14 +291,43 @@ class LmdPdf(object):
             qoi_vals: double, length-n list of quantities of interests
                 computed.
         """
+        #
+        # Modify input file to reflect current parameter values
+        #
+        path_to_input = self.path_to_input+'input.dat'
+        self.modify_input_file(point, path_to_input)
+        # 
+        # Call autostructure function
+        # 
+        os.chdir(self.path_to_input)
+        subprocess.call(['../adas803.testern.pl', '--proc=pp ', 
+                         '--inp', '--born', 'input.dat', '8'])
+        #
+        # Search output files for energies and A-values
+        #
+        path_to_output = self.path_to_input + 'born/adf04ic'
+        qoi_vals = self.get_qois_from_output_file(path_to_output)
+        
+        return qoi_vals
+    
+    
+    
+    def modify_input_file(self, point, path_to_input):
+        """
+        Generates the atomic structure input file, using the current lambdas
+        
+        Input:
+        
+            point: double (dim, ) vector of lambda parameters
+        
+        """
         tags = self.tags.copy()
         point = list(point)
-        n_qois = len(self.qois)
         
         #
         # Modify lambda parameters in autostructure input file
         #     
-        with open(self.path_to_input+'input.dat','r+') as infile:
+        with open(path_to_input,'r+') as infile:
             lines = infile.readlines()
             infile.seek(0)
             infile.truncate()
@@ -311,22 +341,22 @@ class LmdPdf(object):
                             modified = True
                             break
                 infile.write(line)
-        logging.info('Modified "input.dat" file.')
-        # 
-        # Call autostructure function
-        # 
-        # TODO: Suppress autostructure stdout
-        logging.info('Calling adas script.')
-        source_directory = os.getcwd()
-        os.chdir(self.path_to_input)
-        subprocess.call(['../adas803.testern.pl', '--proc=pp ', 
-                         '--inp', '--born', 'input.dat', '8'])
+                
+    
+                
+    def get_qois_from_output_file(self, path_to_output):
+        """
+        Extract values for quantities interest (qoi's) from output file
         
-        #
-        # Search output files for energies and A-values
-        #
-        logging.info('Opening adf04ic file')
-        with open('born/adf04ic','r') as infile:
+            Input:
+            
+                path_to_output: str, path to the 'adf04ic' output file
+        """
+        # Record current directory 
+        current_directory = os.getcwd()
+        
+        n_qois = len(self.qois)
+        with open(path_to_output,'r') as infile:
             # Initialize temporary storage
             qoi_vals = [None]*n_qois
             qoi_extracted = [False]*n_qois
@@ -367,51 +397,210 @@ class LmdPdf(object):
                                 a = float(aval[:dec_pos+3] + 'e' + aval[dec_pos+3:])
                                 qoi_vals[i] = a
                                 qoi_extracted[i] = True
-                                break        
-        os.chdir(source_directory)
-        return qoi_vals
+                                break
+                            
+        # Return to current directory   
+        os.chdir(current_directory)
         
-    def interpolate(self, points):
+        return qoi_vals
+     
+    
+            
+    def make_interpolants(self):
         """
-        Use the interpolants constructed via "construct_interpolants" to 
+        Construct interpolating functions on the lambda grid
+        """
+        #
+        # Compute Qoi's at all grid points.
+        # 
+        n_qois = len(self.qois)
+        qoi_vals = np.empty((self.n_points, n_qois))
+        for i in range(self.n_points):
+            point = self.vals[i,:]
+            qoi_vals[i,:] = self.map_lmd_to_qois(point)
+        # Store values
+        self.qoi_vals = qoi_vals
+        
+        interpolants = []
+        grid_functions = []
+        for j in range(n_qois):
+            #
+            # Interpolate j'th output for quantity of interest
+            #
+            qoi_vals_grid = np.reshape(qoi_vals[:,j], self.resolution)
+            f = RegularGridInterpolator(tuple(self.oned_vals), qoi_vals_grid, 
+                                        bounds_error=False)
+            interpolants.append(f)
+            
+            #
+            # Estimate Grid Functions
+            # 
+            n_intervals = tuple([i-1 for i in self.resolution])
+            bnd = self.range
+            g = GridFunction(bnd, n_intervals, f)
+            grid_functions.append(g)
+            
+        self.interpolants = interpolants
+        self.grid_functions = grid_functions
+        
+    
+        
+    def interpolate(self, points, qoi_indices=None):
+        """
+        Use the interpolants constructed via "make_interpolants" to 
         interpolate the mapping from lambda parameters to qois.
         
         Inputs:
         
             points: double, (n, dim) array of points
-        """
-        pass
-                     
-    
-    
-        
-    def get_qoi_index(self, category=None, tag=None, qoi=None):
-        """
-        Return the index of the quantity of interest, based on its category and tag. 
-        
-        Input:
-        
-            category: str, 'A-value' or 'Energy'
             
-            tag: str/int, marker used to identify specific energy or A-value 
-            
-            qoi: Qoi, object whose index is to be determined
+            qoi_indices: int, n_qois-list of qoi_indices whose values are to be 
+                interpolated.
+                
+                
+        Outputs: 
+        
+            fi: double, (n, n_qois) array of quantities of interest,
+                interpolated at the lambda values.  
         """
-        if category is None or tag is None:
-            assert qoi is not None, \
-            'Either specify category and tag or Qoi object'
-            category = qoi.category
-            tag = qoi.tag
+        if qoi_indices is None:
+            fi = [self.interpolants[i](points) for i in range(self.n_qois)] 
+        else:
+            assert all([type(qi) is np.int for qi in qoi_indices]),\
+            'Only integer indices allowed.'
             
-        n_qois = len(self.qois)
-        for i in range(n_qois):
-            qoi = self.qois[i]
-            if qoi.category==category and qoi.tag==tag:
-                return i
-        return None
-    
-    
+            assert np.max(qoi_indices)  < self.n_qois, \
+            'Maximum index number exceeds number of qois.'
+            
+            fi = [self.interpolants[i](points) for i in qoi_indices]
+            
+        return np.array(fi).transpose()
+            
 
+    def log_prior(self, point, density_type='uniform'):
+        """
+        Evaluate the prior distribution
+        
+        Inputs:
+        
+            point: double, (dim,) vector of inputs
+        
+            type: str, uniform
+        """
+        if density_type=='uniform':
+            #
+            # Uniform prior
+            # 
+            if all([point[i] >= self.range[i,0] and \
+                    point[i]<self.range[i,1] \
+                    for i in range(self.dim)]):
+                
+                p = np.prod(self.range[:,1]-self.range[:,0])
+                return -np.log(p)
+            else:
+                return -np.infty
+        
+        
+    def log_likelihood(self, point, qoi_indices, density_type='gaussian'):
+        """
+        Evaluate the likelihood function at a given point
+        
+        Inputs:
+        
+            point: double, (dim, ) array of lambda parameters
+            
+            qoi_indices: int, list of indices
+            
+            density_type: str, type of density for the error distribution
+                'uniform', or 'gaussian'. 
+                
+        Outputs: 
+        
+            log_pdf = sum_{i=1}^n_qois pdf_{i}(yi_nist-f(lmd))  
+        """
+        #
+        # Evaluate the forward mapping at the current point
+        # 
+        f_value = self.interpolate(point, qoi_indices).ravel()  
+        n_qois = len(qoi_indices)
+        if density_type == 'gaussian':
+            #
+            # Gaussian Likelihood
+            # 
+            ln_pdf = -0.5*n_qois*np.log(2*np.pi)
+            for i in range(n_qois):
+                qoi = self.qois[qoi_indices[i]]
+                sgm = qoi.get_stdev()
+                e   = qoi.nist_value - f_value[i]
+                ln_pdf -= np.log(sgm) + 0.5*(e/sgm)**2  
+                
+        elif density_type == 'uniform':
+            #
+            # Uniform Likelihood
+            # 
+            ln_pdf = 0
+            for i in range(n_qois):
+                qoi = self.qois[qoi_indices[i]]
+                rng = qoi.get_range()
+                e   = qoi.nist_value - f_value[i]
+                if e >= rng[0] and e <= rng[1]:
+                    ln_pdf -= np.log(rng[1]-rng[0])
+                else:
+                    # The deviation of one error exceeds range - impossible lmd
+                    ln_pdf = -np.infty
+                    break
+        return ln_pdf
+    
+        
+        
+    def log_posterior(self, point, qoi_indices, prior_type, likelihood_type):
+        """
+        Define the posterior
+        """
+        log_prior = self.log_prior(point, density_type=prior_type)
+        log_likelihood = self.log_likelihood(point, qoi_indices, \
+                                             density_type=likelihood_type)
+        
+        if not np.isfinite(log_prior) or not np.isfinite(log_likelihood):
+            return -np.infty
+        else:
+            return log_prior + log_likelihood
+    
+        
+    def sample_posterior(self, n_steps, n_walkers, qoi_indices, \
+                         prior_type, likelihood_type, n_burn_in, \
+                         return_histogram=False):
+        """
+        Sample from the posterior distribution 
+        """
+        # Specify the dimension of the input space and the number of starting points
+        n_dim = self.dim
+        
+        # Specify starting points for each Markov chain (in a tight ball around optimum)
+        pos = [np.array([1,1,1]) + 1e-4*np.random.randn(n_dim) for _ in range(n_walkers)]
+        
+        # Initialize the sampler
+        sampler = emcee.EnsembleSampler(n_walkers, n_dim, self.log_posterior, \
+                                        args=(qoi_indices, prior_type, likelihood_type))
+        
+        # Run the MCMC routine
+        sampler.run_mcmc(pos, n_steps);
+        
+        # The sampler.chain has shape (n_walkers, n_steps, n_dim).
+        # Reshape into a (n_walkers*n_steps,n_dim) array of samples. 
+        # Now thow away initial n_burn_in samples for each walker. 
+        samples = sampler.chain[:, n_burn_in:, :].reshape((-1, n_dim))
+   
+        if return_histogram:
+            #
+            # Estimate the sample histogram
+            # 
+            # TODO
+            pass
+        else:
+            return samples
+    
+    
 
 '''
 

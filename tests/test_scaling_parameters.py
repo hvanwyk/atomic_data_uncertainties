@@ -81,7 +81,7 @@ class TestScalingParameters(unittest.TestCase):
         #
         # Test pickle
         # 
-        output_qois = [e1, e2]
+        output_qois = [e2, e3]
         with open('e2.pickle', 'wb') as f:
             pickle.dump(e2, f, pickle.HIGHEST_PROTOCOL)
         
@@ -106,7 +106,7 @@ class TestScalingParameters(unittest.TestCase):
             #
             # Construct interpolants/grid_
             #
-            lmd.construct_interpolants()
+            lmd.make_interpolants()
             
             #
             # Pickle
@@ -116,10 +116,11 @@ class TestScalingParameters(unittest.TestCase):
         else:
             #
             # Load pickle
-            # 
-            assert 'lmd.pickle' in os.listdir(os.getcwd()), \
-            'Cannot find file "lmd.pickle" in current working directory.'
-            with open('lmd.pickle', 'rb') as f:
+            #
+            #print(listdir(os.getcwd()+'../examples/')) 
+            #assert 'lmd_o6.pickle' in os.listdir(os.getcwd()+'../examples/'), \
+            #'Cannot find file "lmd.pickle" in current working directory.'
+            with open('../examples/lmd_o6.pickle', 'rb') as f:
                 lmd = pickle.load(f)
     
         #
@@ -127,7 +128,7 @@ class TestScalingParameters(unittest.TestCase):
         # 
         self.assertEqual(lmd.get_qoi_index(category='Energy', tag=2), 0, \
                          'Qoi index incorrectly identified.')
-        self.assertEqual(lmd.get_qoi_index(qoi=e1), 0, \
+        self.assertEqual(lmd.get_qoi_index(qoi=e2), 0, \
                          'Qoi index incorrectly identified.')
         
         
@@ -139,7 +140,91 @@ class TestScalingParameters(unittest.TestCase):
         
         # Evaluate gridfunction
         # TODO: Grid Functions cannot be evaluated. 
-        #print(lmd.grid_functions[0].eval(points))
+        # print(lmd.grid_functions[0].eval(points))
+    
+    
+    def test02(self):
+        """
+        Test Bayesian sampling
+        """
+        a2 = Qoi(category='A-value', tag=2, 
+                 search_label='   2   1', 
+                 nist_value=1.04e3, nist_rating='AA')
+        
+        a5 = Qoi(category='A-value', tag=5, 
+                 search_label='   5   1', 
+                 nist_value=3.31e5, nist_rating='AA')
+        
+        a7 = Qoi(category='A-value', tag=7, 
+                 search_label='   7   1', 
+                 nist_value=3.309e12, nist_rating='AA')
+        
+        output_qois = [a2, a5, a7]
+        
+        #
+        # Initialize
+        #
+        tags = ['1s', '2s', '2p']
+        rng = np.array([[0.8, 1.2], [0.8, 1.2], [0.8, 1.2]])
+        resolution = (2,2,2)
+        path_to_input = '/home/hans-werner/Dropbox/work/projects'+\
+                        '/atomic_data_uncertainty/code/icft/o_6/'
+        lmd = LmdPdf(tags, rng, resolution, path_to_input, output_qois)
+        
+        #
+        # Construct interpolants
+        #
+        lmd.make_interpolants()
+        
+        #
+        # Interpolate
+        # 
+        points = np.array([[1.1,0.99, 1.01],[1.19, 0.85, 1.0]])
+        y1 = lmd.interpolate(points)
+        self.assertEqual(y1.shape, (2,3), \
+                         'Output of interpolate does'+\
+                         ' not have the correct dimensions')
+        qoi_index_0 = lmd.get_qoi_index(a2.category, a2.tag)
+        qoi_index_1 = lmd.get_qoi_index(qoi=a2)
+        self.assertEqual(qoi_index_0, qoi_index_1, \
+                         'Qoi index should be the same.')
+        
+        y2 = lmd.interpolate(points, qoi_indices=[qoi_index_1])
+        self.assertEqual(y2.shape, (2,1), \
+                         'Output of interpolate does not '+\
+                         'have correct dimensions')
+        
+        #
+        # Evaluate the log prior
+        #   
+        point = np.array([1.1, 0.9, 1.01])
+        point_outside = np.array([0, 0.9, 1])
+        self.assertTrue(np.isfinite(lmd.log_prior(point)), \
+                        'Value should be finite')
+        self.assertFalse(np.isfinite(lmd.log_prior(point_outside)),\
+                         'Value should be infinite') 
+        
+        
+        #
+        # Evaluate log likelihood
+        # 
+        qoi_indices = [0,1]
+        
+        # Gaussian  
+        self.assertTrue(np.isfinite(lmd.log_likelihood(point, qoi_indices)),\
+                        'Value should be finite.')
+        
+        # Uniform
+        ln_likeli = lmd.log_likelihood(point, qoi_indices, density_type='uniform')
+        
+        #
+        # Log posterior
+        # 
+        ln_post = lmd.log_posterior(point, qoi_indices, 'uniform', 'gaussian')
+        
+        smple = lmd.sample_posterior(1000, 10, qoi_indices, 'uniform', 'gaussian', 50)
+        #y2 = lmd.interpolate(points, qoi_index=0) 
+        #y3 = lmd.interpolate(points, qoi_index=[0,1])
         
 if __name__ == "__main__":
     unittest.main()
