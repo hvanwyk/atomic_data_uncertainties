@@ -1,6 +1,7 @@
 # python3 function to read adf11 file
 # returns numpy array with shape (z_max, ntemps, ndens)
 # note that array is zero indexed, so z_max=1 is index 0
+# Author: Ivan Arnold
 
 def read_adf11(filename):
     import numpy as np  
