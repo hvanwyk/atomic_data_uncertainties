@@ -12,6 +12,7 @@ import os
 # 
 # Energies
 """
+Modify file to check authentication
 energies['computed'] = []
 energies['dim'] = 6
 energies['n']   = lmd['n']
