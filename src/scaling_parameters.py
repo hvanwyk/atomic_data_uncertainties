@@ -46,7 +46,7 @@ class Qoi(object):
 
     Attributes
 
-        category: str, 'A-value' or 'Energy' 
+        category: str, 'A-value' or 'Energy', or 'Line' 
         
         tag: str/int used to identify specific qoi for user
 
