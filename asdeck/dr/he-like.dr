@@ -1,0 +1,7 @@
+A.S. DR of He-like Atoms
+ &SALGEB RUN='DR' CUP='IC' MXVORB=2 MXCONF=1 &END
+ 1 0  2 0  2 1
+  2    0    0
+
+  2    1    0
+  2    0    1
