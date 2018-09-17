@@ -1,9 +1,0 @@
-A.S. DR of Li-like Atoms
- &SALGEB RUN='DR' CUP='IC' MXVORB=2 MXCONF=2 KCOR1=1 KCOR2=1 &END
- 2 0  2 1
-  1    0
-  0    1
-      
-  2    0
-  1    1
-  0    2
