@@ -245,7 +245,8 @@ def sample_from_histogram(H, edges, n_samples):
     
     #
     # Select bins randomly.
-    # 
+    # def log_posterior(x, interpolators, x_bnd, y_bnd):
+
     bins = np.searchsorted(CDF, U)
     
     #
