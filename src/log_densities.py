@@ -6,7 +6,9 @@ from scipy.stats import truncnorm
 from scipy.stats import uniform
 from scipy.stats import beta
 
-
+#
+# TODO: Test
+# 
 def log_likelihood(x, y_obs, interpolators, rvs, error_type='mixed'):
     """
     We assume the measurements were made independently, so that
