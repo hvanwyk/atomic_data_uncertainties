@@ -12,9 +12,8 @@ from scipy.interpolate import RegularGridInterpolator
 from mpl_toolkits.mplot3d import Axes3D
 import emcee
 import corner 
-from recombination import State, structure, dielectronic_recomb, get_recombination_rates, graph_from_file, dr_fit_func, fit_rate
+from recombination import State, structure, dielectronic_recomb
 import os
-
 
 """
 This code snippet illustrates how to wrap a Bayesian sampler around
@@ -248,8 +247,10 @@ def interpolators_from_scratch(seq, atom, x_bnd, x_res, n):
     for j in range(n):
         interpolators_err.append(RegularGridInterpolator(X_1D, Err[j], bounds_error=False))
         interpolators_erg.append(RegularGridInterpolator(X_1D, Erg[j], bounds_error=False))
+
+    for j in range(n_rates):
         interpolators_rate.append(RegularGridInterpolator(X_1D, Rate[j], bounds_error=False))
-    
+
     return interpolators_err, interpolators_erg, interpolators_rate
 
 
@@ -305,9 +306,13 @@ def sample_from_histogram(H, edges, n_samples):
 # 1. Construct Interpolators
 # =============================================================================
 seq = "be"
-atom = "c"
+atom = "fe"
 
 n_lambdas = 2
+
+T = dielectronic_recomb(seq, atom, [])[0]
+n_points = len(T)
+
 # Interval endpoints for each input component
 x_bnd = np.array([[0.8,1.2],[0.8,1.2]])
 
@@ -317,8 +322,8 @@ x_res = np.array([5,5])
 # NIST data
 y_nist = structure(seq, atom, [])[1]
 # Construct interpolators
-n = len(y_nist) 
-err_interpolators, erg_interpolators, rate_interpolators = interpolators_from_scratch(seq, atom, x_bnd, x_res, n)
+n_energies = len(y_nist)
+err_interpolators, erg_interpolators, rate_interpolators = interpolators_from_scratch(seq, atom, x_bnd, x_res, n_energies)
 """
 # -----------------------------------------------------------------------------
 # Plot interpolators and exact functions
@@ -367,32 +372,33 @@ plt.show()
 #
 # Likelihood is based on 5% error in each component 
 # 
-#y_bnd = 0.05*np.array([[-1,1],[-1,1],[-1,1]])
-y_bnd = np.zeros((n, 2))
-for i in range(n):
+y_bnd = np.zeros((n_energies, 2))
+for i in range(n_energies):
     y_bnd[i, :] = -1, 1
     
 y_bnd *= 0.05
 
+#plt.plot()
+
 #
 # Specify the dimension of the input space and the number of starting points
 #
-n_dim, n_walkers = 2, 10
+n_dim, n_walkers = n_lambdas, 100
 
 #
 # Specify starting points for each Markov chain (in a tight ball around optimum)
 #
-pos = [np.array([1,1]) + 1e-4*np.random.randn(n_dim) for i in range(n_walkers)]
+pos = [np.array([1 for i in range(n_dim)]) + 1e-4*np.random.randn(n_dim) for i in range(n_walkers)]
 
 #
 # Initialize the sampler
 #
 sampler = emcee.EnsembleSampler(n_walkers, n_dim, log_posterior, 
-                                args=(err_interpolators, x_bnd, y_bnd, "gaussian"))
+                                args=(err_interpolators, x_bnd, y_bnd))
 #
 # Run the MCMC routine
 #
-sampler.run_mcmc(pos, 100);
+sampler.run_mcmc(pos, 1000);
 
 #
 # The sampler.chain has shape (n_walkers, n_steps, n_dim) = (100, 1000, 2)
@@ -404,10 +410,11 @@ samples = sampler.chain[:, 50:, :].reshape((-1, n_dim))
 # -----------------------------------------------------------------------------
 # Visualize the posterior density
 # -----------------------------------------------------------------------------
-"""
-corner.corner(samples, labels=["$\lambda_1$", "$\lambda_2$"], truths=[1,1])
+
+
+corner.corner(samples, labels=["$\lambda_{}$".format(i+1) for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
 plt.show()
-"""
+
 # -----------------------------------------------------------------------------
 # Plug the Monte Carlo samples from the posterior into the function and comput
 # a histogram for the output. Make sure the point [0,0,0] has nonzero density   
@@ -415,20 +422,22 @@ plt.show()
 
 n_samples = samples.shape[0]
 
-print(n_samples)
-T = dielectronic_recomb(seq, atom, [])[0]
-n_points = len(T)
+
 
 
 rate_samples = np.zeros((n_samples,n_points))
-coeff_samples = np.zeros((n_samples, 12))
+#coeff_samples = np.zeros((n_samples, 12))
+
+
+E_samples = np.zeros((n_samples, n_energies))
+
 for i in range(n_samples):
-    rate_samples[i,:] = dielectronic_recomb(seq, atom, samples[i,:])[1]
-    try:
-        coeff_samples[i,:] = fit_rate(T, rate_samples[i,:])
-    except:
-        pass
-#corner.corner(E_samples, labels=["$E_{}$".format(i) for i in range(n)], truths=[0 for i in range(n)])
+    for j in range(n_energies):
+        E_samples[i,j] = erg_interpolators[j](samples[i]) 
+    for j in range(n_points):
+        rate_samples[i,j] = rate_interpolators[j](samples[i]) 
+        
+corner.corner(E_samples[:,1:], labels=["$E_{}$".format(i+1) for i in range(n_energies-1)], truths=[0 for i in range(n_energies-1)])
 
 #plt.show()
 
@@ -457,23 +466,11 @@ state = State(atom, seq)
 direc = "results/isoelectronic/{}/{}{}".format(seq, atom, state.ion_charge)
 os.chdir(direc)
 
-"""
-with open("{}{}_lambdas.dat".format(atom, state.ion_charge), "w") as lambdas:
-    for i in range(n_lambdas):
-        lambdas.write("{:^10.10} ".format("Lambda_{}".format(i)))
-    lambdas.write("\n")
-    
-    for i in range(n_samples):
-        for j in range(n_lambdas):
-            lambdas.write("{:>8.8f} ".format(samples[i,j]))
-        #for j in range(n_temp_points):
-            #lambdas.write("{:>8.7} ".format(rate_samples[i,j]))
-        lambdas.write("\n")
-"""
 
 header = " ".join([str(x) for x in T])
-np.savetxt("rate_samples.dat", rate_samples, header=header)
+np.savetxt("rate_samples.dat", rate_samples, header=header, comments="")
 
-np.savetxt("coeff_samples.dat", np.transpose(coeff_samples))
+#np.savetxt("coeff_samples.dat", np.transpose(coeff_samples))
+
 os.chdir("../../../..")
 
