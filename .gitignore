@@ -101,3 +101,6 @@ ENV/
 .mypy_cache/
 /.project
 /.pydevproject
+
+#Ignore results directory
+/recombination/results

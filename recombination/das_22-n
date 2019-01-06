@@ -1,0 +1,17 @@
+A.S. DR of Li-like Carbon
+ &SALGEB RUN='DR' CUP='IC' MXVORB=2 MXCONF=3 MXCCF=3 KCOR1=1 KCOR2=1 &END
+ 2 0  2 1
+  2    0
+  1    1
+  0    2
+
+  2    1
+  1    2
+  0    3
+ &DRR     NMIN=3 NMAX=15  LMIN=0 LMAX=15 JND=14 LCON=5  &END
+    16   20   25   35   45   55   70  100  140  200  300  450  700  999
+ &SMINIM  NZION=-6 PRINT='FORM' &END
+ &SRADCON MENG=-15 EMIN=0 EMAX=2 &END
+   
+JND=14 LMAX=15 NMAX=15 
+

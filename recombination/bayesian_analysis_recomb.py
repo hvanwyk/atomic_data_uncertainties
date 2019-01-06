@@ -52,7 +52,7 @@ In particular, we want to achieve the following.
 # =============================================================================
 
 
-def do_stuff(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000):
+def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000):
     ion = State(atom, seq, shell)
     
     T = ion.dielectronic_recomb()[0]
@@ -171,7 +171,7 @@ def do_stuff(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_st
 
 if __name__ == "__main__":
     
-    #U Use command line arguments to pass atom, seq, shell
+    # Use command line arguments to pass atom, seq, shell
     """
     if (len(sys.argv) < 3):
         sys.exit("Correct usage: python bayesian_analysis.py <atom> <isoelectronic_sequence> <core-ex shell (e.g. 2-2)>")
@@ -188,6 +188,10 @@ if __name__ == "__main__":
     atom = "o"
     seq = "be"
     shell = "2-2"
-    do_stuff(atom=atom, seq=seq, shell=shell)
+    nist_cutoff=0.05
+    
+    make_distribution(atom=atom, seq=seq, shell=shell, nist_cutoff=nist_cutoff)
+    
     end = time.time()
+    
     print("Runtime: {}s".format(int(end-start)))
