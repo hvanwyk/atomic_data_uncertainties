@@ -10,10 +10,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import emcee
 import corner 
-from recombination import State
+from recombination_methods import State
 from bayesian_methods import log_uniform_prior, log_likelihood, log_posterior, interpolators_from_scratch
 import os
 import time
+from graphing import graph_rates_from_file
+from sklearn.svm import SVC
 
 """
 This code snippet illustrates how to wrap a Bayesian sampler around
@@ -50,9 +52,9 @@ In particular, we want to achieve the following.
 # =============================================================================
 # 1. Construct Interpolators
 # =============================================================================
+    
 
-
-def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000):
+def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000, prior_shape="uniform", likelihood_shape="uniform"):
     ion = State(atom, seq, shell)
     
     T = ion.dielectronic_recomb()[0]
@@ -93,7 +95,7 @@ def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers
     # Initialize the sampler
     #
     sampler = emcee.EnsembleSampler(n_walkers, n_lambdas, log_posterior, 
-                                    args=(err_interpolators, x_bnd, y_bnd))
+                                    args=(err_interpolators, x_bnd, y_bnd, prior_shape, likelihood_shape))
     #
     # Run the MCMC routine
     #
@@ -111,7 +113,7 @@ def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers
     # -----------------------------------------------------------------------------
     
     
-    corner.corner(samples, labels=["$\lambda_{}$".format(i+1) for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
+    corner.corner(samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
     plt.show()
     
     # -----------------------------------------------------------------------------
@@ -133,7 +135,7 @@ def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers
         
     
        
-    corner.corner(E_samples[:,1:], labels=["$E_{}$".format(i+1) for i in range(n_energies-1)], truths=[0 for i in range(n_energies-1)])
+    corner.corner(E_samples[:,1:], labels=[f"$E_{i+1}$" for i in range(n_energies-1)], truths=[0 for i in range(n_energies-1)])
     plt.show()
     
     
@@ -158,20 +160,17 @@ def make_distribution(atom, seq, shell, nist_cutoff=0.05, n_lambdas=2, n_walkers
     """
     
     
-    direc = "results/isoelectronic/{}/{}{}".format(ion.isoelec_seq, ion.species, ion.ion_charge)
-    os.chdir(direc)
-    
-    
-    np.savetxt("rate_samples_{0}_{1}.dat".format(shell, str(int(nist_cutoff*100))), rate_samples, header=" ".join([str(x) for x in T]), comments="")
-    
+    direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"    
+    fname = direc + f"rates_{shell}_{int(nist_cutoff*100)}_{prior_shape}P_{likelihood_shape}L.npy"
+    #np.savetxt(fname, rate_samples, header=" ".join([str(x) for x in T]), comments="")
+    out_data = np.array([T, rate_samples])
+    np.save(fname, arr=out_data)
     return samples, E_samples, rate_samples
     
-    os.chdir("../../../..")
-
 
 if __name__ == "__main__":
     
-    # Use command line arguments to pass atom, seq, shell
+    # Uncomment this section to use command line arguments to pass atom, seq, shell
     """
     if (len(sys.argv) < 3):
         sys.exit("Correct usage: python bayesian_analysis.py <atom> <isoelectronic_sequence> <core-ex shell (e.g. 2-2)>")
@@ -189,9 +188,11 @@ if __name__ == "__main__":
     seq = "be"
     shell = "2-2"
     nist_cutoff=0.05
+    prior_shape="gaussian"
+    likelihood_shape="gaussian"
+    ion = State(atom, seq, shell)
     
-    make_distribution(atom=atom, seq=seq, shell=shell, nist_cutoff=nist_cutoff)
+    make_distribution(atom=atom, seq=seq, shell=shell, nist_cutoff=nist_cutoff, prior_shape=prior_shape, likelihood_shape=likelihood_shape)
     
     end = time.time()
-    
-    print("Runtime: {}s".format(int(end-start)))
+    print(f"Runtime: {int(end-start)}s")

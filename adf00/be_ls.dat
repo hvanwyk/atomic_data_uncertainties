@@ -1,0 +1,23 @@
+beryllium          -4  2  1  2  1                                           /wf=   0.00000/
+ 0     9.32269879d+00  1s2  2s2         ( 1)0(  0.0)
+    1  0.00000000d+00  1s2  2s2         ( 1)0(  0.0)
+    2  2.72519240d+00  1s2  2s1  2p1    ( 3)1(  4.0)
+ 1     1.82111529d+01  1s2  2s1         ( 2)0(  0.5)
+    1  0.00000000d+00  1s2  2s1         ( 2)0(  0.5)
+ 2     1.53896198d+02  1s2              ( 1)0(  0.0)
+    1  0.00000000d+00  1s2              ( 1)0(  0.0)
+    2  1.18591129d+02  1s1  2s1         ( 3)0(  1.0)
+ 3     2.17718577d+02  1s1              ( 2)0(  0.5)
+    1  0.00000000d+00  1s1              ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 ls format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Sources:    /home/adas/adas/adf04/nist#4/    ls and ic forms
+c              /home/adas/adas/adf00/           base form
+c  Code:       make_nist_ls_adf00.pl
+c  Producer:   Hugh P. Summers
+c  Date:       07-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------

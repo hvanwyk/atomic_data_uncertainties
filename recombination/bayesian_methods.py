@@ -8,9 +8,9 @@ Created on Fri Nov 30 13:19:15 2018
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-from recombination import fit_rate, dr_fit_func
+from recombination_methods import fit_rate, dr_fit_func
 
-def log_uniform_prior(x, x_bnd):
+def log_uniform_prior(x, x_bnd, prior_shape="uniform"):
     """
     Natural logarithm of the uniform prior, which encodes our initial belief 
     concerning the distribution of x
@@ -28,14 +28,26 @@ def log_uniform_prior(x, x_bnd):
     """
     x_min, x_max = x_bnd[:,0], x_bnd[:,1]
     
-    if np.all((x >= x_min)*(x <= x_max)):
-        return -np.sum(np.log(x_max-x_min))
-    else:
-        return -np.infty
+    if prior_shape.lower() == "uniform":
+        if np.all((x >= x_min)*(x <= x_max)):
+            return -np.sum(np.log(x_max-x_min))
+        else:
+            return -np.infty
+        
+    elif prior_shape.lower() == "gaussian":
+        
+        sigma = x_bnd[:,1] - x_bnd[:,0]
+        mean = (x_bnd[:,0] + x_bnd[:,1])/2
+        
+        gauss = np.log((1/(np.sqrt(2*np.pi)*sigma))) - ((x-mean)**2) / (2*(sigma**2))
+        
+        gauss[np.isnan(gauss)] = -np.infty
+
+        return np.sum(gauss)
     
     
 
-def log_likelihood(x, interpolators, y_bnd, shape="uniform"):
+def log_likelihood(x, interpolators, y_bnd, likelihood_shape="uniform"):
     """
     Logarithm of the likelhood function (using uniform bounds on the error).
     
@@ -53,7 +65,7 @@ def log_likelihood(x, interpolators, y_bnd, shape="uniform"):
     for i, interpolator in zip(range(n),interpolators):
         y[i] = interpolator(x)
         
-    if shape.lower() == "uniform":
+    if likelihood_shape.lower() == "uniform":
         
         y_min, y_max = y_bnd[:,0], y_bnd[:,1]
         
@@ -62,17 +74,20 @@ def log_likelihood(x, interpolators, y_bnd, shape="uniform"):
         else:
             return -np.infty
         
-    elif shape.lower() == "gaussian":
+    elif likelihood_shape.lower() == "gaussian":
         
         sigma = y_bnd[:,1] - y_bnd[:,0]
+        mean = (y_bnd[:,0] + y_bnd[:,1])/2
         
-        gauss = np.log((1/(np.sqrt(2*np.pi)*sigma))) - y / (2*(sigma**2))
+        gauss = np.log((1/(np.sqrt(2*np.pi)*sigma))) - ((y-mean)**2) / (2*(sigma**2))
+        
+        gauss[np.isnan(gauss)] = -np.infty
         
         return np.sum(gauss)
 
     
     
-def log_posterior(x, interpolators, x_bnd, y_bnd, shape="uniform"):
+def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelihood_shape="uniform"):
     """
     Compute the log of the posterior density, formed from the logs of the
     likelihood and prior density functions. 
@@ -97,11 +112,14 @@ def log_posterior(x, interpolators, x_bnd, y_bnd, shape="uniform"):
         distributions, you can use flags like 'likelihood_type' or 'prior_type'
         
     """
-    lp = log_uniform_prior(x, x_bnd)
+    lp = log_uniform_prior(x, x_bnd, prior_shape)
+    """
     if not np.isfinite(lp):
         return -np.infty
     else:
-        return lp + log_likelihood(x, interpolators, y_bnd, shape)
+    """
+
+    return lp + log_likelihood(x, interpolators, y_bnd, likelihood_shape)
 
 
 def interpolators_from_scratch(ion, x_bnd, x_res, n):
@@ -116,7 +134,7 @@ def interpolators_from_scratch(ion, x_bnd, x_res, n):
         x_bnd: double, (d,2) array whose ith row contain the lower and upper 
             bounds of the ith input variable.
             
-        r_res: int, (d,) array whose ith row contains the number of grid
+        x_res: int, (d,) array whose ith row contains the number of grid
             points in each dimension.
             
         n: int, dimension of the error vector

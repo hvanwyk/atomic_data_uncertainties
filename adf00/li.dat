@@ -1,0 +1,15 @@
+lithium            -3
+ 0  5.39171476d+00  1s2  2s1 ( 2)0(  0.5)
+ 1  7.56400937d+01  1s2      ( 1)0(  0.0)
+ 2  1.22454354d+02  1s1      ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Source:     http://physics.nist.gov
+c  Code:       nist_get_data.pl
+c  Producer:   Hugh P. Summers
+c  Date:       03-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------
