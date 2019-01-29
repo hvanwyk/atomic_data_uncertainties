@@ -1,0 +1,18 @@
+carbon             -6
+ 0  1.12602965d+01  1s2  2s2  2p2 ( 3)1(  0.0)
+ 1  2.43844672d+01  1s2  2s2  2p1 ( 2)1(  0.5)
+ 2  4.78877787d+01  1s2  2s2      ( 1)0(  0.0)
+ 3  6.44935768d+01  1s2  2s1      ( 2)0(  0.5)
+ 4  3.92090501d+02  1s2           ( 1)0(  0.0)
+ 5  4.89993177d+02  1s1           ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Source:     http://physics.nist.gov
+c  Code:       nist_get_data.pl
+c  Producer:   Hugh P. Summers
+c  Date:       04-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------

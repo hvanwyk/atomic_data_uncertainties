@@ -1,0 +1,15 @@
+hydrogen           -1  1                                                    /wf=   0.00000/
+ 0     1.35984340d+01  1s1    ( 2)0(  0.5)
+    1  0.00000000d+00  1s1    ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 ic format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Sources:    /home/adas/adas/adf04/nist#1/    ic form
+c              /home/adas/adas/adf00/           base form
+c  Code:       make_nist_ls_adf00.pl
+c  Producer:   Hugh P. Summers
+c  Date:       07-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------

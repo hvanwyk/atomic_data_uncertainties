@@ -27,7 +27,7 @@ class State:
         self.species = species
         self.isoelec_seq = isoelec_seq
         self.shell = shell
-        with open("../adf00/{}.dat".format(self.isoelec_seq)) as seq_file:
+        with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
             lines = seq_file.read().splitlines()
             self.seq_num_electrons = abs(int(lines[0].split()[1]))
             line = lines[1].split()
@@ -35,7 +35,7 @@ class State:
                 if line[i] == "(":
                     self.seq_config = line[i-1][:2]
                     break
-        with open("../adf00/{}.dat".format(self.species.lower()), "r") as adf00:
+        with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
             lines = adf00.read().splitlines()
             self.nuclear_charge = abs(int(lines[0].split()[1]))
             self.ion_charge = self.nuclear_charge - self.seq_num_electrons
@@ -62,22 +62,21 @@ class State:
         """
         
         # checks if directory exists, creates it if not
-        if not os.access("results/isoelectronic/{}".format(self.isoelec_seq), os.F_OK):
-            os.mkdir("results/isoelectronic/{}".format(self.isoelec_seq))
-        direc = "results/isoelectronic/{}/{}{}".format(self.isoelec_seq, self.species, self.ion_charge)
+        if not os.access(f"results/isoelectronic/{self.isoelec_seq}", os.F_OK):
+            os.mkdir(f"results/isoelectronic/{self.isoelec_seq}")
+        direc = f"results/isoelectronic/{self.isoelec_seq}/{self.species}{self.ion_charge}"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
            
         asdeck_file = "{}{}_das_{}_str".format(self.species, self.ion_charge, self.shell)
-        os.system("cp asdeck/structure/{0}-like_str {1}/{2}".format(
-                self.isoelec_seq, direc, asdeck_file))
+        os.system(f"cp asdeck/structure/{self.isoelec_seq}-like_str {direc}/{asdeck_file}")
         os.chdir(direc)
         
         with open(asdeck_file, "a+") as asdeckin:
-            asdeckin.write(" &SMINIM  NZION={} NLAM={} PRINT='{}' &END\n".format(-self.nuclear_charge, len(lambdas), PRINT))
+            asdeckin.write(f" &SMINIM  NZION={-self.nuclear_charge} NLAM={len(lambdas)} PRINT='{PRINT}' &END\n")
             lam = [str(lambd) for lambd in lambdas]
             asdeckin.write("  " + ' '.join(lam) + "\n")
-            asdeckin.write(" &SRADCON  MENG={} EMIN={} EMAX={} &END\n\n".format(MENG, EMIN, EMAX))
+            asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} &END\n\n")
     
         os.system("./../../../../asdeck.x < " + asdeck_file)
         
@@ -86,8 +85,7 @@ class State:
         y = levels[-1][:len(levels[-1])-1]
         ground = levels[-1][-1]
                 
-        nist = np.transpose(np.genfromtxt("../../../../NIST/isoelectronic/{}/{}{}.nist".format(self.isoelec_seq, self.species, self.ion_charge),
-                                          skip_header=1))
+        nist = np.transpose(np.genfromtxt(f"../../../../NIST/isoelectronic/{self.isoelec_seq}/{self.species}{self.ion_charge}.nist", skip_header=1))
         y_nist = nist[-1]
         
         if E_absolute == True:
@@ -100,7 +98,7 @@ class State:
         
         return y, y_nist, shift
     
-    def dielectronic_recomb(self, lambdas=[], PRINT='FORM', MENG=-15, EMIN=0, EMAX=2, NTAR1=1, NMIN=3, NMAX=3, LMIN=0, LMAX=1, LCON=5,
+    def dielectronic_recomb(self, lambdas=[], PRINT='FORM', MENG=-15, EMIN=0, EMAX=2, NTAR1=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7,
                             xsec=False, EWIDTH_XSEC=0.01, NBIN_XSEC=1000, EMIN_XSEC=0.0, EMAX_XSEC=2.0, E_absolute=False):
             
         """
@@ -108,11 +106,11 @@ class State:
         """
 
         y, y_nist, shift = self.structure(lambdas=lambdas, PRINT=PRINT, MENG=MENG, EMIN=EMIN, EMAX=EMAX, E_absolute=E_absolute)
-        ion = "{}{}".format(self.species, self.ion_charge)
+        ion = f"{self.species}{self.ion_charge}"
         
-        asdeck_file = "{}_das_{}_n".format(ion, self.shell)
-        direc = "results/isoelectronic/{}/{}{}".format(self.isoelec_seq, self.species, self.ion_charge)
-        os.system("cp asdeck/dr/{0}-like.dr {1}/{2}".format(self.isoelec_seq, direc, asdeck_file))
+        asdeck_file = f"{ion}_das_{self.shell}_n"
+        direc = f"results/isoelectronic/{self.isoelec_seq}/{self.species}{self.ion_charge}"
+        os.system(f"cp asdeck/dr/{self.isoelec_seq}-like.dr {direc}/{asdeck_file}")
         os.chdir(direc)
         
         with open("adasin", "w") as adasin:
@@ -121,11 +119,11 @@ class State:
                 NTAR2 = len(y)
                 NECOR=NTAR2
                 adasin.write("/IC/\n")
-                adasin.write(" &ONE NTAR1={} NTAR2={} COREX=\'{}\' &END\n".format(NTAR1, NTAR2, self.shell))
-                adasin.write(" &TWO NECOR={} ".format(NECOR))
+                adasin.write(f" &ONE NTAR1={NTAR1} NTAR2={NTAR2} COREX=\'{self.shell}\' &END\n")
+                adasin.write(f" &TWO NECOR={NECOR} ")
                 
                 if xsec == True:
-                    adasin.write("EWIDTH={} NBIN={} EMIN={} EMAX={} ".format(EWIDTH_XSEC, NBIN_XSEC, EMIN_XSEC, EMAX_XSEC))
+                    adasin.write(f"EWIDTH={EWIDTH_XSEC} NBIN={NBIN_XSEC} EMIN={EMIN_XSEC} EMAX={EMAX_XSEC} ")
                     
                 adasin.write("&END\n")
                 
@@ -145,7 +143,8 @@ class State:
             NMIN, NMAX - n shells used
             LMIN, LMAX - l orbitals used per n shell
             """
-            asdeckin.write(" &DRR    NMIN={} NMAX={} LMIN={} LMAX={} LCON={} &END\n".format(NMIN, NMAX, LMIN, LMAX, LCON))
+            asdeckin.write(f" &DRR    NMIN={NMIN} NMAX={NMAX} JND={JND} LMIN={LMIN} LMAX={LMAX} &END\n")
+            asdeckin.write("16   20   25   35   45   55   70  100  140  200  300  450  700  999\n")
            
             """
             Write the SMINIM namelist, including lambda parameters
@@ -154,10 +153,10 @@ class State:
             NLAM - # of lambda parameters used
             """
             lam = [str(lambd) for lambd in lambdas]
-            asdeckin.write(" &SMINIM  NZION={} NLAM={} PRINT='{}' &END\n".format(-self.nuclear_charge, len(lambdas), PRINT))
+            asdeckin.write(f" &SMINIM  NZION={-self.nuclear_charge} NLAM={len(lambdas)} PRINT='{PRINT}' &END\n")
             asdeckin.write("  " + ' '.join(lam) + "\n")
             
-            asdeckin.write(" &SRADCON  MENG={} EMIN={} EMAX={} &END\n\n".format(MENG, EMIN, EMAX))
+            asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} &END\n\n")
             
         os.system("./../../../../asdeck.x < " + asdeck_file)
         

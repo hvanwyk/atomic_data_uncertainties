@@ -1,0 +1,14 @@
+helium             -2
+ 0  2.45873879d+01  1s2 ( 1)0(  0.0)
+ 1  5.44177631d+01  1s1 ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Source:     http://physics.nist.gov
+c  Code:       nist_get_data.pl
+c  Producer:   Hugh P. Summers
+c  Date:       03-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------

@@ -1,0 +1,20 @@
+lithium            -3  1  2  1                                              /wf=   0.00000/
+ 0     5.39171476d+00  1s2  2s1    ( 2)0(  0.5)
+    1  0.00000000d+00  1s2  2s1    ( 2)0(  0.5)
+ 1     7.56400937d+01  1s2         ( 1)0(  0.0)
+    1  0.00000000d+00  1s2         ( 1)0(  0.0)
+    2  5.90208128d+01  1s1  2s1    ( 3)0(  1.0)
+ 2     1.22454354d+02  1s1         ( 2)0(  0.5)
+    1  0.00000000d+00  1s1         ( 2)0(  0.5)
+c--------------------------------------------------------------------------------------------------
+c
+c  New updated adf00 ic format dataset with current NIST values.
+c  Replaces earlier dataset of same name.
+c
+c  Sources:    /home/adas/adas/adf04/nist#3/    ic form
+c              /home/adas/adas/adf00/           base form
+c  Code:       make_nist_ls_adf00.pl
+c  Producer:   Hugh P. Summers
+c  Date:       07-Sep-2012
+c
+c--------------------------------------------------------------------------------------------------
