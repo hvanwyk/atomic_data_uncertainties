@@ -1,0 +1,7 @@
+A.S. DR of H-like Atoms
+ &SALGEB RUN='DR' CUP='IC' MXVORB=1 MXCONF=1 MXCCF=1 &END
+ 1 0
+  1
+
+  2
+

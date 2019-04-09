@@ -8,9 +8,11 @@ Created on Fri Nov 30 13:19:15 2018
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-from recombination_methods import fit_rate, dr_fit_func
+from recombination_methods import structure, get_rate, structure_dr, postprocessing_rates
+import multiprocessing as mp
 
-def log_uniform_prior(x, x_bnd, prior_shape="uniform"):
+
+def log_prior(x, x_bnd, prior_shape="uniform"):
     """
     Natural logarithm of the uniform prior, which encodes our initial belief 
     concerning the distribution of x
@@ -112,7 +114,7 @@ def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelih
         distributions, you can use flags like 'likelihood_type' or 'prior_type'
         
     """
-    lp = log_uniform_prior(x, x_bnd, prior_shape)
+    lp = log_prior(x, x_bnd, prior_shape)
     """
     if not np.isfinite(lp):
         return -np.infty
@@ -121,26 +123,7 @@ def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelih
 
     return lp + log_likelihood(x, interpolators, y_bnd, likelihood_shape)
 
-
-def interpolators_from_scratch(ion, x_bnd, x_res, n):
-    """
-    Constructs a list of RegularGridInterpolators, one for each output
-    
-    Inputs:
-    
-        ion: instance of class State, stores all info and methods for
-        recombining ion
-        
-        x_bnd: double, (d,2) array whose ith row contain the lower and upper 
-            bounds of the ith input variable.
-            
-        x_res: int, (d,) array whose ith row contains the number of grid
-            points in each dimension.
-            
-        n: int, dimension of the error vector
-        
-        y_nist: double, (n, ) array of NIST (or experimental) values 
-    """
+def lambdas_grid(x_bnd, x_res):
     #
     # One dimensional grid in each direction
     # 
@@ -158,45 +141,72 @@ def interpolators_from_scratch(ion, x_bnd, x_res, n):
     # Unravel grid into (n_points, d) array
     # 
     x_ravel = np.array([x.ravel() for x in X]).T
+    
+    return X_1D, x_ravel
 
+def energy_grid(ion, x_ravel, x_res):
     #
     # Generate error data 
     # 
+    n = structure(ion=ion)[0].shape[0]
     n_points = x_ravel.shape[0]
     err = np.empty((n_points,n))
     erg = np.empty((n_points, n))
-
     
-    T = ion.dielectronic_recomb(lambdas=[])[0]
-    n_rates = len(T)
-    rate = np.empty((n_points, n_rates))
     
     for i in range(n_points):
         x = x_ravel[i,:]
-        data = ion.structure(lambdas=x)
+        data = structure(ion=ion, lambdas=x)
         err[i,:] = data[2]
         erg[i, :] = data[0]
-        rate[i, :] = ion.dielectronic_recomb(lambdas=x)[1]
     
     Err = [np.reshape(err[:,j], x_res) for j in range(n)]
     Erg = [np.reshape(erg[:,j], x_res) for j in range(n)]
-    Rate = [np.reshape(rate[:,j], x_res) for j in range(n_rates)]
-   
+
+    return Err, Erg
+
+def rates_grid(ion, x_ravel, x_res, parallel=False):
+    
+    E, E_nist, shift = structure(ion)
+    structure_dr(ion)
+    T = postprocessing_rates(ion, E, E_nist)[0]
+    n_rates = T.size
+    n_points = x_ravel.shape[0]
+    
+    rates = np.empty((n_points, n_rates))
+    if parallel:
+        n_procs = mp.cpu_count()
+        pool = mp.Pool(processes=n_procs)
+        rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
+        rates = np.array(rates)
+    
+    else:
+        for i in range(n_points):
+            x = x_ravel[i,:]
+            E, E_nist, delta_E = structure(ion, lambdas=x)
+            structure_dr(ion, lambdas=x)
+            rates[i, :] = postprocessing_rates(ion, E, E_nist, lambdas=x)[1]
+    
+    
+    Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
+    return Rates
+    
+def interpolators(X_1D, grid_vals):
+    """
+    Constructs a list of RegularGridInterpolators, one for each output
+    
+    """
     #
     # Form the interpolators
     # 
-    interpolators_err = []
-    interpolators_erg = []
-    interpolators_rate = []
+    n = len(grid_vals)
+    interpolators = []
     for j in range(n):
-        interpolators_err.append(RegularGridInterpolator(X_1D, Err[j], bounds_error=False))
-        interpolators_erg.append(RegularGridInterpolator(X_1D, Erg[j], bounds_error=False))
-
-    for j in range(n_rates):
-        interpolators_rate.append(RegularGridInterpolator(X_1D, Rate[j], bounds_error=False))
-        
-    return interpolators_err, interpolators_erg, interpolators_rate
-
+        interpolators.append(RegularGridInterpolator(X_1D, grid_vals[j], bounds_error=False))
+    
+    return interpolators
+    
+    
 def sample_from_histogram(H, edges, n_samples):
     """
     Generate a random sample from a histogram defined over a hypercube.
