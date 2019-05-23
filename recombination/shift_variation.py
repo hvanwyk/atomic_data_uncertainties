@@ -13,7 +13,7 @@ import corner
 from recombination_methods import State, structure, structure_dr, postprocessing_rates
 from bayesian_methods import log_posterior, interpolators
 from lambda_variation import lambda_distribution, energy_optimization
-from graphing import graph_experimental, graph_rates_from_file
+from graphing import graph_experimental, graph_rates_from_file, graph_xsec
 import time
 
 """
@@ -136,6 +136,10 @@ def simple_shift_method(ion, n_samples, max_shift, rates_file, ECORIC=0, NMIN=3,
         rates[i,:] = postprocessing_rates(ion, E, E_nist, method="shift", shift=shifts)[1]
     np.save(rates_file, np.array([T,rates]))
     
+def shift_method_xsec(ion, n_samples, max_shift, xsec_file, ECORIC=0, NMIN=3, NMAX=15, LMIN=0, LMAX=7,
+                      ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX,
+                      EWIDTH=0.0001, NBIN=1000, EMIN=0.0, EMAX=2.0)
+    
 def graph_rates_shift(rates_file, ECORIC=0):
     
     T, rates = np.load(rates_file)
@@ -187,8 +191,8 @@ ion = State(atom, seq, shell)
 res = 2
 max_shift = 0.2
 ECORIC = 0
-NMIN = 9
-NMAX = 9
+NMIN = 11
+NMAX = 11
 LMIN = 0
 LMAX = 7
 direc = f"results/isoelectronic/{seq}/{atom}{ion.ion_charge}/"
@@ -196,8 +200,8 @@ rates_file = direc + f"rates_shift_{max_shift}" + ("" if ECORIC==0 else f"_ECORI
         "" if (NMIN==3 and NMAX==15) else f"_N_{NMIN}_{NMAX}") + (
         "" if (LMIN==0 and LMAX==7) else f"_L_{LMIN}_{LMAX}") +".npy"
         
-simple_shift_method(ion, 100, max_shift, rates_file, ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
-graph_rates_shift(rates_file, ECORIC=ECORIC)
+#simple_shift_method(ion, 100, max_shift, rates_file, ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
+#graph_rates_shift(rates_file, ECORIC=ECORIC)
 
 
 
