@@ -193,19 +193,22 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
         up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
+    """
     elif method == "shift" and shift != []:
         direc += "_".join([str(x) for x in shift])
-        up_dir = "../../../../../../"
+        up_dir = "../../../../../"
         levels_file = "../LEVELS"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
+    """
     
     os.chdir(direc)
+    """
     if method == "shift" and shift != []:
         os.system("cp ../o1 o1")
         os.system("cp ../olg olg")
         os.system("cp ../ols ols")
-    
+    """
     with open("adasin", "w") as adasin:
         with open(levels_file, "r") as levels:
             lines = levels.read().splitlines()
@@ -223,8 +226,10 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
             if method == "lambdas":
                 nist_str = [str(x) for x in E_nist]
             else:
-                #nist_str = [str(x) for x in E + np.abs(E-E_nist) * shift]
-                nist_str = [str(x) for x in E + shift]
+                if shift == []:
+                    nist_str = [str(x) for x in E]
+                else:
+                    nist_str = [str(x) for x in E + shift]
             adasin.write(" ".join(E_str))
             adasin.write("\n")
             adasin.write(" ".join(nist_str))

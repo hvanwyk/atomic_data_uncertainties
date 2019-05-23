@@ -38,24 +38,21 @@ def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y
     
         
   
-    fig, ax = plt.subplots(2, 1)
+    fig, ax = plt.subplots(2, 1, figsize=(6,8))
     for rate in graphed:
         ax[0].plot(T, rate)
-    ax[0].set_title(f"Dielectronic Recombination of {ion.species}{ion.ion_charge}")
+    ax[0].set_title(f"Dielectronic Recombination of {ion.species.capitalize()}{ion.ion_charge}")
     ax[0].set_xlabel("Temperature (K)")
     ax[0].set_ylabel("DR Rate (cm^3 s^-1)")
     ax[0].set_xscale("log")
-    ax[0].set_yscale("log")
+    #ax[0].set_yscale("log")
     
-    ax[1].plot(T, err)
-    if err_type=="std":
-        ax[1].set_title("Standard Devitation")
-    elif err_type=="max":
-        ax[1].set_title("Max-Min")
+    ax[1].plot(T, 100*err/avg)
+    ax[1].set_title("Percent Uncertainty")
     ax[1].set_xlabel("Temperature (K)")
-    ax[1].set_ylabel("Std. Dev. (cm^3 s^-1)")    
+    ax[1].set_ylabel("% Uncertainty Relative to Mean")    
     ax[1].set_xscale("log")
-    ax[1].set_yscale("log")
+    #ax[1].set_yscale("log")
     
     for a in ax:
         if (x_range != None):
@@ -74,13 +71,13 @@ def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y
         coeff = pd.read_csv(direc+"experimental_coefficients.dat", delimiter=", ")
         c = coeff["c"].values
         E = coeff["E"].values
-        plt.plot(temps, experimental_fit(c, E, temps), label="Experiment")
+        plt.plot(temps, experimental_fit(c, E, temps), label="Experiment", color="orange")
         plt.errorbar(x=T, y=avg, yerr=err, label="Theory")
         #plt.yscale("log")
         plt.xscale("log")
         plt.xlabel("Temperature (K)")
         plt.ylabel("DR Rate (cm^3 s^-1)")
-        plt.title(f"Dielectronic Recombination of {ion.species}{ion.ion_charge}+")
+        plt.title(f"Dielectronic Recombination of {ion.species.capitalize()}{ion.ion_charge}+")
         plt.legend()
         plt.savefig(direc + "/experiment_vs_theory.png")
     
@@ -112,9 +109,23 @@ def graph_xsec(ion, nist_cutoff=0.05, prior_shape="uniform", likelihood_shape="u
     
     plt.savefig(outfile)
 
+def graph_experimental(ion, direc):
+    temps = np.linspace(100, 1e8, 100000)
+    coeff = pd.read_csv(direc+"experimental_coefficients.dat", delimiter=", ")
+    c = coeff["c"].values
+    E = coeff["E"].values
+    plt.plot(temps, experimental_fit(c, E, temps), label="Experiment")
+    #plt.yscale("log")
+    plt.xscale("log")
+    plt.xlabel("Temperature (K)")
+    plt.ylabel("DR Rate (cm^3 s^-1)")
+    plt.title(f"Dielectronic Recombination of {ion.species.capitalize()}{ion.ion_charge}+")
+    plt.legend()
+    #plt.savefig(direc + "/experiment_vs_theory.png")
+
 if __name__ == "__main__":
     
-    atom = "o"
+    atom = "fe"
     seq = "be"
     shell = "2-2"
     ion = State(atom, seq, shell)

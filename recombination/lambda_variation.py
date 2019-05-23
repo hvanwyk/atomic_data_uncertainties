@@ -10,10 +10,78 @@ import matplotlib.pyplot as plt
 import emcee
 import corner 
 from recombination_methods import State, structure, structure_dr, postprocessing_rates
-from bayesian_methods import log_posterior, lambdas_grid, energy_grid, rates_grid, interpolators
+from bayesian_methods import log_posterior, interpolators
 import time
 from graphing import graph_rates_from_file
 from scipy.optimize import minimize
+
+def lambdas_grid(x_bnd, x_res):
+    #
+    # One dimensional grid in each direction
+    # 
+    d = x_bnd.shape[0]
+    X_1D = []
+    for i in range(d):
+        X_1D.append(np.linspace(x_bnd[i,0],x_bnd[i,1],x_res[i]))
+    
+    #
+    # Multi-dimensional Grid, using meshgrid (ij indexing)
+    #
+    X = np.meshgrid(*X_1D, indexing='ij')
+        
+    #
+    # Unravel grid into (n_points, d) array
+    # 
+    x_ravel = np.array([x.ravel() for x in X]).T
+    
+    return X_1D, x_ravel
+
+def energy_grid(ion, x_ravel, x_res):
+    #
+    # Generate error data 
+    # 
+    n = structure(ion=ion)[0].shape[0]
+    n_points = x_ravel.shape[0]
+    err = np.empty((n_points,n))
+    erg = np.empty((n_points, n))
+    
+    
+    for i in range(n_points):
+        x = x_ravel[i,:]
+        data = structure(ion=ion, lambdas=x)
+        err[i,:] = data[2]
+        erg[i, :] = data[0]
+    
+    Err = [np.reshape(err[:,j], x_res) for j in range(n)]
+    Erg = [np.reshape(erg[:,j], x_res) for j in range(n)]
+
+    return Err, Erg
+
+def rates_grid(ion, x_ravel, x_res, parallel=False):
+    
+    E, E_nist, shift = structure(ion)
+    structure_dr(ion)
+    T = postprocessing_rates(ion, E, E_nist)[0]
+    n_rates = T.size
+    n_points = x_ravel.shape[0]
+    
+    rates = np.empty((n_points, n_rates))
+    if parallel:
+        n_procs = mp.cpu_count()
+        pool = mp.Pool(processes=n_procs)
+        rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
+        rates = np.array(rates)
+    
+    else:
+        for i in range(n_points):
+            x = x_ravel[i,:]
+            E, E_nist, delta_E = structure(ion, lambdas=x)
+            structure_dr(ion, lambdas=x)
+            rates[i, :] = postprocessing_rates(ion, E, E_nist, lambdas=x)[1]
+    
+    
+    Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
+    return Rates
 
 def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000, 
                       prior_shape="uniform", likelihood_shape="uniform", plot=True, outfile=None):
@@ -162,23 +230,52 @@ def rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=None):
         
     return T, rate_samples
 
-def energy_optimization(ion, lambda_samples, x_bnd, x_res):
-    y_nist = structure(ion, lambdas=[])[1]
-    n_energies = y_nist.size - 1
-    
+def energy_optimization(ion, lambda_samples, x_bnd, x_res):    
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
     Err, Erg = energy_grid(ion, x_ravel, x_res)
     energy_interpolators = interpolators(X_1D, Erg)
-    lambda_minz = []
-    E_minz = []
+    def func(x): 
+        mean = 0
+        for inty in energy_interpolators[1:]:
+            mean += (inty(x)**2.0)
+        return mean
+    res = minimize(func, x0=np.array([1.0, 1.0]), bounds=[(0, None), (0, None)])
+    lambda_opt = res.x
+    E_min = []
     for inty in energy_interpolators[1:]:
-        res = minimize(inty, np.full(n_energies, 1.0), bounds=[(0, None), (0, None)])
-        lambda_minz.append(res.x)
-        E_minz.append(inty(res.x))
+        E_min.append(inty(lambda_opt))
         
-    return np.array(lambda_minz), np.array(E_minz)
+    return np.array(lambda_opt), np.array(E_min)
 
+def do_everything():
+    ion = State(atom, seq, shell)
+    
+    direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"    
+    file_name_common = f"_{int(nist_cutoff*100)}_{prior_shape}P_{likelihood_shape}L"
+    
+    # Interval endpoints for each input component
+    x_bnd = np.array([[0.8,1.2],[0.8,1.2]])
+    
+    # Resolution in each dimension
+    grid_resolution = 5
+    x_res = np.array([grid_resolution, grid_resolution])
+    
+    lambdas_file = direc + "lambdas" + file_name_common+".npy"
+    lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape, 
+                      likelihood_shape=likelihood_shape, outfile=lambdas_file)
+    
+    energy_distribution(ion, lambda_samples, x_bnd, x_res)
+    
+    rates_file = direc+"rates"+file_name_common+".npy"
+    T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=rates_file)
+    
+    graph_file=direc + "rates"+file_name_common + ".png"
+    graph_rates_from_file(ion, infile = rates_file, outfile=graph_file)
+    
+    end = time.time()
+    print(f"Runtime: {int(end-start)}s")
+    
 if __name__ == "__main__":
     
     # Uncomment this section to use command line arguments to pass atom, seq, shell
@@ -195,38 +292,14 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    atom = "o"
-    seq = "li"
+    atom = "fe"
+    seq = "be"
     shell = "2-2"
     ion = State(atom, seq, shell)
     
     nist_cutoff=0.05
     prior_shape="gaussian"
     likelihood_shape="gaussian"
-    ion = State(atom, seq, shell)
     
-    direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"    
-    file_name_common = f"_{int(nist_cutoff*100)}_{prior_shape}P_{likelihood_shape}L"
+    do_everything()
     
-    # Interval endpoints for each input component
-    x_bnd = np.array([[0.8,1.2],[0.8,1.2]])
-    
-    # Resolution in each dimension
-    grid_resolution = 5
-    x_res = np.array([grid_resolution, grid_resolution])
-    
-    lambdas_file = direc + "lambdas" + file_name_common+".npy"
-    lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape, 
-                      likelihood_shape=likelihood_shape, outfile=lambdas_file)
-    """
-    energy_distribution(ion, lambda_samples, x_bnd, x_res)
-    
-    rates_file = direc+"rates"+file_name_common+".npy"
-    T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=rates_file)
-    
-    graph_file=direc + "rates"+file_name_common + ".png"
-    graph_rates_from_file(ion, infile = rates_file, outfile=graph_file)
-    """
-    print(energy_optimization(ion, lambda_samples, x_bnd, x_res))
-    end = time.time()
-    print(f"Runtime: {int(end-start)}s")
