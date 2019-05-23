@@ -136,7 +136,8 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     
     return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
 
-def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
+def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
+                 MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
     ion_name = f"{ion.species}{ion.ion_charge}"
@@ -180,8 +181,10 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
     os.system("cp oic o1")
 
     os.chdir(up_dir)
+    
 
-def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[], NTAR1=1):
+def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[], NTAR1=1, 
+                         compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, EMAX=2.0):
     
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
@@ -193,22 +196,9 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
         up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
-    """
-    elif method == "shift" and shift != []:
-        direc += "_".join([str(x) for x in shift])
-        up_dir = "../../../../../"
-        levels_file = "../LEVELS"
-        if not os.access(direc, os.F_OK):
-            os.mkdir(direc)
-    """
     
     os.chdir(direc)
-    """
-    if method == "shift" and shift != []:
-        os.system("cp ../o1 o1")
-        os.system("cp ../olg olg")
-        os.system("cp ../ols ols")
-    """
+    
     with open("adasin", "w") as adasin:
         with open(levels_file, "r") as levels:
             lines = levels.read().splitlines()
@@ -217,6 +207,10 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
             adasin.write("/IC/\n")
             adasin.write(f" &ONE NTAR1={NTAR1} NTAR2={NTAR2} COREX=\'{ion.shell}\' &END\n")
             adasin.write(f" &TWO NECOR={NECOR} ")
+            
+            if compute_xsec:
+                adasin.write(f"EWIDTH={EWIDTH} NBIN={NBIN} EMIN={EMIN} EMAX={EMAX}")
+                
             adasin.write("&END\n")
             
             for i in range(1, len(lines)-1):
@@ -234,33 +228,41 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
             adasin.write("\n")
             adasin.write(" ".join(nist_str))
     os.system("./" + up_dir + "adasdr.x < adasin")
-    with open("adasout", "r") as f:
-        string = f.read()
-        f.seek(string.find("T(K)"))
-        f.readline()
-        f.readline()
-        
-        start = f.tell()
-        count = 0
-        line = f.readline()
-        while(line[0] != "C"):
-            count += 1
-            line = f.readline()
+    if not compute_xsec:
+        with open("adasout", "r") as f:
+            string = f.read()
+            f.seek(string.find("T(K)"))
+            f.readline()
+            f.readline()
             
+            start = f.tell()
+            count = 0
+            line = f.readline()
+            while(line[0] != "C"):
+                count += 1
+                line = f.readline()
+                
+            
+            T = np.zeros(count)
+            rate = np.zeros(count)
+            
+            f.seek(start)
+            for i in range(count):
+                line = f.readline().split()
+                try:
+                    T[i] = float(line[0])
+                    rate[i] = float(line[1])
+                except:
+                    pass
+        os.chdir(up_dir)
+        return T, rate
+    else:
+        data = np.transpose(np.genfromtxt("XDRTOT", skip_header=1))
+        energy = data[0,:]
+        xsec= data[1,:]
+        os.chdir(up_dir)
+        return energy, xsec
         
-        T = np.zeros(count)
-        rate = np.zeros(count)
-        
-        f.seek(start)
-        for i in range(count):
-            line = f.readline().split()
-            try:
-                T[i] = float(line[0])
-                rate[i] = float(line[1])
-            except:
-                pass
-    os.chdir(up_dir)
-    return T, rate
 
     
 def get_rate(ion, lambdas):

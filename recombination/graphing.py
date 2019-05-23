@@ -89,23 +89,14 @@ def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y
     plt.ylabel("Count")
     plt.savefig(direc + f"histogram_{T_hist_choice}")
 
-def graph_xsec(ion, nist_cutoff=0.05, prior_shape="uniform", likelihood_shape="uniform"):
-    direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"
-    infile = direc + f"xsec_{ion.shell}_{int(100*nist_cutoff)}_{prior_shape}P_{likelihood_shape}L.npy"
-    outfile =  direc + f"xsec_{ion.shell}_{int(100*nist_cutoff)}_{prior_shape}P_{likelihood_shape}L.png"
-    data = np.load(infile)
-    
-    E = data[0]
-    x_sections = data[1]
-    
+def graph_xsec(ion, energy, xsec, outfile):
     plt.figure()
     plt.title(f"DR Cross Section of {ion.species}{ion.ion_charge}")
     plt.xlabel("Energy (Ryd)")
     plt.ylabel("Cross Section")
     plt.xscale("log")
     
-    for xsec in x_sections:
-        plt.plot(E, xsec)
+    plt.plot(energy, xsec)
     
     plt.savefig(outfile)
 
