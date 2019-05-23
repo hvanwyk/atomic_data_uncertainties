@@ -67,12 +67,10 @@ def read_adf11(filename):
         return(dens, temps, adf11_dat)
 
 
-
-
-
- 
-    
-
+if __name__ == "__main__":
+    dens, temps, acd_dat = read_adf11('acd96_he.dat')
+    dens, temps, scd_dat = read_adf11('scd96_he.dat')
+    print(dens)
                   
                   
 

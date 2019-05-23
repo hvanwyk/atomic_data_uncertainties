@@ -123,73 +123,7 @@ def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelih
 
     return lp + log_likelihood(x, interpolators, y_bnd, likelihood_shape)
 
-def lambdas_grid(x_bnd, x_res):
-    #
-    # One dimensional grid in each direction
-    # 
-    d = x_bnd.shape[0]
-    X_1D = []
-    for i in range(d):
-        X_1D.append(np.linspace(x_bnd[i,0],x_bnd[i,1],x_res[i]))
-    
-    #
-    # Multi-dimensional Grid, using meshgrid (ij indexing)
-    #
-    X = np.meshgrid(*X_1D, indexing='ij')
-        
-    #
-    # Unravel grid into (n_points, d) array
-    # 
-    x_ravel = np.array([x.ravel() for x in X]).T
-    
-    return X_1D, x_ravel
 
-def energy_grid(ion, x_ravel, x_res):
-    #
-    # Generate error data 
-    # 
-    n = structure(ion=ion)[0].shape[0]
-    n_points = x_ravel.shape[0]
-    err = np.empty((n_points,n))
-    erg = np.empty((n_points, n))
-    
-    
-    for i in range(n_points):
-        x = x_ravel[i,:]
-        data = structure(ion=ion, lambdas=x)
-        err[i,:] = data[2]
-        erg[i, :] = data[0]
-    
-    Err = [np.reshape(err[:,j], x_res) for j in range(n)]
-    Erg = [np.reshape(erg[:,j], x_res) for j in range(n)]
-
-    return Err, Erg
-
-def rates_grid(ion, x_ravel, x_res, parallel=False):
-    
-    E, E_nist, shift = structure(ion)
-    structure_dr(ion)
-    T = postprocessing_rates(ion, E, E_nist)[0]
-    n_rates = T.size
-    n_points = x_ravel.shape[0]
-    
-    rates = np.empty((n_points, n_rates))
-    if parallel:
-        n_procs = mp.cpu_count()
-        pool = mp.Pool(processes=n_procs)
-        rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
-        rates = np.array(rates)
-    
-    else:
-        for i in range(n_points):
-            x = x_ravel[i,:]
-            E, E_nist, delta_E = structure(ion, lambdas=x)
-            structure_dr(ion, lambdas=x)
-            rates[i, :] = postprocessing_rates(ion, E, E_nist, lambdas=x)[1]
-    
-    
-    Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
-    return Rates
     
 def interpolators(X_1D, grid_vals):
     """
