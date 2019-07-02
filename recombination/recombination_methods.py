@@ -77,12 +77,17 @@ def create_directories(ion, method="lambdas"):
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
         return direc
-    else:
+    elif  method == "shift":
         direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/shift_method/"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
         return direc
-
+    elif method == "combined":
+        direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/combined_method/"
+        if not os.access(direc, os.F_OK):
+            os.mkdir(direc)
+        return direc
+    
 def get_nist_energy(ion, main_direc=""):
     fname = main_direc + f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist"
     nist = np.transpose(np.genfromtxt(fname, skip_header=1))
@@ -131,6 +136,11 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
         y_nist += ion.nist_ground
     
     y_shift = (y - y_nist) / (1 + y_nist)  
+    
+    os.remove("oic")
+    os.remove("olg")
+    os.remove("ols")
+    os.remove("TERMS")
 
     os.chdir(up_dir)
     
@@ -169,7 +179,7 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
         NLAM - # of lambda parameters used
         """
         lam = [str(lambd) for lambd in lambdas]
-        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
         asdeckin.write("  " + ' '.join(lam) + "\n")
         
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} ")
@@ -178,7 +188,7 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
         asdeckin.write("&END\n\n")
     
     os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
-    os.system("cp oic o1")
+    os.system("mv oicu o1u")
 
     os.chdir(up_dir)
     
@@ -209,7 +219,7 @@ def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[],
             adasin.write(f" &TWO NECOR={NECOR} ")
             
             if compute_xsec:
-                adasin.write(f"EWIDTH={EWIDTH} NBIN={NBIN} EMIN={EMIN} EMAX={EMAX}")
+                adasin.write(f"EWIDTH={EWIDTH} NBIN={NBIN} EMIN={EMIN} EMAX={EMAX} ")
                 
             adasin.write("&END\n")
             
@@ -269,3 +279,6 @@ def get_rate(ion, lambdas):
     E, E_nist, E_shift = structure(ion, lambdas=lambdas)
     structure_dr(ion, lambdas=lambdas)
     return postprocessing_rates(ion, E, E_nist, lambdas=lambdas)[1]
+
+ion = State("f", "li", "2-2")
+E, E_nist, delta_E = structure(ion)
