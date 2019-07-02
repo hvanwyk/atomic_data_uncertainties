@@ -18,6 +18,7 @@ ion = State(atom, seq, "2-2")
 ECORIC = 0
 NMIN = 3
 NMAX = 15
+JND = 14
 LMIN = 0
 LMAX = 7
 direc = f"results/isoelectronic/{seq}/{atom}{ion.ion_charge}/"
@@ -27,8 +28,8 @@ xsec_file = direc + f"xsec" + ("" if ECORIC==0 else f"_ECORIC{ECORIC}") + (
         "" if (LMIN==0 and LMAX==7) else f"_L_{LMIN}_{LMAX}") +".png"
         
 E, E_nist, E_shift = structure(ion)
-structure_dr(ion, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX, ECORIC=ECORIC) 
+structure_dr(ion, NMIN=NMIN, NMAX=NMAX, JND=JND, LMIN=LMIN, LMAX=LMAX, ECORIC=ECORIC) 
 
-energy, xsec = postprocessing_rates(ion, E, E_nist, compute_xsec=True, EWIDTH=0.0001, NBIN=10000)
+energy, xsec = postprocessing_rates(ion, E, E_nist, compute_xsec=True, EWIDTH=0.001, NBIN=1000)
 graph_xsec(ion, energy, xsec, xsec_file)
 

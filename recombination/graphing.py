@@ -95,6 +95,7 @@ def graph_xsec(ion, energy, xsec, outfile):
     plt.xlabel("Energy (Ryd)")
     plt.ylabel("Cross Section")
     plt.xscale("log")
+    #plt.xlim(5e3, 1e5)
     
     plt.plot(energy, xsec)
     
