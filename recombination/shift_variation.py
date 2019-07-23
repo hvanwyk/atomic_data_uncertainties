@@ -125,23 +125,23 @@ def variable_shift_method(ion, n_points, max_shift, res):
     
 def simple_shift_method(ion, n_samples, max_shift, rates_file, xsec_file="", ECORIC=0, NMIN=3, NMAX=15, LMIN=0, LMAX=7,
                         compute_xsec=False, EWIDTH=0.0001, NBIN=1000, EMIN=0.0, EMAX=2.0):
-    E, E_nist, E_shift = structure(ion, method="shift")
+    E = structure(ion, method="shift")
     structure_dr(ion, method="shift", ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
     
-    T = postprocessing_rates(ion, E, E_nist, method="shift", shift=np.zeros(E.shape))[0]
+    T = postprocessing_rates(ion, E, method="shift", shift=np.zeros(E.shape))[0]
     n_rates = T.size
     rates = np.zeros((n_samples, n_rates))
     
-    energy = postprocessing_rates(ion, E, E_nist, method="shift", shift=np.zeros(E.shape), compute_xsec=True,
+    energy = postprocessing_rates(ion, E, method="shift", shift=np.zeros(E.shape), compute_xsec=True,
                 EWIDTH=EWIDTH, NBIN=NBIN, EMIN=EMIN, EMAX=EMAX)[0]
     n_points = energy.size
     xsec = np.zeros((n_samples, n_points))
     
     for i in range(n_samples):
         shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
-        rates[i,:] = postprocessing_rates(ion, E, E_nist, method="shift", shift=shifts)[1]
+        rates[i,:] = postprocessing_rates(ion, E, method="shift", shift=shifts)[1]
         if compute_xsec:
-            xsec[i,:] = postprocessing_rates(ion, E, E_nist, method="shift", shift=shifts, compute_xsec=True, 
+            xsec[i,:] = postprocessing_rates(ion, E, method="shift", shift=shifts, compute_xsec=True, 
                 EWIDTH=EWIDTH, NBIN=NBIN, EMIN=EMIN, EMAX=EMAX)[1]
     np.save(rates_file, np.array([T,rates]))
     
@@ -204,14 +204,16 @@ def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
     
 
 
-atom = "c"
-seq = "be"
+atom = "o"
+seq = "b"
 shell = "2-2"
 
 
 ion = State(atom, seq, shell)
-res = 2
-max_shift = 0
+
+max_shift = 1.5
+n_points = 50
+
 ECORIC = 0
 NMIN = 3
 NMAX = 15
@@ -226,8 +228,8 @@ xsec_file = direc + f"xsec_shift_{max_shift}" + ("" if ECORIC==0 else f"_ECORIC{
         "" if (NMIN==3 and NMAX==15) else f"_N_{NMIN}_{NMAX}") + (
         "" if (LMIN==0 and LMAX==7) else f"_L_{LMIN}_{LMAX}") +".npy"
         
-#simple_shift_method(ion, 1, max_shift, rates_file, xsec_file, ECORIC=ECORIC, compute_xsec=True, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
-#graph_rates_shift(rates_file, xsec_file, ECORIC=ECORIC)
+simple_shift_method(ion, n_points, max_shift, rates_file, xsec_file, ECORIC=ECORIC, compute_xsec=True, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
+graph_rates_shift(rates_file, xsec_file, ECORIC=ECORIC)
 
 #shift_method_xsec(ion, 100, max_shift, xsec_file, ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
 #graph_xsec(xsec_file, )

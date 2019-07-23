@@ -48,7 +48,8 @@ def energy_grid(ion, x_ravel, x_res):
     
     for i in range(n_points):
         x = x_ravel[i,:]
-        data = structure(ion=ion, lambdas=x)
+        potential = np.random.choice([-1, 1])
+        data = structure(ion=ion, lambdas=x, potential=potential)
         err[i,:] = data[2]
         erg[i, :] = data[0]
     

@@ -130,13 +130,13 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
             
     #nist = np.transpose(np.genfromtxt(up_dir +f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist", skip_header=1))
     #y_nist = nist[-1]
-    y_nist = get_nist_energy(ion, up_dir)
+    if method=="lambdas" or method=="combined":
+        y_nist = get_nist_energy(ion, up_dir)
     if E_absolute == True:
         y += ground
-        y_nist += ion.nist_ground
-    
-    y_shift = (y - y_nist) / (1 + y_nist)  
-    
+        if method == "lambdas" or method=="combined":
+            y_nist += ion.nist_ground
+            
     os.remove("oic")
     os.remove("olg")
     os.remove("ols")
@@ -144,7 +144,11 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
 
     os.chdir(up_dir)
     
-    return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
+    if method=="lambdas" or method=="combined":
+        y_shift = (y - y_nist) / (1 + y_nist)  
+        return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
+    else:
+        return np.array([y]).flatten()
 
 def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
                  MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
@@ -193,7 +197,7 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
     os.chdir(up_dir)
     
 
-def postprocessing_rates(ion, E, E_nist, method="lambdas", lambdas=[], shift=[], NTAR1=1, 
+def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=[], NTAR1=1, 
                          compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, EMAX=2.0):
     
     direc = create_directories(ion, method)

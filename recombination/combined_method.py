@@ -21,9 +21,9 @@ if __name__ == "__main__":
     
     start = time.time()
     
-    shell = "2-2"
-    atom = "n"
-    seq = "be"
+    shell = "2-2" #core excitation shells
+    atom = "fe" #nucleus
+    seq = "be" #isoelectronic sequence
     
     ion = State(atom, seq, shell)
     
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     lambdas_file = direc + "lambdas.npy"
     
     n_samples = 50
-
+    
     if "lambdas.npy" in os.listdir(direc):
         lambda_samples = np.load(lambdas_file)
     else:
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         
     lambda_samples = lambda_samples[np.random.randint(0, lambda_samples.shape[0], size=n_samples), :]
 
-    max_shift = 1.5
+    max_shift = 2
     
     E, E_nist, delta_E = structure(ion, method="combined")
     structure_dr(ion, method="combined")

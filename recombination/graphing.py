@@ -8,6 +8,7 @@ Created on Tue Nov 20 11:55:15 2018
 
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 from recombination_methods import State
 import matplotlib.pyplot as plt
 import os
@@ -29,6 +30,8 @@ def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y
     rates = data[1]
     
     avg = np.mean(rates, axis=0)
+    med = np.median(rates, axis=0)
+    mode = np.full(avg.shape, st.mode(rates, axis=0)[0])
     if err_type=="std":
         err = np.std(rates, axis=0)
     elif err_type=="max":
