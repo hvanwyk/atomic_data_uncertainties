@@ -104,7 +104,7 @@ ENV/
 
 #Ignore results subdirectories
 /recombination/results
-/excitation/results
+/excitation/isoelectronic
 
 #Ignore r-matrix directory
 /r_matrix
