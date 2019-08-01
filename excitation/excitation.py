@@ -108,12 +108,12 @@ def run_r_matrix(ion, lambdas):
     direc = create_directories(ion)
     gen_input(ion, lambdas)
     if "pp" not in os.listdir(direc):
-        os.system("cp ../r-matrix/bin/parallel_procfile " + direc+"pp")
+        os.system("cp ../r_matrix/bin/parallel_procfile " + direc+"pp")
     if "adas803.pl" not in os.listdir(direc):
-        os.system("cp ../r-matrix/adas803.pl " + direc+"adas803.pl")
+        os.system("cp ../r_matrix/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
-    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}") 
-    
+    os.system(f"./adas803.pl --proc=pp --clean input.dat {ion.nuclear_charge}") 
+    os.chdir("../../../")
 
 if __name__ == "__main__":
     
@@ -133,4 +133,12 @@ if __name__ == "__main__":
     accel = 0
     
     lambdas = [1.0]*6
-    run_r_matrix(ion, lambdas)
+
+    basis_size = [30, 32, 34, 36, 38, 40]
+    direc = create_directories(ion)
+
+    for bs in basis_size:
+        maxc = bs
+        run_r_matrix(ion, lambdas)
+        os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_maxc_{maxc}")
+        os.system("mv " + direc + "adas/omega " + direc + f"omega_maxc_{maxc}")
