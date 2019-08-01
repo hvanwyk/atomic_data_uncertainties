@@ -1,0 +1,957 @@
+
+
+ ------------------------------------------------------------------------
+
+ S.S. Automatically generated ADAS8#3 stg3 input                         
+
+ ------------------------------------------------------------------------
+
+
+
+                SSSSSSSS      TTTTTTTTTT      GGGGGGGG       33333333 
+               SSSSSSSSSS     TTTTTTTTTT     GGGGGGGGGG     3333333333
+               SS                 TT         GG      GG     33      33
+               SS                 TT         GG                     33
+               SS                 TT         GG                     33
+               SSSSSSSSS          TT         GG               3333333 
+                SSSSSSSSS         TT         GG    GGGG       3333333 
+                       SS         TT         GG    GGGG             33
+                       SS         TT         GG      GG             33
+                       SS         TT         GG      GG     33      33
+               SSSSSSSSSS         TT         GGGGGGGGGG     33      33
+                SSSSSSSS          TT          GGGGGGGG       33333333 
+
+
+          COMPILED FOR DIMENSIONS -
+
+               MAX. NUMBER OF CHANNELS (NCHAN)         MZCHF =    400
+               NO. OF MULTIPOLES IN POTENTIALS (LAMAX) MZLMX =     15
+               NO OF CONTINUUM ANGULAR MOM. (LRANG2)   MZLR2 =     86
+               MEGAWORDS OF MEMORY AVAILABLE           MZMEG =     18
+               KILOWORDS OF MEMORY AVAILABLE           MZKIL =    100
+               N+1 ELECTRON CONFIGURATIONS             MZNC2 =   1501
+               CONTINUUM ORBITALS (NRANG2)             MZNR2 =     81
+               NO OF (N+1) ELECTRON SYMMETRIES         MZSLP =    400
+               TARGET STATES (NAST)                    MZTAR =    120
+               MAX. ORDER OF HAMILTONIAN MATRIX (MNP1)    MXMAT =  33901
+
+
+ OPENING FILE STG2H000.DAT
+
+
+
+                                   SUBROUTINE STG3RD
+                                   -----------------
+
+ INPUT-OUTPUT CHANNEL NUMBERS
+ ----------------------------
+
+ IREAD  ( 5) .. input data                .. dstg3
+ IWRITE ( 6) .. printed output            .. rout3r
+ IPUNCH ( 0) .. NOT USED
+ IDISC1 (11) .. scratch
+ IDISC2 (12) .. scratch (DA2) 
+ IDISC3 (13) .. scratch
+ IDISC4 ( 0) .. NOT USED
+
+ ITAPE1 ( 0) .. RECUPD/STG2 dump (dipole)       .. RECUPD/STG2D.DAT
+                                                   if IPOLPH=2
+
+ ITAPE2 ( 2) .. RECUPD/STG2 dump (hamiltonians) .. RECUPH/STG2H.DAT
+                                                   always used
+
+ ITAPE3 ( 3) .. STG3 dump (hamiltonians)        .. H.DAT
+                                                   always used
+
+ ITAPE4 ( 0) .. STG3 dump (dipole matrices)     .. D00 etc
+                                                   if IPOLPH=2
+ NBUG PARAMETERS
+    0    0    0    0    0    0    0    0    0
+
+ ICOPY  =   0
+ ITOTAL =   0
+ IPOLPH =   1
+                                       INPUT CHANNEL ITAPE2 =    2
+                                      OUTPUT CHANNEL ITAPE3 =    3
+
+ BASIC DATA
+ ----------
+
+ NBUT =  1  NOT1 =999  NOT2 =999  IDIAG =  1  NAST =  0  INAST =  0
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ NELC =  2  NZ =  8  LRANG1 =  3  LRANG2 = 20 NRANG2 = 30  LAMAX = 4  LAM=1
+ MASS-CORRECTION(1), DARWIN-TERM(1), SPIN-ORBIT( 0);       IZESP =  0
+ MAXNHF =  3  3  3
+ MAXNLG =  3  3  3
+ RA =   6.61388,  BSTO = 0.00000E+00;   NIX = 0
+
+  NAST =           11
+ LRGL =  0  NSPN =  2  NPTY =  0  NCFGP =   11
+ TARGET OR CORE STATE DATA
+          LPARITY  CHANNELS  ENERGY(AU)  CORRECTION  ENERGY(RY)
+ SINGLET  0 EVEN      1     -59.1557724   0.0000000     0.00000       1
+ TRIPLET  0 EVEN      1     -38.5294850   0.0000000    41.25257       2
+ TRIPLET  1  ODD      1     -38.2485169   0.0000000    41.81451       3
+ SINGLET  0 EVEN      1     -38.2196653   0.0000000    41.87221       4
+ SINGLET  1  ODD      1     -38.0320633   0.0000000    42.24742       5
+ TRIPLET  0 EVEN      1     -34.8104349   0.0000000    48.69068       6
+ TRIPLET  1  ODD      1     -34.7351139   0.0000000    48.84132       7
+ SINGLET  0 EVEN      1     -34.7300316   0.0000000    48.85148       8
+ TRIPLET  2 EVEN      1     -34.6939315   0.0000000    48.92368       9
+ SINGLET  2 EVEN      1     -34.6913614   0.0000000    48.92882      10
+ SINGLET  1  ODD      1     -34.6758512   0.0000000    48.95984      11
+
+ HAMILTONIAN MATRIX - SIZE =  341        11 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   1 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  0  NSPN =  4  NPTY =  0  NCFGP =    2
+
+ HAMILTONIAN MATRIX - SIZE =  152         5 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   2 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  1  NSPN =  2  NPTY =  0  NCFGP =    5
+
+ HAMILTONIAN MATRIX - SIZE =  185         6 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   3 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  1  NSPN =  2  NPTY =  1  NCFGP =   14
+
+ HAMILTONIAN MATRIX - SIZE =  524        17 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   4 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  1  NSPN =  4  NPTY =  0  NCFGP =    4
+
+ HAMILTONIAN MATRIX - SIZE =   94         3 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   5 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  1  NSPN =  4  NPTY =  1  NCFGP =    6
+
+ HAMILTONIAN MATRIX - SIZE =  246         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   6 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  2  NSPN =  2  NPTY =  0  NCFGP =   10
+
+ HAMILTONIAN MATRIX - SIZE =  580        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   7 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H001.DAT
+
+ LRGL =  2  NSPN =  2  NPTY =  1  NCFGP =    4
+
+ HAMILTONIAN MATRIX - SIZE =  244         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   8 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  2  NSPN =  4  NPTY =  0  NCFGP =    3
+
+ HAMILTONIAN MATRIX - SIZE =  273         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER   9 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  2  NSPN =  4  NPTY =  1  NCFGP =    2
+
+ HAMILTONIAN MATRIX - SIZE =  122         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  10 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  3  NSPN =  2  NPTY =  0  NCFGP =    1
+
+ HAMILTONIAN MATRIX - SIZE =  241         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  11 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  3  NSPN =  2  NPTY =  1  NCFGP =    4
+
+ HAMILTONIAN MATRIX - SIZE =  574        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  12 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  3  NSPN =  4  NPTY =  0  NCFGP =    1
+
+ HAMILTONIAN MATRIX - SIZE =  121         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  13 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  3  NSPN =  4  NPTY =  1  NCFGP =    2
+
+ HAMILTONIAN MATRIX - SIZE =  272         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  14 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  4  NSPN =  2  NPTY =  0  NCFGP =    1
+
+ HAMILTONIAN MATRIX - SIZE =  571        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  15 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  4  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  16 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H002.DAT
+
+ LRGL =  4  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  17 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  4  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  18 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  5  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  19 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  5  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  20 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  5  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  21 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  5  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  22 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  6  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  23 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  6  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  24 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  6  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  25 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H003.DAT
+
+ LRGL =  6  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  26 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  7  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  27 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  7  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  28 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  7  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  29 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  7  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  30 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  8  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  31 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  8  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  32 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  8  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  33 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  8  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  34 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H004.DAT
+
+ LRGL =  9  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  35 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  9  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  36 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  9  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  37 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL =  9  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  38 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 10  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  39 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 10  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  40 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 10  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  41 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 10  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  42 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 11  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  43 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H005.DAT
+
+ LRGL = 11  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  44 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 11  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  45 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 11  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  46 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 12  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  47 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 12  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  48 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 12  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  49 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 12  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  50 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 13  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  51 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 13  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  52 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H006.DAT
+
+ LRGL = 13  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  53 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 13  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  54 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 14  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  55 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 14  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  56 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 14  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  57 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 14  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  58 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 15  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  59 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 15  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  60 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 15  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  61 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ OPENING FILE STG2H007.DAT
+
+ LRGL = 15  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  62 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 16  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  63 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 16  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  64 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 16  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  65 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 16  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  66 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 17  NSPN =  2  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  240         8 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  67 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 17  NSPN =  2  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  570        19 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  68 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 17  NSPN =  4  NPTY =  0  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  120         4 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  69 COMPLETE.
+
+                                   SUBROUTINE TAPERD
+                                   -----------------
+ LRGL = 17  NSPN =  4  NPTY =  1  NCFGP =    0
+
+ HAMILTONIAN MATRIX - SIZE =  270         9 CHANNELS
+
+
+ CORRECT DATA READ FROM STG2
+ end of RSCT
+
+ SYMMETRY NUMBER  70 COMPLETE.
+
+                                   END OF STG3
+                                   -----------
