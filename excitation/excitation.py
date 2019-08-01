@@ -106,9 +106,9 @@ def run_r_matrix(ion, lambdas):
     direc = create_directories(ion)
     gen_input(ion, lambdas)
     if "pp" not in os.listdir(direc):
-        os.system("cp ../r_matrix/bin/parallel_procfile " + direc+"pp")
+        os.system("cp ../../r_matrix/bin/parallel_procfile " + direc+"pp")
     if "adas803.pl" not in os.listdir(direc):
-        os.system("cp ../r_matrix/adas803.pl " + direc+"adas803.pl")
+        os.system("cp ../../r_matrix/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
     os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}") 
     os.chdir("../../../")
