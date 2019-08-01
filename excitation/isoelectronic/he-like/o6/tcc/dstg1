@@ -1,3 +1,0 @@
-S.S. Automatically generated ADAS8#3 stg1 input
- &STG1A RELOP='TCC' IDWOUT=2 &END
- &STG1B MAXLA=2 MAXLT=17 MAXC=30 MAXE=164 &END
