@@ -67,17 +67,20 @@ def orbitals(ion):
     
     orb = []
     
-    with open("/".join(direc.split("/")[:-2]) + "/config.dat") as config:
+    with open("/".join(direc.split("/")[:-2]) + "/config.dat", "r") as config:
         lines = config.readlines()
         for line in lines:
             line = line.split(" ")
-            orb += line.rstrip()
+            for term in line:
+                x = term.rstrip()[:2]
+                if x not in orb:
+                    orb.append(x)
     return orb
 
-def gen_input(ion):
+def gen_input(ion, lambdas):
     direc = create_directories(ion)
     
-    with open(direc + "input.dat") as file:
+    with open(direc + "input.dat", "w") as file:
         file.write("GENERAL\n")
         file.write(f"2Jmax_ex = {max_ex}\n")
         file.write(f"2Jmax_nx = {max_nx}\n")
@@ -88,12 +91,29 @@ def gen_input(ion):
         file.write(f"adamp = {adamp}\n")
         file.write(f"accel = {accel}\n")
         
-        file.write("")
+        file.write("\n")
         file.write("CONFIGURATION LIST\n")
-        with open(direc+"../config.dat") as config:
+        with open(direc+"../config.dat", "r") as config:
             lines = config.readlines()
             for line in lines:
                 file.write(line)
+        file.write("\n")
+        file.write("SCALING PARAMETERS\n")
+        
+        orbs = orbitals(ion)
+        for i, orb in enumerate(orbs):
+            file.write(f"{orb} = {lambdas[i]}\n")
+
+def run_r_matrix(ion, lambdas):
+    direc = create_directories(ion)
+    gen_input(ion, lambdas)
+    if "pp" not in os.listdir(direc):
+        os.system("cp ../r-matrix/bin/parallel_procfile " + direc+"pp")
+    if "adas803.pl" not in os.listdir(direc):
+        os.system("cp ../r-matrix/adas803.pl " + direc+"adas803.pl")
+    os.chdir(direc)
+    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}") 
+    
 
 if __name__ == "__main__":
     
@@ -112,5 +132,5 @@ if __name__ == "__main__":
     adamp = 0
     accel = 0
     
-    create_directories(ion)
-    print(orbitals(ion))
+    lambdas = [1.0]*6
+    run_r_matrix(ion, lambdas)

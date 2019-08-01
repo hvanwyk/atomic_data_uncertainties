@@ -249,7 +249,7 @@ def energy_optimization(ion, lambda_samples, x_bnd, x_res):
         
     return np.array(lambda_opt), np.array(E_min)
 
-def do_everything():
+def main():
     ion = State(atom, seq, shell)
     
     direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"    
@@ -266,8 +266,9 @@ def do_everything():
     lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape, 
                       likelihood_shape=likelihood_shape, outfile=lambdas_file)
     
-    energy_distribution(ion, lambda_samples, x_bnd, x_res)
     
+    energy_distribution(ion, lambda_samples, x_bnd, x_res)
+    """
     rates_file = direc+"rates"+file_name_common+".npy"
     T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=rates_file)
     
@@ -276,6 +277,7 @@ def do_everything():
     
     end = time.time()
     print(f"Runtime: {int(end-start)}s")
+    """
     
 if __name__ == "__main__":
     
@@ -293,14 +295,14 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    atom = "fe"
-    seq = "be"
+    atom = "c"
+    seq = "he"
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    nist_cutoff=0.05
-    prior_shape="gaussian"
-    likelihood_shape="gaussian"
+    nist_cutoff=0.01
+    prior_shape="uniform"
+    likelihood_shape="uniform"
     
-    do_everything()
+    main()
     

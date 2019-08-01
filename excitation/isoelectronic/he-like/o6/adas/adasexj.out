@@ -1,0 +1,10 @@
+ *** USING FORMATTED omega FILE
+
+     ****************************** WARNING!******************************
+     The maximum temperature should be decreased from  9.80E+07 K to  2.48E+07 K
+     In light of the maximum energy contained in the omega file, a higher
+     temperature could yield inaccurate effective collision strengths
+     **********************************************************************
+
+
+cpu time =    0.005 min

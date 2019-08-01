@@ -1,0 +1,39 @@
+GENERAL
+chunk_size = 2000
+chunk_size_high_ex = 100
+chunk_size_nex = 100
+internal_split = 10
+adf00_path = /home/kyle/Documents/r-matrix/adf00
+matrix_type = K
+
+EXECUTABLE INFORMATION
+auto            1 /home/kyle/Documents/r-matrix/bin/autos.x
+stg1_ex         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg1r.x
+stg2_ex         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg2r.x
+stg3_ex         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg3r.x
+stg1_dip        8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg1r.x
+stg2_dip        8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg2r_dip.x
+stg3_dip        8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg3r_dip.x
+stgd_dip        8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgd_dip.x
+stg1_tcc        1 /home/kyle/Documents/r-matrix/bin/stg1r.x
+stg2_tcc        1 /home/kyle/Documents/r-matrix/bin/stg2r.x
+stgjk_tcc       1 /home/kyle/Documents/r-matrix/bin/stgjk.x
+stgf_ex         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgf.x
+stgicf_ex       8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgicf.x
+stgfdamp_ex     8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgfdamp.x
+stgicfdamp_ex   8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgicfdamp.x
+stgb            1 /home/kyle/Documents/r-matrix/bin/stgb.x
+stg1_nx         1 /home/kyle/Documents/r-matrix/bin/stg1r.x
+stg2_nx         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg2r.x
+stg3_nx         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstg3r.x
+stgf_nx         8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgf.x
+stgicf_nx       8  mpirun -np 8 /home/kyle/Documents/r-matrix/bin/pstgicf.x
+omadd           1 /home/kyle/Documents/r-matrix/bin/omadd.x
+om2omu          1 /home/kyle/Documents/r-matrix/bin/om2omu.x
+omr2omc         1 /home/kyle/Documents/r-matrix/bin/omr2omc.x
+adasexj         1 /home/kyle/Documents/r-matrix/bin/adasexj.x
+adasex          1 /home/kyle/Documents/r-matrix/bin/adasex.x
+arrange         1 /home/kyle/Documents/r-matrix/bin/arrange.x
+dfilter         1 /home/kyle/Documents/r-matrix/bin/dfilter.x
+hfilter         1 /home/kyle/Documents/r-matrix/bin/hfilter.x
+width           1 /home/kyle/Documents/r-matrix/bin/width.x

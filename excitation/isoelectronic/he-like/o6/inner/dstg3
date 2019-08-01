@@ -1,0 +1,5 @@
+S.S. Automatically generated ADAS8#3 stg3 input
+ &prediag npw_per_subworld=72 &END
+  &STG3A &END
+ &STG3B INAST=0 NAST=0 &END
+ &MATRIXDAT NPROW=2 NPCOL=4 NDIV=1 &END

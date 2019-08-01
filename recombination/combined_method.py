@@ -22,7 +22,7 @@ if __name__ == "__main__":
     start = time.time()
     
     shell = "2-2" #core excitation shells
-    atom = "fe" #nucleus
+    atom = "c" #nucleus
     seq = "be" #isoelectronic sequence
     
     ion = State(atom, seq, shell)
@@ -36,6 +36,7 @@ if __name__ == "__main__":
     create_directories(ion, method="combined")
     
     direc = f"results/isoelectronic/{seq}/{atom}{ion.ion_charge}/combined_method/"
+    
     os.system("cp " + f"results/isoelectronic/{seq}/{atom}{ion.ion_charge}/experimental_coefficients.dat " +
               direc+"experimental_coefficients.dat")
     lambdas_file = direc + "lambdas.npy"
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         
     lambda_samples = lambda_samples[np.random.randint(0, lambda_samples.shape[0], size=n_samples), :]
 
-    max_shift = 2
+    max_shift = 0.2
     
     E, E_nist, delta_E = structure(ion, method="combined")
     structure_dr(ion, method="combined")
@@ -63,12 +64,21 @@ if __name__ == "__main__":
         E, E_nist, delta_E = structure(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
         structure_dr(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
     
-        shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
+        #shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
+        
+        shifts = np.zeros(*E.shape)
+        for i in range(len(shifts)-5):
+            shifts[i] = (np.random.random()*2 - 1) * 0.2 / 13.6
+        for i in range(len(shifts)-5, len(shifts)):
+            shifts[i] = (np.random.random()*2 - 1) * 1.5 / 13.6
+        
+        shifts[0] = 0.0
+        
         rates[i,:] = postprocessing_rates(ion, E, E_nist, method="combined", shift=shifts)[1]
     
     
     rates_file = direc + "rates.npy"
-    np.save(rates_file, np.array([T,rates]))
+    #np.save(rates_file, np.array([T,rates]))
 
     graphs = direc + f"graphs_{n_samples}_samples.png"
     
