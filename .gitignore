@@ -102,8 +102,9 @@ ENV/
 /.project
 /.pydevproject
 
-#Ignore results directory
+#Ignore results subdirectories
 /recombination/results
+/excitation/results
 
 #Ignore r-matrix directory
-/r-matrix
+/r_matrix
