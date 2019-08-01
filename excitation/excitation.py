@@ -132,7 +132,7 @@ if __name__ == "__main__":
     
     lambdas = [1.0]*6
 
-    basis_size = [30]
+    basis_size = [30, 35, 40, 45, 50]
     direc = create_directories(ion)
     
     for bs in basis_size:
