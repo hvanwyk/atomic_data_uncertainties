@@ -62,12 +62,10 @@ def create_directories(ion):
     
     return direc
 
-def orbitals(ion):
-    direc = create_directories(ion)
-    
+def orbitals(ion):    
     orb = []
     
-    with open("/".join(direc.split("/")[:-2]) + "/config.dat", "r") as config:
+    with open(f"configs/{ion.isoelec_seq}.config", "r") as config:
         lines = config.readlines()
         for line in lines:
             line = line.split(" ")
@@ -93,7 +91,7 @@ def gen_input(ion, lambdas):
         
         file.write("\n")
         file.write("CONFIGURATION LIST\n")
-        with open(direc+"../config.dat", "r") as config:
+        with open(f"configs/{ion.isoelec_seq}.config", "r") as config:
             lines = config.readlines()
             for line in lines:
                 file.write(line)
@@ -136,9 +134,11 @@ if __name__ == "__main__":
 
     basis_size = [30, 32, 34, 36, 38, 40]
     direc = create_directories(ion)
-
+    """
     for bs in basis_size:
         maxc = bs
         run_r_matrix(ion, lambdas)
         os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_maxc_{maxc}")
         os.system("mv " + direc + "adas/omega " + direc + f"omega_maxc_{maxc}")
+    """
+    gen_input(ion, lambdas)
