@@ -110,7 +110,7 @@ def run_r_matrix(ion, lambdas):
     if "adas803.pl" not in os.listdir(direc):
         os.system("cp ../r_matrix/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
-    os.system(f"./adas803.pl --proc=pp --clean input.dat {ion.nuclear_charge}") 
+    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}") 
     os.chdir("../../../")
 
 if __name__ == "__main__":
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     
     lambdas = [1.0]*6
 
-    basis_size = [30, 32, 34, 36, 38, 40]
+    basis_size = [30]
     direc = create_directories(ion)
     
     for bs in basis_size:
@@ -140,3 +140,4 @@ if __name__ == "__main__":
         run_r_matrix(ion, lambdas)
         os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_maxc_{maxc}")
         os.system("mv " + direc + "adas/omega " + direc + f"omega_maxc_{maxc}")
+    
