@@ -134,11 +134,9 @@ if __name__ == "__main__":
 
     basis_size = [30, 32, 34, 36, 38, 40]
     direc = create_directories(ion)
-    """
+    
     for bs in basis_size:
         maxc = bs
         run_r_matrix(ion, lambdas)
         os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_maxc_{maxc}")
         os.system("mv " + direc + "adas/omega " + direc + f"omega_maxc_{maxc}")
-    """
-    gen_input(ion, lambdas)
