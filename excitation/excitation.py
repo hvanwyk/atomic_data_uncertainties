@@ -120,9 +120,9 @@ if __name__ == "__main__":
     
     ion = State(atom, seq)
     
-    max_ex = 31
-    max_nx = 71
-    maxc = 30
+    max_ex = 30
+    max_nx = 70
+    maxc = 50
     mesh_fine = 0.000325
     mesh_coarse = 0.01
     maxe_ionpot = 4
@@ -132,12 +132,12 @@ if __name__ == "__main__":
     
     lambdas = [1.0]*6
 
-    basis_size = [30, 35, 40, 45, 50]
+    jmaxnx = [70, 80, 90, 100, 150]
     direc = create_directories(ion)
     
-    for bs in basis_size:
-        maxc = bs
+    for nx in jmaxnx:
+        max_nx = nx
         run_r_matrix(ion, lambdas)
-        os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_maxc_{maxc}")
-        os.system("mv " + direc + "adas/omega " + direc + f"omega_maxc_{maxc}")
+        os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_2Jmaxnx_{max_nx}")
+        os.system("mv " + direc + "adas/omega " + direc + f"omega_2Jmaxnx_{max_nx}")
     
