@@ -14,19 +14,11 @@ from recombination_methods import State, structure, structure_dr, postprocessing
 from bayesian_methods import log_posterior, interpolators
 from lambda_variation import lambdas_grid, lambda_distribution
 from graphing import graph_rates_from_file
+import multiprocessing as mp
 
-
-
-if __name__ == "__main__":
-    
-    start = time.time()
-    
-    shell = "2-2" #core excitation shells
-    atom = "c" #nucleus
-    seq = "be" #isoelectronic sequence
-    
+def get_them_rates_boi(atom):
     ion = State(atom, seq, shell)
-    
+        
     x_bnd = np.array([[0.8, 1.2], [0.8,1.2]])
     x_res = np.array([5,5])
     nist_cutoff = 0.05
@@ -64,30 +56,41 @@ if __name__ == "__main__":
         E, E_nist, delta_E = structure(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
         structure_dr(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
     
-        #shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
-        
+        shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
+        """
         shifts = np.zeros(*E.shape)
         for i in range(len(shifts)-5):
             shifts[i] = (np.random.random()*2 - 1) * 0.2 / 13.6
         for i in range(len(shifts)-5, len(shifts)):
             shifts[i] = (np.random.random()*2 - 1) * 1.5 / 13.6
-        
+        """
         shifts[0] = 0.0
         
         rates[i,:] = postprocessing_rates(ion, E, E_nist, method="combined", shift=shifts)[1]
     
     
     rates_file = direc + "rates.npy"
-    #np.save(rates_file, np.array([T,rates]))
+    np.save(rates_file, np.array([T,rates]))
 
     graphs = direc + f"graphs_{n_samples}_samples.png"
     
-
     graph_rates_from_file(ion, rates_file, graphs, graph_every=1)
     
-    end = time.time()
     
-    print(f"Time: {end - start}s")
+if __name__ == "__main__":
+    
+    start = time.time()
+    
+    shell = "2-2" #core excitation shells
+    atomz = ["c", "n", "o", "f", "ne", "na", "mg", "al", "si", "p", "s", "cl", "k", "ca", "sc", "ti", "v", "cr", "mn", "fe"]   #nucleus
+    seq = "be" #isoelectronic sequence
+    
+    p = mp.Pool(4)
+    p.map(get_them_rates_boi, atomz)
     
     
-    
+        
+                
+        
+        
+        
