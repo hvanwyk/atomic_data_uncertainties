@@ -82,12 +82,10 @@ if __name__ == "__main__":
     start = time.time()
     
     shell = "2-2" #core excitation shells
-    atomz = ["c", "n", "o", "f", "ne", "na", "mg", "al", "si", "p", "s", "cl", "k", "ca", "sc", "ti", "v", "cr", "mn", "fe"]   #nucleus
+    atom = "s"
     seq = "be" #isoelectronic sequence
     
-    p = mp.Pool(4)
-    p.map(get_them_rates_boi, atomz)
-    
+    get_them_rates_boi(atom)
     
         
                 
