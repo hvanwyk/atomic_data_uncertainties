@@ -112,7 +112,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
         
-    asdeck_file = "{}{}_das_{}_str".format(ion.species, ion.ion_charge, ion.shell)
+    asdeck_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_str"
     os.system(f"cp asdeck/structure/{ion.isoelec_seq}-like_str {direc}/{asdeck_file}")
     os.chdir(direc)
     
