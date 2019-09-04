@@ -61,10 +61,11 @@ def read_adf04(filename):
     
     return levels, T, rates
 
-filename = "isoelectronic/he-like/o6/adas/adf04"
+if __name__ == "__main__":
+    filename = "isoelectronic/he-like/o6/adas/adf04"
 
-levels, T, rates = read_adf04(filename)
+    levels, T, rates = read_adf04(filename)
 
-print(levels)
+    print(levels)
 
 
