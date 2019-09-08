@@ -114,7 +114,6 @@ def compare(file_1, file_2):
     diff = np.max(np.abs(r1-r2))
     return diff
     
-
 if __name__ == "__main__":
     
     file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
@@ -122,5 +121,6 @@ if __name__ == "__main__":
     
     diff = compare(file_1, file_2)
     print(diff)
+
 
 
