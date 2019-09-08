@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import re
 
-def read_adf04(filename):
+def read_adf04_np(filename):
     with open(filename, "r") as adf04:
         adf04.readline()
         levels = []
@@ -49,22 +49,78 @@ def read_adf04(filename):
             arr += r
             rates = np.concatenate((rates, np.array(arr).reshape((1,-1))),axis=0)
             line = adf04.readline()
-            
+    
+    shape = rates.shape
+
+    rates = rates.ravel()
+    for i in range(len(rates)):
+        if "+" in rates[i]:
+            r = rates[i].split("+")
+            r = float("e+".join(r))
+            rates[i] = r
+        elif "-" in rates[i]:
+            neg = False
+            if rates[i][0] == "-":
+                neg = True
+            r = rates[i].split("-")
+            if neg:
+                r = float("e-".join(r[1:]))
+                r *= -1
+            else:
+                r = float("e-".join(r))
+            rates[i] = r
+    for i in range(len(T)):
+        if "+" in T[i]:
+            t = T[i].split("+")
+            t = float("e+".join(t))
+            T[i] = t
+        elif "-" in T[i]:
+            neg = False
+            if T[i][0] == "-":
+                neg = True
+            t = T[i].split("-")
+            if neg:
+                t = "e-".join(t[1:])
+                t *= -1
+            else:
+                t = "e-".join(t)
+            T[i] = t
+        else:
+            T[i] = float(T[i])
+    
+    rates = rates.reshape(shape)
     levels = np.array(levels)
-    levels = pd.DataFrame({"#": levels[:, 0], "config": levels[:, 1], "(2S+1)L( 2J)": levels[:, 2], "Energy": levels[:, 3]})
     T = np.array(T)
+    levels = pd.DataFrame({"#": levels[:, 0], "config": levels[:, 1], "(2S+1)L( 2J)": levels[:, 2], "Energy": levels[:, 3]})
+
+    return levels, T.astype(np.float), rates.astype(np.float)
+
+def rates_dataframe(filename):
+    
+    levels, T, rates = read_adf04_np(filename)
+    
     dct = {"initial": rates[:, 0], "final": rates[:, 1]}
     for i in range(2, rates.shape[1]):
         dct[f"T{i-2}"] = rates[:, i]
 
-    rates = pd.DataFrame(dct)
+    rates_df = pd.DataFrame(dct)
     
-    return levels, T, rates
+    return rates_df
+    
+def compare(file_1, file_2):
+    lev1, T1, r1 = read_adf04_np(file_1)
+    lev2, T2, r2 = read_adf04_np(file_2)
+    
+    diff = np.max(np.abs(r1-r2))
+    return diff
+    
 
-filename = "isoelectronic/he-like/o6/adas/adf04"
-
-levels, T, rates = read_adf04(filename)
-
-print(levels)
+if __name__ == "__main__":
+    
+    file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
+    file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
+    
+    diff = compare(file_1, file_2)
+    print(diff)
 
 
