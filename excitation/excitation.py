@@ -132,12 +132,6 @@ if __name__ == "__main__":
     
     lambdas = [1.0]*6
 
-    jmaxnx = [70, 80] #, 90, 100, 150]
     direc = create_directories(ion)
     
-    for nx in jmaxnx:
-        max_nx = nx
-        run_r_matrix(ion, lambdas)
-        os.system("mv " + direc + "adas/adf04 " + direc + f"adf04_2Jmaxnx_{max_nx}")
-        os.system("mv " + direc + "adas/omega " + direc + f"omega_2Jmaxnx_{max_nx}")
-    
+    run_r_matrix(ion, lambdas)
