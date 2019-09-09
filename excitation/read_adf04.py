@@ -111,16 +111,23 @@ def compare(file_1, file_2):
     lev1, T1, r1 = read_adf04_np(file_1)
     lev2, T2, r2 = read_adf04_np(file_2)
     
+    r1 = r1.ravel()
+    r2 = r2.ravel()
     diff = np.max(np.abs(r1-r2))
-    return diff
+    ind = np.argmax(r1-r2)
+    avg = (r1[ind] + r2[ind])/2
+    
+    per_diff = (diff/avg)*100
+    print(f"% difference: {(diff/avg)*100}")
+
+    return diff, avg, per_diff
     
 if __name__ == "__main__":
     
     file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
-    diff = compare(file_1, file_2)
-    print(diff)
+    compare(file_1, file_2)
 
 
 
