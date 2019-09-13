@@ -114,20 +114,43 @@ def compare(file_1, file_2):
     r1 = r1.ravel()
     r2 = r2.ravel()
     diff = np.max(np.abs(r1-r2))
-    ind = np.argmax(r1-r2)
+    ind = np.argmax(np.abs(r1-r2))
     avg = (r1[ind] + r2[ind])/2
     
     per_diff = (diff/avg)*100
-    print(f"% difference: {(diff/avg)*100}")
+    print(f"% difference: {per_diff}")
 
     return diff, avg, per_diff
+
+def compare_ground(file_1, file_2, max_n):
+    df_1 = rates_dataframe(file_1)
+    df_1 = df_1.loc[(df_1["final"]==1.0) & (df_1["initial"] <= max_n)]
+    df_2 = rates_dataframe(file_2)
+    df_2 = df_2.loc[(df_2["final"]==1.0) & (df_2["initial"] <= max_n)]
+    
+    r_1 = df_1.values[:,2:]
+    r_2 = df_2.values[:,2:]
+    
+    diff = np.max(np.abs(r_1-r_2))
+    ind = np.argmax(np.abs(r_1-r_2))
+    avg = np.mean((r_1[ind] + r_2[ind])/2)
+    
+    per_diff = (diff/avg)*100
+    
+    print(f"% difference up to n={max_n}: {per_diff}")
+    return diff, avg, per_diff 
+    
+    
+    
     
 if __name__ == "__main__":
     
     file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
-    compare(file_1, file_2)
 
+    compare_ground(file_1, file_2, 17)
+    
+    compare(file_1, file_2)
 
 
