@@ -113,14 +113,17 @@ def compare(file_1, file_2):
     
     r1 = r1.ravel()
     r2 = r2.ravel()
-    diff = np.max(np.abs(r1-r2))
-    ind = np.argmax(np.abs(r1-r2))
-    avg = (r1[ind] + r2[ind])/2
     
-    per_diff = (diff/avg)*100
-    print(f"% difference: {per_diff}")
+    r1[r1==0] = 1e-99
+    r2[r2==0] = 1e-99
+    
+    diff = np.abs((r1-r2)/((r1+r2)/2))
+    
+    
+    max_diff = np.max(diff)
+    print(f"% difference: {max_diff*100}")
 
-    return diff, avg, per_diff
+    return diff
 
 def compare_ground(file_1, file_2, max_n):
     df_1 = rates_dataframe(file_1)
@@ -139,7 +142,7 @@ def compare_ground(file_1, file_2, max_n):
     max_diff = np.max(diff)
     
     print(f"% difference for up to n={max_n} transitions to ground: {max_diff*100}")
-    return max_diff
+    return diff
     
     
     
