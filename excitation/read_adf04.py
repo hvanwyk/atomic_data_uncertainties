@@ -130,9 +130,11 @@ def compare_ground(file_1, file_2, max_n):
     
     r_1 = df_1.values[:,2:]
     r_2 = df_2.values[:,2:]
+
+    r_1[r_1==0] = 1e-99
+    r_2[r_2==0] = 1e-99
     
     diff = np.abs((r_1-r_2)/((r_1 + r_2)/2))
-    diff[np.isnan(diff)] = 0
     
     max_diff = np.max(diff)
     
