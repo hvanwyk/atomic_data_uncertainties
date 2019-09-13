@@ -131,10 +131,13 @@ def compare_ground(file_1, file_2, max_n):
     r_1 = df_1.values[:,2:]
     r_2 = df_2.values[:,2:]
     
-    diff = np.max(np.abs((r_1-r_2)/((r_1 + r_2)/2)))
+    diff = np.abs((r_1-r_2)/((r_1 + r_2)/2))
+    diff[np.isnan(diff)] = 0
     
-    print(f"% difference for up to n={max_n} transitions to ground: {diff*100}")
-    return diff
+    max_diff = np.max(diff)
+    
+    print(f"% difference for up to n={max_n} transitions to ground: {max_diff*100}")
+    return max_diff
     
     
     
