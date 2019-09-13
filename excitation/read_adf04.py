@@ -131,14 +131,10 @@ def compare_ground(file_1, file_2, max_n):
     r_1 = df_1.values[:,2:]
     r_2 = df_2.values[:,2:]
     
-    diff = np.max(np.abs(r_1-r_2))
-    ind = np.argmax(np.abs(r_1-r_2))
-    avg = np.mean((r_1[ind] + r_2[ind])/2)
+    diff = np.max(np.abs((r_1-r_2)/((r_1 + r_2)/2)))
     
-    per_diff = (diff/avg)*100
-    
-    print(f"% difference up to n={max_n}: {per_diff}")
-    return diff, avg, per_diff 
+    print(f"% difference for up to n={max_n} transitions to ground: {diff*100}")
+    return diff
     
     
     
@@ -149,7 +145,7 @@ if __name__ == "__main__":
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
 
-    compare_ground(file_1, file_2, 17)
+    compare_ground(file_1, file_2, 4)
     
     compare(file_1, file_2)
 
