@@ -65,7 +65,7 @@ def create_directories(ion):
 def orbitals(ion, nmax):    
     orb = []
     
-    with open(f"configs/{ion.isoelec_seq}_n={nmax}.config", "r") as config:
+    with open(f"configs/{ion.isoelec_seq}_n_{nmax}.config", "r") as config:
         lines = config.readlines()
         for line in lines:
             line = line.split(" ")
@@ -91,7 +91,7 @@ def gen_input(ion, lambdas, nmax):
         
         file.write("\n")
         file.write("CONFIGURATION LIST\n")
-        with open(f"configs/{ion.isoelec_seq}_n={nmax}.config", "r") as config:
+        with open(f"configs/{ion.isoelec_seq}_n_{nmax}.config", "r") as config:
             lines = config.readlines()
             for line in lines:
                 file.write(line)
