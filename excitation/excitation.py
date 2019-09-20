@@ -62,10 +62,10 @@ def create_directories(ion):
     
     return direc
 
-def orbitals(ion):    
+def orbitals(ion, nmax):    
     orb = []
     
-    with open(f"configs/{ion.isoelec_seq}.config", "r") as config:
+    with open(f"configs/{ion.isoelec_seq}_n={nmax}.config", "r") as config:
         lines = config.readlines()
         for line in lines:
             line = line.split(" ")
@@ -75,7 +75,7 @@ def orbitals(ion):
                     orb.append(x)
     return orb
 
-def gen_input(ion, lambdas):
+def gen_input(ion, lambdas, nmax):
     direc = create_directories(ion)
     
     with open(direc + "input.dat", "w") as file:
@@ -91,20 +91,20 @@ def gen_input(ion, lambdas):
         
         file.write("\n")
         file.write("CONFIGURATION LIST\n")
-        with open(f"configs/{ion.isoelec_seq}.config", "r") as config:
+        with open(f"configs/{ion.isoelec_seq}_n={nmax}.config", "r") as config:
             lines = config.readlines()
             for line in lines:
                 file.write(line)
         file.write("\n")
         file.write("SCALING PARAMETERS\n")
         
-        orbs = orbitals(ion)
+        orbs = orbitals(ion, nmax)
         for i, orb in enumerate(orbs):
             file.write(f"{orb} = {lambdas[i]}\n")
 
-def run_r_matrix(ion, lambdas):
+def run_r_matrix(ion, lambdas, nmax):
     direc = create_directories(ion)
-    gen_input(ion, lambdas)
+    gen_input(ion, lambdas, nmax)
     if "pp" not in os.listdir(direc):
         os.system("cp ../../r_matrix/bin/parallel_procfile " + direc+"pp")
     if "adas803.pl" not in os.listdir(direc):
@@ -134,4 +134,5 @@ if __name__ == "__main__":
 
     direc = create_directories(ion)
     
-    run_r_matrix(ion, lambdas)
+    nmax=3
+    run_r_matrix(ion, lambdas, nmax)
