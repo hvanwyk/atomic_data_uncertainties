@@ -130,9 +130,11 @@ if __name__ == "__main__":
     adamp = 0
     accel = 0
     
-    lambdas = [1.0]*6
+    nmax=4
+
+    orbs = orbitals(ion, nmax)
+    lambdas = [1.0]*len(orbs)
 
     direc = create_directories(ion)
     
-    nmax=3
     run_r_matrix(ion, lambdas, nmax)
