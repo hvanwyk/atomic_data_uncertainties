@@ -102,7 +102,7 @@ def gen_input(ion, lambdas, nmax):
         for i, orb in enumerate(orbs):
             file.write(f"{orb} = {lambdas[i]}\n")
 
-def run_r_matrix(ion, lambdas, nmax):
+def run_r_matrix(ion, lambdas, nmax, potential_type=1):
     direc = create_directories(ion)
     gen_input(ion, lambdas, nmax)
     if "pp" not in os.listdir(direc):
@@ -110,7 +110,7 @@ def run_r_matrix(ion, lambdas, nmax):
     if "adas803.pl" not in os.listdir(direc):
         os.system("cp ../../r_matrix/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
-    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}") 
+    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge*potential_type}") 
     os.chdir("../../../")
 
 if __name__ == "__main__":
@@ -130,11 +130,11 @@ if __name__ == "__main__":
     adamp = 0
     accel = 0
     
-    nmax=4
+    nmax=3
 
     orbs = orbitals(ion, nmax)
     lambdas = [1.0]*len(orbs)
 
     direc = create_directories(ion)
-    
+    potential_type = -1
     run_r_matrix(ion, lambdas, nmax)
