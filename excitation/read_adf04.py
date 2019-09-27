@@ -125,11 +125,11 @@ def compare(file_1, file_2):
 
     return diff
 
-def compare_ground(file_1, file_2, max_n):
+def compare_ground(file_1, file_2):
     df_1 = rates_dataframe(file_1)
-    df_1 = df_1.loc[(df_1["final"]==1.0) & (df_1["initial"] <= max_n)]
+    df_1 = df_1.loc[df_1["final"]==1.0]
     df_2 = rates_dataframe(file_2)
-    df_2 = df_2.loc[(df_2["final"]==1.0) & (df_2["initial"] <= max_n)]
+    df_2 = df_2.loc[df_2["final"]==1.0]
     
     r_1 = df_1.values[:,7:]
     r_2 = df_2.values[:,7:]
@@ -141,7 +141,7 @@ def compare_ground(file_1, file_2, max_n):
     
     max_diff = np.max(diff)
     
-    print(f"% difference for up to n={max_n} transitions to ground: {max_diff*100}")
+    print(f"% difference for up to n=4 transitions to ground: {max_diff*100}")
     return diff
     
     
@@ -152,5 +152,6 @@ if __name__ == "__main__":
     file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
-    compare_ground(file_1, file_2, 4)
+    compare_ground(file_1, file_2)
+    
     
