@@ -8,7 +8,6 @@ Created on Fri Nov 30 13:19:15 2018
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-from recombination_methods import structure, get_rate, structure_dr, postprocessing_rates
 import multiprocessing as mp
 
 
@@ -140,7 +139,27 @@ def interpolators(X_1D, grid_vals):
     
     return interpolators
     
+def lambdas_grid(x_bnd, x_res):
+    #
+    # One dimensional grid in each direction
+    # 
+    d = x_bnd.shape[0]
+    X_1D = []
+    for i in range(d):
+        X_1D.append(np.linspace(x_bnd[i,0],x_bnd[i,1],x_res[i]))
     
+    #
+    # Multi-dimensional Grid, using meshgrid (ij indexing)
+    #
+    X = np.meshgrid(*X_1D, indexing='ij')
+        
+    #
+    # Unravel grid into (n_points, d) array
+    # 
+    x_ravel = np.array([x.ravel() for x in X]).T
+    
+    return X_1D, x_ravel
+
 def sample_from_histogram(H, edges, n_samples):
     """
     Generate a random sample from a histogram defined over a hypercube.

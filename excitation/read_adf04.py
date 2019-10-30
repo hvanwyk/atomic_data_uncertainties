@@ -100,10 +100,13 @@ def rates_dataframe(filename):
     levels, T, rates = read_adf04_np(filename)
     
     dct = {"initial": rates[:, 0], "final": rates[:, 1]}
+    dct["A"] = rates[:, 2]
     for i in range(3, rates.shape[1]-1):
-        dct[f"T{i-2}"] = rates[:, i]
+        dct[f"{T[i-3]}"] = rates[:, i]
+    dct["inf_energy"] = rates[:,-1]
 
     rates_df = pd.DataFrame(dct)
+    rates_df.sort_values(by=["final", "initial"])
     
     return rates_df
     
@@ -130,10 +133,9 @@ def compare_ground(file_1, file_2):
     df_1 = df_1.loc[df_1["final"]==1.0]
     df_2 = rates_dataframe(file_2)
     df_2 = df_2.loc[df_2["final"]==1.0]
-    
-    r_1 = df_1.values[:,7:]
-    r_2 = df_2.values[:,7:]
-    
+
+    r_1 = df_1.values[:,8:]
+    r_2 = df_2.values[:,8:]
     r_1[r_1==0] = 1e-99
     r_2[r_2==0] = 1e-99
     
@@ -152,6 +154,7 @@ if __name__ == "__main__":
     file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
-    compare_ground(file_1, file_2)
+    data = read_adf04_np(file_1)
+    print(data[0])
     
     

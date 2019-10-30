@@ -7,14 +7,16 @@ Created on Wed Jun 12 12:16:24 2019
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 import time
-from recombination_methods import State, structure, structure_dr, postprocessing_rates, create_directories
-from bayesian_methods import log_posterior, interpolators
-from lambda_variation import lambdas_grid, lambda_distribution
+import sys
+if ".." not in sys.path:
+    sys.path.append("..")
+from utilities import create_directories
+from state import State
+from recombination_methods import structure, structure_dr, postprocessing_rates
+from lambda_variation import lambda_distribution
 from graphing import graph_rates_from_file
-import multiprocessing as mp
 
 def get_them_rates_boi(atom):
     ion = State(atom, seq, shell)
@@ -53,8 +55,11 @@ def get_them_rates_boi(atom):
     
     for i in range(n_samples):
         potential = np.random.choice([-1,1])
-        E, E_nist, delta_E = structure(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
-        structure_dr(ion, method="combined", lambdas=lambda_samples[i,:], potential=potential)
+        x = lambda_samples[i,:]
+        if seq == "he":
+            x = np.r_[1.0,x]
+        E, E_nist, delta_E = structure(ion, method="combined", lambdas=x, potential=potential)
+        structure_dr(ion, method="combined", lambdas=x, potential=potential)
     
         shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
         """
@@ -82,7 +87,7 @@ if __name__ == "__main__":
     start = time.time()
     
     shell = "2-2" #core excitation shells
-    atom = "s"
+    atom = "c"
     seq = "be" #isoelectronic sequence
     
     get_them_rates_boi(atom)

@@ -6,35 +6,18 @@ Created on Mon Apr  8 16:20:47 2019
 @author: kyle
 """
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 import emcee
 import corner 
-from recombination_methods import State, structure, structure_dr, postprocessing_rates
-from bayesian_methods import log_posterior, interpolators
+from recombination_methods import State, structure, structure_dr, postprocessing_rates, get_rate
+if ".." not in sys.path:
+    sys.path.append("..")
+from bayesian_methods import log_posterior, interpolators, lambdas_grid
 import time
 from graphing import graph_rates_from_file
 from scipy.optimize import minimize
-
-def lambdas_grid(x_bnd, x_res):
-    #
-    # One dimensional grid in each direction
-    # 
-    d = x_bnd.shape[0]
-    X_1D = []
-    for i in range(d):
-        X_1D.append(np.linspace(x_bnd[i,0],x_bnd[i,1],x_res[i]))
-    
-    #
-    # Multi-dimensional Grid, using meshgrid (ij indexing)
-    #
-    X = np.meshgrid(*X_1D, indexing='ij')
-        
-    #
-    # Unravel grid into (n_points, d) array
-    # 
-    x_ravel = np.array([x.ravel() for x in X]).T
-    
-    return X_1D, x_ravel
+import multiprocessing as mp
 
 def energy_grid(ion, x_ravel, x_res):
     #
@@ -48,6 +31,8 @@ def energy_grid(ion, x_ravel, x_res):
     
     for i in range(n_points):
         x = x_ravel[i,:]
+        if ion.isoelec_seq == "he":
+            x=np.r_[1.0,x]
         potential = np.random.choice([-1, 1])
         data = structure(ion=ion, lambdas=x, potential=potential)
         err[i,:] = data[2]
@@ -70,12 +55,17 @@ def rates_grid(ion, x_ravel, x_res, parallel=False):
     if parallel:
         n_procs = mp.cpu_count()
         pool = mp.Pool(processes=n_procs)
-        rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
+        if ion.isoelec_seq == "he":
+            rates = [pool.apply(get_rate, args=(ion, np.r_[1.0,x])) for x in x_ravel]
+        else:
+            rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
         rates = np.array(rates)
     
     else:
         for i in range(n_points):
             x = x_ravel[i,:]
+            if ion.isoelec_seq == "he":
+                x=np.r_[1.0,x]
             E, E_nist, delta_E = structure(ion, lambdas=x)
             structure_dr(ion, lambdas=x)
             rates[i, :] = postprocessing_rates(ion, E, E_nist, lambdas=x)[1]
@@ -138,8 +128,11 @@ def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walk
     # -----------------------------------------------------------------------------
     
     if plot:
+        plt.figure()
         corner.corner(lambda_samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
-        plt.show()
+        #plt.show()
+        plt.savefig("lambdas.jpg")
+        
     
     # -----------------------------------------------------------------------------
     # Plug the Monte Carlo samples from the posterior into the function and comput
@@ -191,8 +184,10 @@ def energy_distribution(ion, lambda_samples, x_bnd, x_res, plot=True, outfile=No
             E_samples[i,j] = energy_interpolators[j](lambda_samples[i])         
         
     if plot:
+        plt.figure()
         corner.corner(E_samples[:,1:], labels=[f"$E_{i+1}$" for i in range(n_energies-1)], truths=[0 for i in range(n_energies-1)])
-        plt.show()
+        #plt.show()
+        plt.savefig("Energies.jpg")
     
     return E_samples
 
@@ -268,7 +263,7 @@ def main():
     
     
     energy_distribution(ion, lambda_samples, x_bnd, x_res)
-    """
+    
     rates_file = direc+"rates"+file_name_common+".npy"
     T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=rates_file)
     
@@ -277,7 +272,7 @@ def main():
     
     end = time.time()
     print(f"Runtime: {int(end-start)}s")
-    """
+    
     
 if __name__ == "__main__":
     
@@ -295,12 +290,12 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    atom = "c"
-    seq = "he"
+    atom = "o"
+    seq = "li"
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    nist_cutoff=0.01
+    nist_cutoff=0.05
     prior_shape="uniform"
     likelihood_shape="uniform"
     

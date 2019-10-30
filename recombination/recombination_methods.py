@@ -2,97 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jun 10 12:01:25 2018
-
 @author: kyle
 """
 
 import os
+import sys
 import numpy as np
-       
-class State:
-    """
-    Stores attributes of the initial ion state, before 
-    recombination/ionization.
-    """
-    
-    nuclear_charge = 2
-    configuration = "" 
-    ionized = True
-
-    def __init__(self, species="c", isoelec_seq="li", shell="2-2"):
-        self.species = species
-        self.isoelec_seq = isoelec_seq
-        self.shell = shell
-        with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
-            lines = seq_file.read().splitlines()
-            self.seq_num_electrons = abs(int(lines[0].split()[1]))
-            line = lines[1].split()
-            for i in range(len(line)):
-                if line[i] == "(":
-                    self.seq_config = line[i-1][:2]
-                    break
-        with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
-            lines = adf00.read().splitlines()
-            self.nuclear_charge = abs(int(lines[0].split()[1]))
-            self.ion_charge = self.nuclear_charge - self.seq_num_electrons
-            state = lines[self.ion_charge + 1].split()
-            for i in range(len(state)):
-                if (state[i] == "("):
-                    self.configuration = '  '.join(state[2:i]).split()
-                    break
-                elif (i == len(state) - 1):
-                    self.configuration =  '  '.join(state[2:]).split()
-            self.nist_ground = 0
-            for i in range(self.ion_charge+1, self.nuclear_charge+1):
-                self.nist_ground += float(lines[i].split()[1].replace('d', 'e'))
-            
-            self.nist_ground /= -13.605698 
-        
-    def __repr__(self):
-        formatted = f"{self.isoelec_seq.capitalize()}-like {self.species.capitalize()}:\n"
-        formatted += "\t Z: {self.nuclear_charge}\n"
-        formatted += "\t Charge: {self.ion_charge}+\n"
-        formatted += "\t Ground-state energy (NIST): {self.nist_ground}\n"
-        formatted += "\t Core Excitation: {self.shell}\n"
-        return formatted
-        
-    
-
-def create_directories(ion, method="lambdas"):
-
-    if not os.access("results", os.F_OK):
-        os.mkdir("results")
-        
-    if not os.access(f"results/isoelectronic", os.F_OK):
-        os.mkdir("results/isoelectronic")
-        
-    if not os.access(f"results/isoelectronic/{ion.isoelec_seq}", os.F_OK):
-        os.mkdir(f"results/isoelectronic/{ion.isoelec_seq}")
-    
-    if not os.access(f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}", os.F_OK):
-        os.mkdir(f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}")
-        
-    if method == "lambdas":
-        direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/lambda_method/"
-        if not os.access(direc, os.F_OK):
-            os.mkdir(direc)
-        return direc
-    elif  method == "shift":
-        direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/shift_method/"
-        if not os.access(direc, os.F_OK):
-            os.mkdir(direc)
-        return direc
-    elif method == "combined":
-        direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/combined_method/"
-        if not os.access(direc, os.F_OK):
-            os.mkdir(direc)
-        return direc
-    
-def get_nist_energy(ion, main_direc=""):
-    fname = main_direc + f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist"
-    nist = np.transpose(np.genfromtxt(fname, skip_header=1))
-    E_nist = nist[-1]
-    return E_nist
+if ".." not in sys.path:
+    sys.path.append("..")
+from utilities import create_directories, get_nist_energy, read_levels, compare_to_nist
+from state import State
     
 def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, EMAX=2, E_absolute=False):
         
@@ -124,14 +43,12 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
         
     os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
 
-    levels = np.transpose(np.genfromtxt("LEVELS", skip_header=1))
-    y = levels[-1][:len(levels[-1])-1]
-    ground = levels[-1][-1]
+    y, ground = read_levels("LEVELS") 
             
     #nist = np.transpose(np.genfromtxt(up_dir +f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist", skip_header=1))
     #y_nist = nist[-1]
     if method=="lambdas" or method=="combined":
-        y_nist = get_nist_energy(ion, up_dir)
+        y_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
     if E_absolute == True:
         y += ground
         if method == "lambdas" or method=="combined":
@@ -145,7 +62,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     os.chdir(up_dir)
     
     if method=="lambdas" or method=="combined":
-        y_shift = (y - y_nist) / (1 + y_nist)  
+        y_shift = compare_to_nist(y, y_nist)
         return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
     else:
         return np.array([y]).flatten()
@@ -283,6 +200,3 @@ def get_rate(ion, lambdas):
     E, E_nist, E_shift = structure(ion, lambdas=lambdas)
     structure_dr(ion, lambdas=lambdas)
     return postprocessing_rates(ion, E, E_nist, lambdas=lambdas)[1]
-
-ion = State("f", "li", "2-2")
-E, E_nist, delta_E = structure(ion)

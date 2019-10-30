@@ -7,45 +7,7 @@ Created on Mon Jul 15 15:22:30 2019
 """
 
 import os
-
-class State:
-    """
-    Stores attributes of the initial ion state, before 
-    recombination/ionization.
-    """
-    
-    nuclear_charge = 2
-    configuration = "" 
-    ionized = True
-
-    def __init__(self, species="c", isoelec_seq="li", shell="2-2"):
-        self.species = species
-        self.isoelec_seq = isoelec_seq
-        self.shell = shell
-        with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
-            lines = seq_file.read().splitlines()
-            self.seq_num_electrons = abs(int(lines[0].split()[1]))
-            line = lines[1].split()
-            for i in range(len(line)):
-                if line[i] == "(":
-                    self.seq_config = line[i-1][:2]
-                    break
-        with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
-            lines = adf00.read().splitlines()
-            self.nuclear_charge = abs(int(lines[0].split()[1]))
-            self.ion_charge = self.nuclear_charge - self.seq_num_electrons
-            state = lines[self.ion_charge + 1].split()
-            for i in range(len(state)):
-                if (state[i] == "("):
-                    self.configuration = '  '.join(state[2:i]).split()
-                    break
-                elif (i == len(state) - 1):
-                    self.configuration =  '  '.join(state[2:]).split()
-            self.nist_ground = 0
-            for i in range(self.ion_charge+1, self.nuclear_charge+1):
-                self.nist_ground += float(lines[i].split()[1].replace('d', 'e'))
-            
-            self.nist_ground /= -13.605698 
+from state import State
             
 def create_directories(ion):
     
@@ -60,7 +22,7 @@ def create_directories(ion):
     
     direc = f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/"
     
-    return direc
+    return direc    
 
 def orbitals(ion, nmax):    
     orb = []
@@ -75,8 +37,14 @@ def orbitals(ion, nmax):
                     orb.append(x)
     return orb
 
-def gen_input(ion, lambdas, nmax):
+def gen_input(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50):
     direc = create_directories(ion)
+    mesh_fine = 0.000325
+    mesh_coarse = 0.01
+    maxe_ionpot = 4
+    rdamp = 0
+    adamp = 0
+    accel = 0
     
     with open(direc + "input.dat", "w") as file:
         file.write("GENERAL\n")
@@ -102,15 +70,26 @@ def gen_input(ion, lambdas, nmax):
         for i, orb in enumerate(orbs):
             file.write(f"{orb} = {lambdas[i]}\n")
 
-def run_r_matrix(ion, lambdas, nmax, potential_type=1):
+def run_r_matrix(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50, potential_type=1, born_only=False):
     direc = create_directories(ion)
-    gen_input(ion, lambdas, nmax)
+    gen_input(ion, lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc)
     if "pp" not in os.listdir(direc):
         os.system("cp ../../r_matrix/bin/parallel_procfile " + direc+"pp")
     if "adas803.pl" not in os.listdir(direc):
         os.system("cp ../../r_matrix/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
-    os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge*potential_type}") 
+    
+    #delete all the subdirectories before doing new run
+    os.system(f"./adas803.pl --delete") 
+
+    #only compute structure and A-values
+    if born_only:
+        os.system(f"./adas803.pl --proc=pp --inp input.dat {ion.nuclear_charge*potential_type}") 
+        os.system(f"./adas803.pl --proc=pp --born input.dat {ion.nuclear_charge*potential_type}")
+        
+    #full R-matrix calculation
+    else:
+        os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge*potential_type}") 
     os.chdir("../../../")
 
 if __name__ == "__main__":
@@ -123,12 +102,7 @@ if __name__ == "__main__":
     max_ex = 30
     max_nx = 70
     maxc = 50
-    mesh_fine = 0.000325
-    mesh_coarse = 0.01
-    maxe_ionpot = 4
-    rdamp = 0
-    adamp = 0
-    accel = 0
+    
     
     nmax=3
 
@@ -136,5 +110,5 @@ if __name__ == "__main__":
     lambdas = [1.0]*len(orbs)
 
     direc = create_directories(ion)
-    potential_type = -1
-    run_r_matrix(ion, lambdas, nmax)
+    potential_type = 1
+    run_r_matrix(ion, lambdas=lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc, potential_type=potential_type)
