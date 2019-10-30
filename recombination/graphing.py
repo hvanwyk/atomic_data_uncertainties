@@ -44,7 +44,7 @@ def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y
     fig, ax = plt.subplots(2, 1, figsize=(6,8))
     for rate in graphed:
         ax[0].plot(T, rate)
-    ax[0].set_title(f"Dielectronic Recombination of {ion.species.capitalize()}{ion.ion_charge}")
+    ax[0].set_title(f"Dielectronic Recombination of {ion.species.capitalize()}{ion.ion_charge}+")
     ax[0].set_xlabel("Temperature (K)")
     ax[0].set_ylabel("DR Rate (cm^3 s^-1)")
     ax[0].set_xscale("log")
@@ -120,7 +120,7 @@ def graph_experimental(ion, direc):
 
 if __name__ == "__main__":
     
-    atom = "fe"
+    atom = "c"
     seq = "be"
     shell = "2-2"
     ion = State(atom, seq, shell)
