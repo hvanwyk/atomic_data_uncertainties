@@ -82,7 +82,7 @@ def make_rates_grid(ion, x_ravel, x_res, nmax=3):
     
     
     Rates = [[np.reshape(rates[:,j, k], x_res) for k in range(n_temperatures)] for j in range(n_rates)]
-    return Rates, df_base
+    return np.array(Rates), df_base
 
 
 def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_steps=1000, nist_cutoff=0.05, outfile=None):
@@ -224,33 +224,14 @@ if __name__ == "__main__":
     
     nmax = 3
     
-    orbs = orbitals(ion, nmax)
-    lambdas = [1.0]*len(orbs)
-    
-    df = rates_dataframe("adf04")
-    df = df[df["final"]==1.0]
-    print(df.values[:,3:])  
-    """
-    df.sort_values(by=["final", "initial"], inplace=True)
-    df2 = df.copy()
-    
-    df_comb = pd.concat((df,df2))
-    df_comb = pd.concat((df_comb, df))
-    
-    by_row_ind = df_comb.groupby(df_comb.index)
-    df_means = by_row_ind.mean()
-    
-    print(df_comb)
-    
     # Interval endpoints for each input component
     x_bnd = np.array([[0.8,1.2],[0.8,1.2]])
     
     # Resolution in each dimension
-    grid_resolution = 5
+    grid_resolution = 2
     x_res = np.array([grid_resolution, grid_resolution])
     
     lambdas = make_lambda_distribution(ion, x_bnd, x_res)
-    print(lambdas.shape)
-    """
+    
     
     
