@@ -151,10 +151,14 @@ def compare_ground(file_1, file_2):
     
 if __name__ == "__main__":
     
-    file_1 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_70"
+    file_1 = "isoelectronic/he-like/o6/born/adf04ic"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
     data = read_adf04_np(file_1)
+    
+    df = rates_dataframe(file_1)
+    df = df[df["final"]==1]
+    print(df)
     print(data[0])
     
     
