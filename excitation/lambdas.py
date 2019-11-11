@@ -22,7 +22,7 @@ import emcee
 import corner
 import matplotlib.pyplot as plt
 
-def make_energy_grid(ion, x_ravel, x_res, nmax=3, include_einstein=False):
+def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=False):
     # Generate error data 
     # 
     y_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
@@ -42,7 +42,10 @@ def make_energy_grid(ion, x_ravel, x_res, nmax=3, include_einstein=False):
     
     for i in range(n_points):
         x = x_ravel[i,:]
-        x=np.r_[1.0,x,[1.0]*(len(orbs)-3)]
+        if n_lambdas < 5:
+            x=np.r_[1.0,x,[1.0]*(len(orbs)-n_lambdas-1)]
+        else:
+            x = np.r_[1.0, x]
         #potential = np.random.choice([-1, 1])
         potential = 1
         run_r_matrix(ion, lambdas=x, potential_type=potential, born_only=True)
@@ -58,7 +61,7 @@ def make_energy_grid(ion, x_ravel, x_res, nmax=3, include_einstein=False):
 
     return Err, Erg
 
-def make_rates_grid(ion, x_ravel, x_res, nmax=3):
+def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
     
     orbs = orbitals(ion, nmax)
     run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax)
@@ -74,7 +77,10 @@ def make_rates_grid(ion, x_ravel, x_res, nmax=3):
 
     for i in range(n_points):
         x = x_ravel[i,:]
-        x=np.r_[1.0, x, [1.0]*(len(orbs)-3)]
+        if n_lambdas < 5:
+            x=np.r_[1.0, x, [1.0]*(len(orbs)-n_lambdas-1)]
+        else:
+            x = np.r_[1.0,x]
         run_r_matrix(ion, lambdas=x, nmax=nmax)
         df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         df = df[df["final"]==1]
@@ -135,12 +141,12 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_ste
     
     return lambda_samples
 
-def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, save=True):
+def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save=True):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     n_samples = lambda_samples.shape[0]
     
-    Rates, df_base = make_rates_grid(ion, x_ravel, x_res)
+    Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, x_res=x_res, n_lambdas=n_lambdas)
     
     T = df_base.columns[3:]
     n_rates = df_base.values.shape[0]
@@ -148,7 +154,7 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, save=True):
     
     rate_interpolators = []
     for j in range(n_rates):
-        rate_interpolators += interpolators(X_1D, Rates[:,j,:])
+        rate_interpolators.append(interpolators(X_1D, Rates[j]))
     
     rate_samples = np.zeros((n_samples, n_rates, n_temperatures))
     
@@ -164,13 +170,16 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, save=True):
     return T, rate_samples, df_base
 
 """
-def rate_samples(ion, lambda_samples, n_samples=50, nmax=3, save=True):
+def rate_samples(ion, lambda_samples, n_samples=50, n_lambdas=2, nmax=3, save=True):
     
     orbs = orbitals(ion, nmax)
         
     sample_size = lambda_samples.shape[0]
     for i in range(n_samples):
-        lambdas = np.r_[1.0, lambda_samples[np.random.randint(0, high=sample_size), :], [1.0]*(len(orbs)-3)]
+        if n_lambdas<5:
+            lambdas = np.r_[1.0, lambda_samples[np.random.randint(0, high=sample_size), :], [1.0]*(len(orbs)-n_lambdas-1)]
+        else:
+            lambdas = np.r_[1.0, lambda_samples[np.random.randint(0, high=sample_size), :]]
         run_r_matrix(ion, lambdas=lambdas, nmax=nmax)
         if i==0:
             df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
@@ -190,7 +199,6 @@ def rate_samples(ion, lambda_samples, n_samples=50, nmax=3, save=True):
     
     return df
 
-        
 
 def graph_rate_coefficients(ion, datafile):
     
@@ -212,8 +220,42 @@ def graph_rate_coefficients(ion, datafile):
             ax[0].set_ylabel("Excitation Rate Coeff")
             ax[0].set_title(f"Excitation Rate - {levels[levels['config']]}")
 """
-    
 
+def graph_rates(ion, file):
+    T, rate_samples = np.load(file)
+    rate_samples = np.abs(rate_samples)
+    n_samples, n_rates, n_temperatures = rate_samples.shape
+    finite_T = T[:-1].values.astype(np.float)
+    
+    levels = read_adf04_np(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
+    
+    for j in range(n_rates):
+        
+        avg = np.mean(rate_samples[:,j,:-1], axis=0)
+        std = np.std(rate_samples[:,j,:-1], axis=0)
+        
+        fig, ax = plt.subplots(3, 1)
+        
+        for sample in rate_samples[::100, j, :-1]:
+            ax[0].semilogx(finite_T, sample)
+            ax[0].set_xlabel("Temperature (K)")
+            ax[0].set_ylabel("Rate Coeff.")
+            ax[0].set_title(f"Excitation Rate: {levels['config'].values[j+1]} {levels['(2S+1)L( 2J)'].values[j+1]} to Ground")
+            
+            ax[1].semilogx(finite_T, (std/avg)*100)
+            ax[1].set_xlabel("Temperature (K)")
+            ax[1].set_ylabel("% Deviation")
+            ax[1].set_title("Relative Uncertainty")
+            
+            ax[2].hist(rate_samples[:,j,-1])
+            ax[2].set_xlabel("Rate Coefficient")
+            ax[2].set_ylabel("Count")
+            ax[2].set_title("Infinite Energy Rate")
+            
+        fig.tight_layout()
+        fig.savefig(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/excitation_graph_{j+2}_to_1.png")
+        
+    
 if __name__ == "__main__":
     
     atom = "o"
@@ -225,13 +267,17 @@ if __name__ == "__main__":
     nmax = 3
     
     # Interval endpoints for each input component
-    x_bnd = np.array([[0.8,1.2],[0.8,1.2]])
+    n_lambdas = 3
+    x_bnd = []
+    for i in range(n_lambdas):
+        x_bnd.append([0.8,1.2])
+    x_bnd = np.array(x_bnd)
+    
     
     # Resolution in each dimension
-    grid_resolution = 2
-    x_res = np.array([grid_resolution, grid_resolution])
+    grid_resolution = 5
+    x_res = np.array([grid_resolution]*n_lambdas)
     
-    lambdas = make_lambda_distribution(ion, x_bnd, x_res)
-    
-    
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
+    make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
     

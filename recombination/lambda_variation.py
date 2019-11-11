@@ -213,6 +213,7 @@ def rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=None):
     n_samples = lambda_samples.shape[0]
     
     Rates = rates_grid(ion, x_ravel, x_res)
+    
     rate_interpolators = interpolators(X_1D, Rates)
     
     rate_samples = np.zeros((n_samples,n_points))
@@ -225,6 +226,7 @@ def rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=None):
         np.save(outfile, np.array([T, rate_samples]))
         
     return T, rate_samples
+    
 
 def energy_optimization(ion, lambda_samples, x_bnd, x_res):    
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
@@ -257,13 +259,17 @@ def main():
     grid_resolution = 5
     x_res = np.array([grid_resolution, grid_resolution])
     
+    X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
+    
     lambdas_file = direc + "lambdas" + file_name_common+".npy"
     lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape, 
                       likelihood_shape=likelihood_shape, outfile=lambdas_file)
     
-    
+    """
     energy_distribution(ion, lambda_samples, x_bnd, x_res)
     
+    Rates = rates_grid(ion, x_ravel, x_res)    
+
     rates_file = direc+"rates"+file_name_common+".npy"
     T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, outfile=rates_file)
     
@@ -272,6 +278,7 @@ def main():
     
     end = time.time()
     print(f"Runtime: {int(end-start)}s")
+    """
     
     
 if __name__ == "__main__":
@@ -295,7 +302,7 @@ if __name__ == "__main__":
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    nist_cutoff=0.05
+    nist_cutoff=0.01
     prior_shape="uniform"
     likelihood_shape="uniform"
     

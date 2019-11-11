@@ -23,7 +23,6 @@ def get_them_rates_boi(atom):
         
     x_bnd = np.array([[0.8, 1.2], [0.8,1.2]])
     x_res = np.array([5,5])
-    nist_cutoff = 0.05
     prior_shape = "gaussian"
     likelihood_shape = "gaussian"
     
@@ -87,8 +86,10 @@ if __name__ == "__main__":
     start = time.time()
     
     shell = "2-2" #core excitation shells
-    atom = "c"
-    seq = "be" #isoelectronic sequence
+    atom = "o"
+    seq = "li" #isoelectronic sequence
+    nist_cutoff = 0.01
+
     
     get_them_rates_boi(atom)
     

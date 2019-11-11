@@ -106,7 +106,7 @@ def graph_xsec(ion, energy, xsec, outfile):
 
 def graph_experimental(ion, direc):
     temps = np.linspace(100, 1e8, 100000)
-    coeff = pd.read_csv(direc+"experimental_coefficients.dat", delimiter=", ")
+    coeff = pd.read_csv(direc+f"experimental_coefficients_{ion.species}{ion.ion_charge}.dat", delimiter=", ")
     c = coeff["c"].values
     E = coeff["E"].values
     plt.plot(temps, experimental_fit(c, E, temps), label="Experiment")
