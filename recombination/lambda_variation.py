@@ -74,7 +74,7 @@ def rates_grid(ion, x_ravel, x_res, parallel=False):
     Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
     return Rates
 
-def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=10, n_steps=1000, 
+def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=100, n_steps=10000, 
                       prior_shape="uniform", likelihood_shape="uniform", plot=True, outfile=None):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     
     nist_cutoff=0.01
     prior_shape="uniform"
-    likelihood_shape="uniform"
+    likelihood_shape="gaussian"
     
     main()
     
