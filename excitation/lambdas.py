@@ -21,6 +21,7 @@ from excitation import run_r_matrix, orbitals
 import emcee
 import corner
 import matplotlib.pyplot as plt
+from graphing_exc import graph_rates, plot_G_ratio, plot_R_ratio
 
 def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=False):
     # Generate error data 
@@ -106,7 +107,7 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_ste
     err_interpolators = interpolators(X_1D, Err)
     
     
-    y_bnd = np.zeros((n_energies, n_lambdas))
+    y_bnd = np.zeros((n_energies, 2))
     for i in range(n_energies):
         y_bnd[i, :] = -1, 1
         
@@ -221,40 +222,6 @@ def graph_rate_coefficients(ion, datafile):
             ax[0].set_title(f"Excitation Rate - {levels[levels['config']]}")
 """
 
-def graph_rates(ion, file):
-    T, rate_samples = np.load(file)
-    rate_samples = np.abs(rate_samples)
-    n_samples, n_rates, n_temperatures = rate_samples.shape
-    finite_T = T[:-1].values.astype(np.float)
-    
-    levels = read_adf04_np(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
-    
-    for j in range(n_rates):
-        
-        avg = np.mean(rate_samples[:,j,:-1], axis=0)
-        std = np.std(rate_samples[:,j,:-1], axis=0)
-        
-        fig, ax = plt.subplots(3, 1)
-        
-        for sample in rate_samples[::100, j, :-1]:
-            ax[0].semilogx(finite_T, sample)
-            ax[0].set_xlabel("Temperature (K)")
-            ax[0].set_ylabel("Rate Coeff.")
-            ax[0].set_title(f"Excitation Rate: {levels['config'].values[j+1]} {levels['(2S+1)L( 2J)'].values[j+1]} to Ground")
-            
-            ax[1].semilogx(finite_T, (std/avg)*100)
-            ax[1].set_xlabel("Temperature (K)")
-            ax[1].set_ylabel("% Deviation")
-            ax[1].set_title("Relative Uncertainty")
-            
-            ax[2].hist(rate_samples[:,j,-1])
-            ax[2].set_xlabel("Rate Coefficient")
-            ax[2].set_ylabel("Count")
-            ax[2].set_title("Infinite Energy Rate")
-            
-        fig.tight_layout()
-        fig.savefig(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/excitation_graph_{j+2}_to_1.png")
-        
     
 if __name__ == "__main__":
     
@@ -267,7 +234,7 @@ if __name__ == "__main__":
     nmax = 3
     
     # Interval endpoints for each input component
-    n_lambdas = 3
+    n_lambdas = 2
     x_bnd = []
     for i in range(n_lambdas):
         x_bnd.append([0.8,1.2])
@@ -275,9 +242,20 @@ if __name__ == "__main__":
     
     
     # Resolution in each dimension
-    grid_resolution = 5
+    grid_resolution = 2
     x_res = np.array([grid_resolution]*n_lambdas)
-    
+    """
     lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
+    
+    graph_rates(ion, "rates.npy")
+    """
+    
+    #plot_G_ratio(ion, "rates.npy")
+    
+    T, data = np.load("rates.npy")
+    
+    plot_R_ratio(ion, "rates.npy")
+    plot_G_ratio(ion, "rates.npy")
+            
     
