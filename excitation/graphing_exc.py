@@ -9,7 +9,7 @@ Created on Tue Jan 21 11:42:20 2020
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from read_adf04 import read_adf04_np
+from read_adf04 import read_adf04
 from state import State
 
 def graph_rates(ion, file):
@@ -18,7 +18,7 @@ def graph_rates(ion, file):
     n_samples, n_rates, n_temperatures = rate_samples.shape
     finite_T = T[:-1].values.astype(np.float)
     
-    levels = read_adf04_np(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
+    levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
     
     for j in range(n_rates):
         
@@ -56,7 +56,7 @@ def plot_G_ratio(ion, rates_file):
     n_samples, n_rates, n_temperatures = rate_samples.shape
 
     n_temperatures -= 1
-    levels = read_adf04_np(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
+    levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
     
     w_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(1)1( 1.0)'), "#"].values[0])
     x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])
@@ -98,7 +98,7 @@ def plot_R_ratio(ion, rates_file):
     
     n_temperatures-=1
     
-    levels = read_adf04_np(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
+    levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
     
     x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])
     y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])
@@ -127,3 +127,4 @@ def plot_R_ratio(ion, rates_file):
     plt.title(f"R Ratio vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+")
     plt.xlabel("Temperature (K)")
     plt.ylabel("R Ratio")
+    print(df.corr())

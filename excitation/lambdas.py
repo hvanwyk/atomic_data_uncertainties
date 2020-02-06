@@ -15,7 +15,7 @@ if "../recombination" not in sys.path:
     sys.path.append("../recombination")
 from state import State
 from bayesian_methods import log_posterior, interpolators, lambdas_grid
-from read_adf04 import rates_dataframe, read_adf04_np
+from read_adf04 import rates_dataframe, read_adf04
 from utilities import get_nist_energy, read_levels, compare_to_nist
 from excitation import run_r_matrix, orbitals
 import emcee
@@ -67,9 +67,11 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
     orbs = orbitals(ion, nmax)
     run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax)
     df_base = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
+    df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_all.csv", index=None)
     df_base = df_base[df_base["final"]==1]
+    df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_ground.csv", index=None)
     
-    T = df_base.columns[3:]
+    T = df_base.columns[2:]
     n_rates = df_base.values.shape[0]
     n_temperatures = T.size
     n_points = x_ravel.shape[0]
@@ -85,7 +87,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
         run_r_matrix(ion, lambdas=x, nmax=nmax)
         df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         df = df[df["final"]==1]
-        rates[i, :, :] = df.values[:, 3:]
+        rates[i, :, :] = df.values[:, 2:]
     
     
     Rates = [[np.reshape(rates[:,j, k], x_res) for k in range(n_temperatures)] for j in range(n_rates)]
@@ -166,9 +168,9 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save
         
     if save:
         np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates.npy", np.array([T, rate_samples]))
-        df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/base_adf04.csv")
         
     return T, rate_samples, df_base
+
 
 """
 def rate_samples(ion, lambda_samples, n_samples=50, n_lambdas=2, nmax=3, save=True):
@@ -208,7 +210,7 @@ def graph_rate_coefficients(ion, datafile):
     df_avg = by_row_ind.mean()
     
     df.sort_values(by=["initial"], inplace=True)
-    levels = read_adf04_np(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")[0]
+    levels = read_adf04(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")[0]
     
     
     
@@ -251,11 +253,13 @@ if __name__ == "__main__":
     graph_rates(ion, "rates.npy")
     """
     
-    #plot_G_ratio(ion, "rates.npy")
     
     T, data = np.load("rates.npy")
-    
-    plot_R_ratio(ion, "rates.npy")
-    plot_G_ratio(ion, "rates.npy")
+    levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
+    hdr = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[3]
+
+    df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
+    print(data[0,:,:])
+   
             
     

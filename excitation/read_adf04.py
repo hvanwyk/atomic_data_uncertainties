@@ -10,12 +10,13 @@ import numpy as np
 import pandas as pd
 import re
 
-def read_adf04_np(filename):
+def read_adf04(filename):
     with open(filename, "r") as adf04:
-        adf04.readline()
+        hdr = adf04.readline()
         levels = []
         line = adf04.readline()
         while "-1" not in line:
+            hdr += line
             line = line.strip()
             ang = re.findall("\(\d\)\d\( \d.\d\)", line)
             line = re.sub("\(\d\)\d\( \d.\d\)", "", line)
@@ -32,7 +33,11 @@ def read_adf04_np(filename):
             levels.append(current)
             
             line = adf04.readline()
-        T = adf04.readline().split()
+        hdr += line
+        
+        line = adf04.readline()
+        hdr += line
+        T = line.split()
         line = adf04.readline()
         r = re.findall("\-?\d.\d{2}[\+|\-]\d{2}", line)
         line = re.sub("\-?\d.\d{2}[\+|\-]\d{2}", "", line)
@@ -93,11 +98,11 @@ def read_adf04_np(filename):
     T = np.array(T)
     levels = pd.DataFrame({"#": levels[:, 0], "config": levels[:, 1], "(2S+1)L( 2J)": levels[:, 2], "Energy": levels[:, 3]})
 
-    return levels, T.astype(np.float)[2:], rates.astype(np.float)
+    return levels, T.astype(np.float)[2:], rates.astype(np.float), hdr
 
 def rates_dataframe(filename):
     
-    levels, T, rates = read_adf04_np(filename)
+    levels, T, rates, hdr = read_adf04(filename)
     
     dct = {"initial": rates[:, 0], "final": rates[:, 1]}
     dct["A"] = rates[:, 2]
@@ -111,8 +116,8 @@ def rates_dataframe(filename):
     return rates_df
     
 def compare(file_1, file_2):
-    lev1, T1, r1 = read_adf04_np(file_1)
-    lev2, T2, r2 = read_adf04_np(file_2)
+    lev1, T1, r1 = read_adf04(file_1)
+    lev2, T2, r2 = read_adf04(file_2)
     
     r1 = r1.ravel()
     r2 = r2.ravel()
@@ -154,7 +159,7 @@ if __name__ == "__main__":
     file_1 = "isoelectronic/he-like/o6/born/adf04ic"
     file_2 = "isoelectronic/he-like/o6/adf04_2Jmaxnx_80" 
     
-    data = read_adf04_np(file_1)
+    data = read_adf04(file_1)
     
     df = rates_dataframe(file_1)
     df = df[df["final"]==1]
