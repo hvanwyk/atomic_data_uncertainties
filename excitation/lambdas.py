@@ -66,7 +66,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
     
     orbs = orbitals(ion, nmax)
     run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax)
-    df_base = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
+    df_base = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/{ion.isoelec_seq}like_ks20#{ion.species}{ion.ion_charge}.dat")
     df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_all.csv", index=None)
     df_base = df_base[df_base["final"]==1]
     df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_ground.csv", index=None)
@@ -85,7 +85,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
         else:
             x = np.r_[1.0,x]
         run_r_matrix(ion, lambdas=x, nmax=nmax)
-        df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
+        df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/{ion.isoelec_seq}like_ks20#{ion.species}{ion.ion_charge}.dat")
         df = df[df["final"]==1]
         rates[i, :, :] = df.values[:, 2:]
     
@@ -246,20 +246,9 @@ if __name__ == "__main__":
     # Resolution in each dimension
     grid_resolution = 2
     x_res = np.array([grid_resolution]*n_lambdas)
-    """
+    
     lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
     
     graph_rates(ion, "rates.npy")
-    """
-    
-    
-    T, data = np.load("rates.npy")
-    levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
-    hdr = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[3]
-
-    df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
-    print(data[0,:,:])
-   
-            
     
