@@ -63,8 +63,9 @@ if __name__ == "__main__":
     shell = "1-2"
     
     ion = State(atom, seq, shell)
-    T, data = np.load("rates.npy")
-    
+    T, data = np.load("rates_gridres_5.npy")
+    print(data[0,0,:])
+    """
     adf04 = "test_adf04"
     metastable_levels = np.array([0])
     temperature_arr = np.geomspace(100, 1000, 50)
@@ -173,7 +174,7 @@ if __name__ == "__main__":
     
     fig2.savefig("R Ratio vs. Density.eps")
     
-    
+    """
     
     
     
