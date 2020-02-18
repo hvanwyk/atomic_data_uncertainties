@@ -21,7 +21,7 @@ from colradpy import colradpy
 import matplotlib.pyplot as plt
 
 
-def write_adf04(filename, ion, rates=[], adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04", nmax=3):
+def write_adf04(filename, ion, rates=[], adf04_template=f"isoelectronic/he-like/o6/adas/adf04", nmax=3):
     if adf04_template is None:
         lmb = [1.0]*len(orbitals(ion, nmax)) 
         run_r_matrix(ion, lambdas=lmb, nmax=nmax)
@@ -30,7 +30,7 @@ def write_adf04(filename, ion, rates=[], adf04_template=f"isoelectronic/{ion.iso
     hdr = re.sub("\(  \)", "(2S)", hdr)
     df_all = pd.read_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_all.csv")
     df_ground = pd.read_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_ground.csv")
-    df_ground[list(df_ground.columns.values[3:])] = rates
+    df_ground[list(df_ground.columns.values[2:])] = rates
     
     df_all[df_all["final"]==1] = df_ground
     with open(filename, "w") as file:
@@ -65,13 +65,24 @@ if __name__ == "__main__":
     ion = State(atom, seq, shell)
     T, data = np.load("rates.npy")
     
+    adf04 = "test_adf04"
+    metastable_levels = np.array([0])
+    temperature_arr = np.geomspace(100, 1000, 50)
+    density_arr  = np.geomspace(1e1, 1e18, 50)
+    
+    o = colradpy(adf04, metastable_levels, temperature_arr, density_arr, use_recombination=False, 
+              use_recombination_three_body=False, use_ionization=False, suppliment_with_ecip=False)
+    o.solve_cr()
+    
+
+    
     fig1, ax1 = plt.subplots(2,1)
     fig2, ax2 = plt.subplots(2,1)
     
     g_samples = []
     r_samples = []
 
-    for rates in data[::250, :, :]:
+    for rates in data[::500, :, :]:
         write_adf04("test_adf04", ion, rates=rates, adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         adf04 = "test_adf04"
         metastable_levels = np.array([0])
@@ -87,7 +98,7 @@ if __name__ == "__main__":
         x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])-1
         y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])-1
         z_num = int(levels.loc[(levels['config']=='1S1 2S1') & (levels['(2S+1)L( 2J)'] == '(3)0( 1.0)'), "#"].values[0])-1
-        
+                               
         
         x_pec_ind = np.where( (o.data['processed']['pec_levels'][:,0] == x_num) & (o.data['processed']['pec_levels'][:,1] == 0))[0]
         y_pec_ind = np.where( (o.data['processed']['pec_levels'][:,0] == y_num) & (o.data['processed']['pec_levels'][:,1] == 0))[0]
@@ -122,9 +133,9 @@ if __name__ == "__main__":
         
         
     ax1[0].set_xscale('log')
-    ax1[0].set_yscale('log')
+    #ax1[0].set_yscale('log')
     ax1[0].set_title(f"G Ratio vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+ at a Density of {densities[dens_ind]} cm$^{-3}$")
-    ax1[0].set_xlabel("Temperature (K)")
+    ax1[0].set_xlabel("Electron Temperature (eV)")
     ax1[0].set_ylabel("G Ratio")
         
     g_samples = np.array(g_samples)
@@ -134,7 +145,7 @@ if __name__ == "__main__":
     ax1[1].plot(temperatures, (g_err/g_avg)*100)
     ax1[1].set_xscale('log')
     ax1[1].set_title("% Error in G Ratio")
-    ax1[1].set_xlabel("Temperature (K)")
+    ax1[1].set_xlabel("Electron Temperature (eV)")
     ax1[1].set_ylabel("% Error")
 
     fig1.tight_layout()
@@ -143,8 +154,8 @@ if __name__ == "__main__":
     
     
     ax2[0].set_xscale('log')
-    ax2[0].set_yscale('log')
-    ax2[0].set_title(f"R Ratio vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at a Temperature of {temperatures[temp_ind]:.2f} K")
+    #ax2[0].set_yscale('log')
+    ax2[0].set_title(f"R Ratio vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at Electron Temperature of {temperatures[temp_ind]:.2f} eV")
     ax2[0].set_xlabel("Density (cm$^{-3}$)")
     ax2[0].set_ylabel("R Ratio")
     
@@ -162,7 +173,7 @@ if __name__ == "__main__":
     
     fig2.savefig("R Ratio vs. Density.eps")
     
-
+    
     
     
     

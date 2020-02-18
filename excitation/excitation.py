@@ -24,7 +24,8 @@ def create_directories(ion):
     
     return direc    
 
-def orbitals(ion, nmax):    
+def orbitals(ion, nmax): 
+    #Generate list of orbitals through shell "nmax"
     orb = []
     
     with open(f"configs/{ion.isoelec_seq}_n_{nmax}.config", "r") as config:
@@ -38,6 +39,7 @@ def orbitals(ion, nmax):
     return orb
 
 def gen_input(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50):
+    #Create input file for R-matrix run
     direc = create_directories(ion)
     mesh_fine = 0.000325
     mesh_coarse = 0.01

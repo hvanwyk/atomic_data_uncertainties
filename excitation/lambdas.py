@@ -151,7 +151,7 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save
     
     Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, x_res=x_res, n_lambdas=n_lambdas)
     
-    T = df_base.columns[3:]
+    T = df_base.columns[2:]
     n_rates = df_base.values.shape[0]
     n_temperatures = T.size
     
@@ -170,59 +170,6 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save
         np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates.npy", np.array([T, rate_samples]))
         
     return T, rate_samples, df_base
-
-
-"""
-def rate_samples(ion, lambda_samples, n_samples=50, n_lambdas=2, nmax=3, save=True):
-    
-    orbs = orbitals(ion, nmax)
-        
-    sample_size = lambda_samples.shape[0]
-    for i in range(n_samples):
-        if n_lambdas<5:
-            lambdas = np.r_[1.0, lambda_samples[np.random.randint(0, high=sample_size), :], [1.0]*(len(orbs)-n_lambdas-1)]
-        else:
-            lambdas = np.r_[1.0, lambda_samples[np.random.randint(0, high=sample_size), :]]
-        run_r_matrix(ion, lambdas=lambdas, nmax=nmax)
-        if i==0:
-            df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
-            df = df[df["final"]==1.0]
-            for j in range(lambdas.size):
-                df[f"lambda_{orbs[j]}"] = lambdas[j]
-        else:
-            data = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
-            data = data[data["final"]==1.0]
-            for j in range(lambdas.size):
-                data[f"lambda_{orbs[j]}"] = lambdas[j]
-            df = pd.concat((df, data))
-    
-    df.sort_values(by=[f"lambda_{i+1}" for i in range(len(orbs))] + ["final","initial"], inplace=True)
-    if save:
-        df.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rate_coefficients.csv")
-    
-    return df
-
-
-def graph_rate_coefficients(ion, datafile):
-    
-    df = pd.read_csv(datafile)
-    by_row_ind = df.groupby(df.index)
-    df_avg = by_row_ind.mean()
-    
-    df.sort_values(by=["initial"], inplace=True)
-    levels = read_adf04(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")[0]
-    
-    
-    
-    
-    for i in range(n_rates):
-        fig, ax = plt.subplots(2,1)
-        for j in range(n_samples):
-            ax[0].plot(T[:-1], rates[j, i, :-1])
-            ax[0].set_xlabel("Temperature (K)")
-            ax[0].set_ylabel("Excitation Rate Coeff")
-            ax[0].set_title(f"Excitation Rate - {levels[levels['config']]}")
-"""
 
     
 if __name__ == "__main__":
