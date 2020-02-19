@@ -62,7 +62,7 @@ def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=
 
     return Err, Erg
 
-def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
+def make_rates_grid(ion, x_ravel, n_lambdas=2, nmax=3):
     
     orbs = orbitals(ion, nmax)
     run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax)
@@ -90,7 +90,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
         rates[i, :, :] = df.values[:, 2:]
     
     
-    Rates = [[np.reshape(rates[:,j, k], x_res) for k in range(n_temperatures)] for j in range(n_rates)]
+    Rates = [[np.reshape(rates[:,j, k], x_res_rates) for k in range(n_temperatures)] for j in range(n_rates)]
     return np.array(Rates), df_base
 
 
@@ -149,7 +149,7 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     n_samples = lambda_samples.shape[0]
     
-    Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, x_res=x_res, n_lambdas=n_lambdas)
+    Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, n_lambdas=n_lambdas)
     
     T = df_base.columns[2:]
     n_rates = df_base.values.shape[0]
@@ -190,12 +190,16 @@ if __name__ == "__main__":
     x_bnd = np.array(x_bnd)
     
     
-    # Resolution in each dimension
-    grid_resolution = 2
-    x_res = np.array([grid_resolution]*n_lambdas)
+    # Resolution in each dimension for lambdas interpolation grid
+    grid_size_energies = 2
+    x_res_energies = np.array([grid_size_energies]*n_lambdas)
     
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
-    make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res, n_lambdas=n_lambdas)
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
+    
+    # Resolution in each dimension for rates interpolation grid
+    grid_size_rates = 2
+    x_res_rates = np.array([grid_size_rates]*n_lambdas)
+    make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
     
     graph_rates(ion, "rates.npy")
     
