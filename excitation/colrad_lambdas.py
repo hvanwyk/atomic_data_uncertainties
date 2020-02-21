@@ -77,13 +77,21 @@ if __name__ == "__main__":
     
 
     
-    fig1, ax1 = plt.subplots(2,1)
-    fig2, ax2 = plt.subplots(2,1)
+    fig_G, ax_G = plt.subplots(2,1)
+    fig_R, ax_R = plt.subplots(2,1)
+    fig_X_temp, ax_X_temp = plt.subplots(2, 1)
+    fig_Z_temp, ax_Z_temp = plt.subplots(2, 1)
+    fig_X_dens, ax_X_dens = plt.subplots(2, 1)
+    fig_Z_dens, ax_Z_dens = plt.subplots(2, 1)
     
     g_samples = []
     r_samples = []
+    x_samples_temp = []
+    x_samples_dens = []
+    z_samples_temp = []
+    z_samples_dens = []
 
-    for rates in data[::500, :, :]:
+    for rates in data[:, :, :]:
         write_adf04("test_adf04", ion, rates=rates, adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         adf04 = "test_adf04"
         metastable_levels = np.array([0])
@@ -116,9 +124,13 @@ if __name__ == "__main__":
         
         g = (x1+y1+z1)/w1
         g_samples.append(g)
+        x_samples_temp.append(x1)
+        z_samples_temp.append(z1)
         temperatures = o.data['user']['temp_grid']
         
-        ax1[0].plot(temperatures, g)
+        ax_G[0].plot(temperatures, g)
+        ax_X_temp[0].plot(temperatures, x1)
+        ax_Z_temp[0].plot(temperatures, z1)
         
         
         temp_ind = 30
@@ -128,52 +140,128 @@ if __name__ == "__main__":
         
         r = z2/(x2+y2)
         r_samples.append(r)
+        x_samples_dens.append(x2)
+        z_samples_dens.append(z2)
         densities = o.data['user']['dens_grid']
         
-        ax2[0].plot(densities, r)
+        ax_R[0].plot(densities, r)
+        ax_X_dens[0].plot(densities, x2)
+        ax_Z_dens[0].plot(densities, z2)
         
         
-    ax1[0].set_xscale('log')
-    #ax1[0].set_yscale('log')
-    ax1[0].set_title(f"G Ratio vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+ at a Density of {densities[dens_ind]} cm$^{-3}$")
-    ax1[0].set_xlabel("Electron Temperature (eV)")
-    ax1[0].set_ylabel("G Ratio")
+    ax_G[0].set_xscale('log')
+    #ax_G[0].set_yscale('log')
+    ax_G[0].set_title(f"G Ratio vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+ at N$_e$={densities[dens_ind]} cm$^{-3}$")
+    ax_G[0].set_xlabel("Electron Temperature (eV)")
+    ax_G[0].set_ylabel("G Ratio")
         
     g_samples = np.array(g_samples)
     g_avg = np.mean(g_samples, axis=0)
     g_err = np.std(g_samples, axis=0)
     
-    ax1[1].plot(temperatures, (g_err/g_avg)*100)
-    ax1[1].set_xscale('log')
-    ax1[1].set_title("% Error in G Ratio")
-    ax1[1].set_xlabel("Electron Temperature (eV)")
-    ax1[1].set_ylabel("% Error")
+    ax_G[1].plot(temperatures, (g_err/g_avg)*100)
+    ax_G[1].set_xscale('log')
+    ax_G[1].set_title("% Error in G Ratio")
+    ax_G[1].set_xlabel("Electron Temperature (eV)")
+    ax_G[1].set_ylabel("% Error")
 
-    fig1.tight_layout()
+    fig_G.tight_layout()
     
-    fig1.savefig("G Ratio vs. T.eps")
+    fig_G.savefig("G Ratio vs. T.eps")
     
     
-    ax2[0].set_xscale('log')
-    #ax2[0].set_yscale('log')
-    ax2[0].set_title(f"R Ratio vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at Electron Temperature of {temperatures[temp_ind]:.2f} eV")
-    ax2[0].set_xlabel("Density (cm$^{-3}$)")
-    ax2[0].set_ylabel("R Ratio")
+    ax_R[0].set_xscale('log')
+    #ax_R[0].set_yscale('log')
+    ax_R[0].set_title(f"R Ratio vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at T$_e$={temperatures[temp_ind]:.2f}eV")
+    ax_R[0].set_xlabel("Density (cm$^{-3}$)")
+    ax_R[0].set_ylabel("R Ratio")
     
     r_samples = np.array(r_samples)
     r_avg = np.mean(r_samples, axis=0)
     r_err = np.std(r_samples, axis=0)
     
-    ax2[1].plot(densities, (r_err/r_avg)*100)
-    ax2[1].set_xscale('log')
-    ax2[1].set_title("% Error in R Ratio")
-    ax2[1].set_xlabel("Density (cm$^{-3}$)")
-    ax2[1].set_ylabel("% Error")
+    ax_R[1].plot(densities, (r_err/r_avg)*100)
+    ax_R[1].set_xscale('log')
+    ax_R[1].set_title("% Error in R Ratio")
+    ax_R[1].set_xlabel("Density (cm$^{-3}$)")
+    ax_R[1].set_ylabel("% Error")
     
-    fig2.tight_layout()
-    
-    fig2.savefig("R Ratio vs. Density.eps")
-    
+    fig_R.tight_layout()
+    fig_R.savefig("R Ratio vs. Density.eps")
     
     
+    ax_X_temp[0].set_xscale('log')
+    ax_X_temp[0].set_title(f"X PEC vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+ at N$_e$={densities[dens_ind]}cm$^{-3}$")
+    ax_X_temp[0].set_xlabel("Electron Temperature (eV)")
+    ax_X_temp[0].set_ylabel("X PEC")
     
+    x_samples_temp = np.array(x_samples_temp)
+    x_avg_temp = np.mean(x_samples_temp, axis=0)
+    x_err_temp = np.std(x_samples_temp, axis=0)
+    ax_X_temp[1].plot(temperatures, (x_err_temp/x_avg_temp)*100)
+    ax_X_temp[1].set_xscale('log')
+    ax_X_temp[1].set_title("% Error in X Line PEC")
+    ax_X_temp[1].set_xlabel("Electron Temperature (eV)")
+    ax_X_temp[1].set_ylabel("% Error")
+    
+<<<<<<< HEAD
+    fig_X_temp.tight_layout()
+    fig_X_temp.savefig("X PEC vs. Temperature.eps")
+    
+    ax_Z_temp[0].set_xscale('log')
+    ax_Z_temp[0].set_title(f"Z PEC vs. Temperature for {ion.species.capitalize()}{ion.ion_charge}+ at N$_e$={densities[dens_ind]}cm$^{-3}$")
+    ax_Z_temp[0].set_xlabel("Electron Temperature (eV)")
+    ax_Z_temp[0].set_ylabel("Z PEC")
+    
+    z_samples_temp = np.array(z_samples_temp)
+    z_avg_temp = np.mean(z_samples_temp, axis=0)
+    z_err_temp = np.std(z_samples_temp, axis=0)
+    ax_Z_temp[1].plot(temperatures, (z_err_temp/z_avg_temp)*100)
+    ax_Z_temp[1].set_xscale('log')
+    ax_Z_temp[1].set_title("% Error in Z Line PEC")
+    ax_Z_temp[1].set_xlabel("Electron Temperature (eV)")
+    ax_Z_temp[1].set_ylabel("% Error")
+    
+    fig_Z_temp.tight_layout()
+    fig_Z_temp.savefig("Z PEC vs. Temperature.eps")
+
+    
+    
+    
+    ax_X_dens[0].set_xscale('log')
+    ax_X_dens[0].set_title(f"X PEC vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at T$_e$={temperatures[temp_ind]:.2f}eV")
+    ax_X_dens[0].set_xlabel("Density (cm$^{-3}$)")
+    ax_X_dens[0].set_ylabel("X PEC")
+    
+    x_samples_dens = np.array(x_samples_dens)
+    x_avg_dens = np.mean(x_samples_dens, axis=0)
+    x_err_dens = np.std(x_samples_dens, axis=0)
+    ax_X_dens[1].plot(densities, (x_err_dens/x_avg_dens)*100)
+    ax_X_dens[1].set_xscale('log')
+    ax_X_dens[1].set_title("% Error in X Line PEC")
+    ax_X_dens[1].set_xlabel("Density (cm$^{-3}$)")
+    ax_X_dens[1].set_ylabel("% Error")
+    
+    fig_X_dens.tight_layout()
+    fig_X_dens.savefig("X PEC vs. Density.eps")
+
+    
+    ax_Z_dens[0].set_xscale('log')
+    ax_Z_dens[0].set_title(f"Z PEC vs. Density for {ion.species.capitalize()}{ion.ion_charge}+ at T$_e$={temperatures[temp_ind]:.2f}eV")
+    ax_Z_dens[0].set_xlabel("Density (cm$^{-3}$)")
+    ax_Z_dens[0].set_ylabel("Z PEC")
+    
+    z_samples_dens = np.array(z_samples_dens)
+    z_avg_dens = np.mean(z_samples_dens, axis=0)
+    z_err_dens = np.std(z_samples_dens, axis=0)
+    ax_Z_dens[1].plot(densities, (z_err_dens/z_avg_dens)*100)
+    ax_Z_dens[1].set_xscale('log')
+    ax_Z_dens[1].set_title("% Error in Z Line PEC")
+    ax_Z_dens[1].set_xlabel("Density (cm$^{-3}$)")
+    ax_Z_dens[1].set_ylabel("% Error")
+    
+    fig_Z_dens.tight_layout()
+    fig_Z_dens.savefig("Z PEC vs. Density.eps")
+=======
+    
+>>>>>>> c5f04a32d40bbe0cf6f76c520a256c36d1059214
