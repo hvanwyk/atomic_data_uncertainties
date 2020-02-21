@@ -204,8 +204,7 @@ if __name__ == "__main__":
     ax_X_temp[1].set_xlabel("Electron Temperature (eV)")
     ax_X_temp[1].set_ylabel("% Error")
     
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     fig_X_temp.tight_layout()
     fig_X_temp.savefig("X PEC vs. Temperature.eps")
     
@@ -263,9 +262,4 @@ if __name__ == "__main__":
     
     fig_Z_dens.tight_layout()
     fig_Z_dens.savefig("Z PEC vs. Density.eps")
-=======
-    
->>>>>>> c5f04a32d40bbe0cf6f76c520a256c36d1059214
-=======
-    
->>>>>>> c5f04a32d40bbe0cf6f76c520a256c36d1059214
+

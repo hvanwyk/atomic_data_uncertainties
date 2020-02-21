@@ -227,7 +227,7 @@ if __name__ == "__main__":
     grid_size_rates = 2
     x_res_rates = np.array([grid_size_rates]*n_lambdas)
     
-<<<<<<< HEAD
+
     rates_grid, df_base = make_rates_grid(ion, x_ravel, x_res_rates)
         
     fig_X = plt.figure()
@@ -291,10 +291,3 @@ if __name__ == "__main__":
     
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
     """    
-=======
-    
-<<<<<<< HEAD
->>>>>>> c5f04a32d40bbe0cf6f76c520a256c36d1059214
-=======
-    
->>>>>>> c5f04a32d40bbe0cf6f76c520a256c36d1059214
