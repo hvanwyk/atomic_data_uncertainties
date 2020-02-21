@@ -94,7 +94,7 @@ def make_rates_grid(ion, x_ravel, n_lambdas=2, nmax=3):
     return np.array(Rates), df_base
 
 
-def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_steps=1000, nist_cutoff=0.05, outfile=None):
+def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_steps=10000, nist_cutoff=0.05, outfile=None):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     
     
     # Resolution in each dimension for lambdas interpolation grid
-    grid_size_energies = 2
+    grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
     
     lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
@@ -201,5 +201,4 @@ if __name__ == "__main__":
     x_res_rates = np.array([grid_size_rates]*n_lambdas)
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
     
-    graph_rates(ion, "rates.npy")
     
