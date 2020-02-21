@@ -83,7 +83,7 @@ if __name__ == "__main__":
     g_samples = []
     r_samples = []
 
-    for rates in data[::500, :, :]:
+    for rates in data[:, :, :]:
         write_adf04("test_adf04", ion, rates=rates, adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         adf04 = "test_adf04"
         metastable_levels = np.array([0])
