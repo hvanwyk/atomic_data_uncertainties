@@ -63,9 +63,9 @@ if __name__ == "__main__":
     shell = "1-2"
     
     ion = State(atom, seq, shell)
-    T, data = np.load("rates_gridres_5.npy")
+    T, data = np.load("rate_samples.npy")
     
-   
+
     adf04 = "test_adf04"
     metastable_levels = np.array([0])
     temperature_arr = np.geomspace(100, 1000, 50)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     z_samples_temp = []
     z_samples_dens = []
 
-    for rates in data[:, :, :]:
+    for rates in data[::500, :, :]:
         write_adf04("test_adf04", ion, rates=rates, adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         adf04 = "test_adf04"
         metastable_levels = np.array([0])

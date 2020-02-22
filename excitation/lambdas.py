@@ -146,7 +146,7 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_ste
     
     return lambda_samples
 
-def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save=True):
+def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, rates_file="rates.npy"):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     n_samples = lambda_samples.shape[0]
@@ -168,8 +168,8 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, save
             for k in range(n_temperatures):
                 rate_samples[i,j,k] = rate_interpolators[j][k](lambda_samples[i]) 
         
-    if save:
-        np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates.npy", np.array([T, rate_samples]))
+
+    np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/" + rates_file, np.array([T, rate_samples]))
         
     return T, rate_samples, df_base
 
