@@ -54,5 +54,6 @@ lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_stru
 grid_size_rates = 5 # Number of points per lambda used in full R-matrix runs to generate rate interpolators
 x_res_rates = np.array([grid_size_rates]*n_lambdas)
 
+# Compute excitation rates for each sample set of lambdas using interpolators
 rate_samples = make_rates_distribution(ion=ion, lambda_samples=lambda_samples, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
 
