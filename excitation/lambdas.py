@@ -191,103 +191,18 @@ if __name__ == "__main__":
         x_bnd.append([0.8,1.2])
     x_bnd = np.array(x_bnd)
     
-    levels, T, _1, _2 = read_adf04("adf04")
     
-    w_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(1)1( 1.0)'), "#"].values[0])-1
-    x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])-1
-    y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])-1
-    z_num = int(levels.loc[(levels['config']=='1S1 2S1') & (levels['(2S+1)L( 2J)'] == '(3)0( 1.0)'), "#"].values[0])-1
     
-    # Resolution in each dimension for lambdas interpolation grid
+    """
+    
+    # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
-    
-    X_1D, x_ravel = lambdas_grid(x_bnd, x_res_energies)
-    
-    lam_grid = np.array(x_ravel)
-
-    """
-    Err, Erg = make_energy_grid(ion, x_ravel, x_res_energies)
-    
-    err_grid = np.array(Err)
-    
-    for i in range(1, len(Err)):
-        
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(x_ravel[:, 0], x_ravel[:, 1], err_grid[i,:,:])
-        ax.set_xlabel("2s Lambda")
-        ax.set_ylabel("2p Lambda")
-        ax.set_zlabel(f"E$_{i}$ Error")
-        fig.tight_layout()
-        fig.savefig(f"Err{i}_grid.eps")
-    """
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
     
     # Resolution in each dimension for rates interpolation grid
     grid_size_rates = 2
     x_res_rates = np.array([grid_size_rates]*n_lambdas)
-    
-
-    rates_grid, df_base = make_rates_grid(ion, x_ravel, x_res_rates)
-        
-    fig_X = plt.figure()
-    
-    ax = fig_X.add_subplot(211, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[x_num,0, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel("X A-Value")
-    
-    ax = fig_X.add_subplot(212, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[x_num,10, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel(f"X Epsilon at T={T[9]}")
-    
-    fig_X.tight_layout()
-    fig_X.savefig(f"X_grid.eps")
-    
-    
-    
-    fig_Z = plt.figure()
-    
-    ax = fig_Z.add_subplot(211, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[z_num,0, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel("Z A-Value")
-    
-    ax = fig_Z.add_subplot(212, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[z_num,10, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel(f"Z Epsilon at T={T[9]}")
-    
-    fig_Z.tight_layout()
-    fig_Z.savefig(f"Z_grid.eps")
-    
-    
-    
-    fig_W = plt.figure()
-    
-    ax = fig_W.add_subplot(211, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[w_num,0, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel("W A-Value")
-    
-    ax = fig_W.add_subplot(212, projection="3d")
-    ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[w_num,10, :,:])
-    ax.set_xlabel("2s Lambda")
-    ax.set_ylabel("2p Lambda")
-    ax.set_zlabel(f"W Epsilon at T={T[9]}")
-    
-    fig_W.tight_layout()
-    fig_W.savefig(f"W_grid.eps")
-    
-    """
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
-    
-    
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
+    
     """    
