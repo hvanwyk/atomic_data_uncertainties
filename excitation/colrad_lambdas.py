@@ -65,6 +65,8 @@ if __name__ == "__main__":
     ion = State(atom, seq, shell)
     T, data = np.load("rates.npy")
     
+    print(data.shape)
+    
     """
     adf04 = "test_adf04"
     metastable_levels = np.array([0])
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     o.solve_cr()
     
 
-    """
+    
     fig_G, ax_G = plt.subplots(2,1)
     fig_R, ax_R = plt.subplots(2,1)
     fig_X_temp, ax_X_temp = plt.subplots(2, 1)
@@ -271,3 +273,4 @@ if __name__ == "__main__":
     
     fig_Z_dens.tight_layout()
     fig_Z_dens.savefig("Z PEC vs. Density.eps")
+    """

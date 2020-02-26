@@ -161,14 +161,16 @@ def compare_ground(file_1, file_2):
     
 if __name__ == "__main__":
     
-    slater = rates_dataframe("slater.dat")
-    slater = slater[slater["final"]==1]
-    #tf = rates_dataframe("thomas_fermi.dat")
-    #tf = tf[tf["final"]==1]
-    """
-    T = read_adf04("slater.dat")[1]
+    import matplotlib.pyplot as plt
     
-    rate_ind = 6
+    slater = rates_dataframe("graphs/slater.dat")
+    slater = slater[slater["final"]==1]
+    tf = rates_dataframe("graphs/thomas_fermi.dat")
+    tf = tf[tf["final"]==1]
+    
+    T = read_adf04("graphs/slater.dat")[1]
+    
+    rate_ind = 5
     plt.plot(T, slater.values[rate_ind, 3:-1], label="Slater")
     plt.plot(T, tf.values[rate_ind, 3:-1], label="Thomas-Fermi")
     plt.xscale("log")
@@ -182,8 +184,6 @@ if __name__ == "__main__":
     n = np.arange(1, 17)
     plt.scatter(n, slater.values[:, 2])
     plt.scatter(n, tf.values[:, 2])
-    """
     
-    print(slater["A"])
-    
+        
     

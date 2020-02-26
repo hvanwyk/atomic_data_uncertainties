@@ -32,7 +32,7 @@ def graph_rates(ion, file):
         ax[0].grid()
         ax[1].grid()
         ax[2].grid()
-        for sample in rate_samples[::500, j, 1:-1]:
+        for sample in rate_samples[::1000, j, 1:-1]:
             ax[0].semilogx(finite_T, sample)
             ax[0].set_xlabel("Temperature (K)")
             ax[0].set_ylabel("Epsilon")
@@ -58,4 +58,4 @@ if __name__ == "__main__":
     shell="1-2"
     
     ion = State(atom, seq, shell)
-    graph_rates(ion, f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_gridres_5.npy")
+    graph_rates(ion, "rates.npy")

@@ -32,7 +32,7 @@ def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1,
     orbs = orbitals(ion, nmax)
 
     if include_einstein:
-        run_r_matrix(ion, lambdas=[1.0]*len(orbs), born_only=True)
+        run_r_matrix(ion, lambdas=[1.0]*len(orbs), born_only=True, potential_type=potential_type)
         einstein = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/born/adf04ic")
         einstein = einstein[einstein["final"]==1.0]
         n = y_nist.shape[0] + einstein["A"].values.shape[0]
@@ -94,7 +94,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1):
     return np.array(Rates), df_base
 
 
-def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=1000, nist_cutoff=0.05, potential_type=1, outfile="lambda_samples.npy"):
+def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=10000, nist_cutoff=0.05, potential_type=1, outfile="lambda_samples.npy"):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
@@ -104,7 +104,7 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     # Construct interpolators
     n_energies = y_nist.size
     
-    Err, Erg = make_energy_grid(ion, x_ravel, x_res)
+    Err, Erg = make_energy_grid(ion, x_ravel, x_res, potential_type=potential_type)
     
     err_interpolators = interpolators(X_1D, Err)
     
@@ -143,12 +143,12 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     
     return lambda_samples
 
-def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, rates_file="rates.npy"):
+def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, potential_type=1, rates_file="rates.npy"):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     n_samples = lambda_samples.shape[0]
     
-    Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, x_res=x_res, n_lambdas=n_lambdas)
+    Rates, df_base = make_rates_grid(ion=ion, x_ravel=x_ravel, x_res=x_res, n_lambdas=n_lambdas, potential_type=potential_type)
     
     T = df_base.columns[2:]
     n_rates = df_base.values.shape[0]
@@ -189,16 +189,15 @@ if __name__ == "__main__":
     x_bnd = np.array(x_bnd)
     
     
-    
+    """
     
     
     # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, potential_type=-1)
     
-    print(lambdas)
-    """
+    
     # Resolution in each dimension for rates interpolation grid
     grid_size_rates = 2
     x_res_rates = np.array([grid_size_rates]*n_lambdas)
