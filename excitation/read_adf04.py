@@ -58,11 +58,14 @@ def read_adf04(filename):
     shape = rates.shape
 
     rates = rates.ravel()
+    new_rates = np.zeros(rates.shape)
+    
     for i in range(len(rates)):
+        
         if "+" in rates[i]:
             r = rates[i].split("+")
             r = float("e+".join(r))
-            rates[i] = r
+            new_rates[i] = r
         elif "-" in rates[i]:
             neg = False
             if rates[i][0] == "-":
@@ -73,7 +76,7 @@ def read_adf04(filename):
                 r *= -1
             else:
                 r = float("e-".join(r))
-            rates[i] = r
+            new_rates[i] = r
     for i in range(len(T)):
         if "+" in T[i]:
             t = T[i].split("+")
@@ -92,13 +95,15 @@ def read_adf04(filename):
             T[i] = t
         else:
             T[i] = float(T[i])
-    
     rates = rates.reshape(shape)
+    new_rates = new_rates.reshape(shape)
+    new_rates[:, 0] = rates[:, 0]
+    new_rates[:, 1] = rates[:, 1]
     levels = np.array(levels)
     T = np.array(T)
     levels = pd.DataFrame({"#": levels[:, 0], "config": levels[:, 1], "(2S+1)L( 2J)": levels[:, 2], "Energy": levels[:, 3]})
-
-    return levels, T.astype(np.float)[2:], rates.astype(np.float), hdr
+    
+    return levels, T.astype(np.float)[2:], new_rates, hdr
 
 def rates_dataframe(filename):
     
@@ -156,13 +161,29 @@ def compare_ground(file_1, file_2):
     
 if __name__ == "__main__":
     
-    file_1 = "adf04"
+    slater = rates_dataframe("slater.dat")
+    slater = slater[slater["final"]==1]
+    #tf = rates_dataframe("thomas_fermi.dat")
+    #tf = tf[tf["final"]==1]
+    """
+    T = read_adf04("slater.dat")[1]
     
-    data = read_adf04(file_1)
+    rate_ind = 6
+    plt.plot(T, slater.values[rate_ind, 3:-1], label="Slater")
+    plt.plot(T, tf.values[rate_ind, 3:-1], label="Thomas-Fermi")
+    plt.xscale("log")
+    plt.xlabel("Temperature (K)")
+    plt.ylabel("Epsilon")
+    plt.title("7-1 Epsilon")
+    plt.legend()
+    plt.savefig("potentials_7-1.eps")
     
-    df = rates_dataframe(file_1)
-    df = df[df["final"]==1]
-    print(df)
-    print(data[1][9])
+    plt.figure()
+    n = np.arange(1, 17)
+    plt.scatter(n, slater.values[:, 2])
+    plt.scatter(n, tf.values[:, 2])
+    """
+    
+    print(slater["A"])
     
     

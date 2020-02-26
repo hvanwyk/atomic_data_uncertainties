@@ -7,6 +7,9 @@ Created on Mon Jul 15 15:22:30 2019
 """
 
 import os
+import sys
+if ".." not in sys.path:
+    sys.path.append("..")
 from state import State
             
 def create_directories(ion):
@@ -86,12 +89,20 @@ def run_r_matrix(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50, potential_
 
     #only compute structure and A-values
     if born_only:
-        os.system(f"./adas803.pl --proc=pp --inp input.dat {ion.nuclear_charge*potential_type}") 
-        os.system(f"./adas803.pl --proc=pp --born input.dat {ion.nuclear_charge*potential_type}")
+        inp_string = f"./adas803.pl --proc=pp --inp input.dat {ion.nuclear_charge}"
+        born_string = f"./adas803.pl --proc=pp --born input.dat {ion.nuclear_charge}"
+        if potential_type==-1:
+            inp_string += " --tf_potential"
+            born_string += " --tf_potential"
+        os.system(inp_string) 
+        os.system(born_string)
         
     #full R-matrix calculation
     else:
-        os.system(f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge*potential_type}") 
+        command_line = f"./adas803.pl --proc=pp input.dat {ion.nuclear_charge}"
+        if potential_type==-1:
+            command_line += " --tf_potential"
+        os.system(command_line) 
     os.chdir("../../../")
 
 if __name__ == "__main__":
@@ -112,5 +123,5 @@ if __name__ == "__main__":
     lambdas = [1.0]*len(orbs)
 
     direc = create_directories(ion)
-    potential_type = 1
-    run_r_matrix(ion, lambdas=lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc, potential_type=potential_type)
+    #run_r_matrix(ion, lambdas=lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc, potential_type=-1)
+    

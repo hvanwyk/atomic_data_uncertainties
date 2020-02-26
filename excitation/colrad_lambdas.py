@@ -63,9 +63,9 @@ if __name__ == "__main__":
     shell = "1-2"
     
     ion = State(atom, seq, shell)
-    T, data = np.load("rate_samples.npy")
+    T, data = np.load(f"isoelectronic/he-like/o6/rate_samples.npy")
     
-
+    
     adf04 = "test_adf04"
     metastable_levels = np.array([0])
     temperature_arr = np.geomspace(100, 1000, 50)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     z_samples_temp = []
     z_samples_dens = []
 
-    for rates in data[::500, :, :]:
+    for rates in data[::1000, :, :]:
         write_adf04("test_adf04", ion, rates=rates, adf04_template=f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")
         adf04 = "test_adf04"
         metastable_levels = np.array([0])
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         ax_Z_temp[0].plot(temperatures, z1)
         
         
-        temp_ind = 30
+        temp_ind = 0
         x2 = o.data['processed']['pecs'][x_pec_ind, met_ind, temp_ind, :].ravel()
         y2 = o.data['processed']['pecs'][y_pec_ind, met_ind, temp_ind, :].ravel()
         z2 = o.data['processed']['pecs'][z_pec_ind, met_ind, temp_ind, :].ravel()
@@ -262,4 +262,3 @@ if __name__ == "__main__":
     
     fig_Z_dens.tight_layout()
     fig_Z_dens.savefig("Z PEC vs. Density.eps")
-
