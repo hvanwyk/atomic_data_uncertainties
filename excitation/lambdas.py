@@ -25,7 +25,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=False):
+def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1, include_einstein=False):
     # Generate error data 
     # 
     y_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
@@ -49,9 +49,7 @@ def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=
             x=np.r_[1.0,x,[1.0]*(len(orbs)-n_lambdas-1)]
         else:
             x = np.r_[1.0, x]
-        #potential = np.random.choice([-1, 1])
-        potential = 1
-        run_r_matrix(ion, lambdas=x, potential_type=potential, born_only=True)
+        run_r_matrix(ion, lambdas=x, potential_type=potential_type, born_only=True)
         y_comp,ground = read_levels(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/str/LEVELS")
         if include_einstein:
             einstein = rates_dataframe("isoelectronic/he-like/o6/born/adf04ic")
@@ -64,10 +62,10 @@ def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, include_einstein=
 
     return Err, Erg
 
-def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
+def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1):
     
     orbs = orbitals(ion, nmax)
-    run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax)
+    run_r_matrix(ion, lambdas=[1.0]*len(orbs), nmax=nmax, potential_type=potential_type)
     df_base = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/{ion.isoelec_seq}like_ks20#{ion.species}{ion.ion_charge}.dat")
     df_base.to_csv(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_dataframe_template_all.csv", index=None)
     df_base = df_base[df_base["final"]==1]
@@ -86,7 +84,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
             x=np.r_[1.0, x, [1.0]*(len(orbs)-n_lambdas-1)]
         else:
             x = np.r_[1.0,x]
-        run_r_matrix(ion, lambdas=x, nmax=nmax)
+        run_r_matrix(ion, lambdas=x, nmax=nmax, potential_type=potential_type)
         df = rates_dataframe(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/{ion.isoelec_seq}like_ks20#{ion.species}{ion.ion_charge}.dat")
         df = df[df["final"]==1]
         rates[i, :, :] = df.values[:, 2:]
@@ -96,7 +94,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
     return np.array(Rates), df_base
 
 
-def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=10000, nist_cutoff=0.05, outfile=None):
+def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=1000, nist_cutoff=0.05, potential_type=1, outfile="lambda_samples.npy"):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
@@ -141,8 +139,7 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     corner.corner(lambda_samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
     plt.show()
     
-    if outfile is not None:
-        np.save(outfile, arr=lambda_samples)
+    np.save(outfile, arr=lambda_samples)
     
     return lambda_samples
 
@@ -193,16 +190,18 @@ if __name__ == "__main__":
     
     
     
-    """
+    
     
     # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
     lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas)
     
+    print(lambdas)
+    """
     # Resolution in each dimension for rates interpolation grid
     grid_size_rates = 2
     x_res_rates = np.array([grid_size_rates]*n_lambdas)
     make_rates_distribution(ion=ion, lambda_samples=lambdas, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
     
-    """    
+    """
