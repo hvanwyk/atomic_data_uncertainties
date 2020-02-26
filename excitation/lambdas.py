@@ -139,7 +139,7 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     corner.corner(lambda_samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
     plt.show()
     
-    np.save(outfile, arr=lambda_samples)
+    np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/" + outfile, arr=lambda_samples)
     
     return lambda_samples
 
