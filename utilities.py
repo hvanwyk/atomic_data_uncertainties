@@ -53,6 +53,6 @@ def read_levels(levels_file):
     return y, ground
 
 def compare_to_nist(y_comp, y_nist):
-    err = ((y_comp - y_nist) / (y_nist))
+    err = ((y_comp - y_nist) / (1+y_nist))
     err[err==0]=1e-30
     return err

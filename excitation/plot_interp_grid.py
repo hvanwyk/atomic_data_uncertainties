@@ -26,7 +26,7 @@ ion = State(atom, seq, shell)
 
 nmax = 3
 
-rates_grid = np.load(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_grid.npy")
+rates_grid = np.load(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rate_grid.npy")
 # Resolution in each dimension for lambdas interpolation grid
 grid_size = rates_grid.shape[2]
 
@@ -48,12 +48,11 @@ lam_grid = np.array(x_ravel)
 
 levels, T, _1, _2 = read_adf04("adf04")
 
-w_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(1)1( 1.0)'), "#"].values[0])-1
-x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])-1
-y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])-1
-z_num = int(levels.loc[(levels['config']=='1S1 2S1') & (levels['(2S+1)L( 2J)'] == '(3)0( 1.0)'), "#"].values[0])-1
-                       
-print(w_num)
+w_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(1)1( 1.0)'), "#"].values[0])-2
+x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])-2
+y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])-2
+z_num = int(levels.loc[(levels['config']=='1S1 2S1') & (levels['(2S+1)L( 2J)'] == '(3)0( 1.0)'), "#"].values[0])-2
+
 """
 
 Err, Erg = make_energy_grid(ion, x_ravel, x_res)
@@ -81,6 +80,7 @@ for i in range(1, len(Err)):
     fig.savefig(f"E{i}_grid.eps")
 
 
+"""
 
 fig_X = plt.figure()
 
@@ -91,7 +91,7 @@ ax.set_ylabel("2p Lambda")
 ax.set_zlabel("X A-Value")
 
 ax = fig_X.add_subplot(212, projection="3d")
-ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[x_num,10, :,:])
+ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[x_num,1, :,:])
 ax.set_xlabel("2s Lambda")
 ax.set_ylabel("2p Lambda")
 ax.set_zlabel(f"X Epsilon at T={T[9]}")
@@ -110,7 +110,7 @@ ax.set_ylabel("2p Lambda")
 ax.set_zlabel("Z A-Value")
 
 ax = fig_Z.add_subplot(212, projection="3d")
-ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[z_num,10, :,:])
+ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[z_num,1, :,:])
 ax.set_xlabel("2s Lambda")
 ax.set_ylabel("2p Lambda")
 ax.set_zlabel(f"Z Epsilon at T={T[9]}")
@@ -129,11 +129,11 @@ ax.set_ylabel("2p Lambda")
 ax.set_zlabel("W A-Value")
 
 ax = fig_W.add_subplot(212, projection="3d")
-ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[w_num,10, :,:])
+ax.scatter(x_ravel[:, 0], x_ravel[:, 1], rates_grid[w_num,1, :,:])
 ax.set_xlabel("2s Lambda")
 ax.set_ylabel("2p Lambda")
 ax.set_zlabel(f"W Epsilon at T={T[9]}")
 
 fig_W.tight_layout()
 fig_W.savefig(f"W_grid.eps")
-"""
+
