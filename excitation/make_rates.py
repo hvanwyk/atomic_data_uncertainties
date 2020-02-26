@@ -45,9 +45,10 @@ grid_size_structure = 5 # Number of points per lambda used in autostructure runs
 x_res_structure = np.array([grid_size_structure]*n_lambdas)
 
 nist_cutoff = 0.05 # Tolerance for computed energies relative to NIST values
+potential_type = -1 # Central field potential used by autostructure. +1 for Thomas-Fermi potential, -1 for Slater-type
 
 # Computes level energies over lambda grid, generates lambda distribution, and then samples from distribution using MCMC
-lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff)
+lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff, potential_type=potential_type)
 
 
 
@@ -55,5 +56,5 @@ grid_size_rates = 5 # Number of points per lambda used in full R-matrix runs to 
 x_res_rates = np.array([grid_size_rates]*n_lambdas)
 
 # Compute excitation rates for each sample set of lambdas using interpolators
-rate_samples = make_rates_distribution(ion=ion, lambda_samples=lambda_samples, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas)
+rate_samples = make_rates_distribution(ion=ion, lambda_samples=lambda_samples, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas, potential_type=potential_type)
 
