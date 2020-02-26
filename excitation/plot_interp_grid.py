@@ -52,7 +52,9 @@ w_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] =
 x_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 2.0)'), "#"].values[0])-1
 y_num = int(levels.loc[(levels['config']=='1S1 2P1') & (levels['(2S+1)L( 2J)'] == '(3)1( 1.0)'), "#"].values[0])-1
 z_num = int(levels.loc[(levels['config']=='1S1 2S1') & (levels['(2S+1)L( 2J)'] == '(3)0( 1.0)'), "#"].values[0])-1
-
+                       
+print(w_num)
+"""
 
 Err, Erg = make_energy_grid(ion, x_ravel, x_res)
 
@@ -134,3 +136,4 @@ ax.set_zlabel(f"W Epsilon at T={T[9]}")
 
 fig_W.tight_layout()
 fig_W.savefig(f"W_grid.eps")
+"""
