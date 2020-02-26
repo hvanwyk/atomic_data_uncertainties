@@ -23,7 +23,7 @@ corex = "1-2" # Core excitation shells
 
 ion = State(atom, seq, corex)
 
-n_max = 3 # Highest n shell used in R-matrix input file
+nmax = 3 # Highest n shell used in R-matrix input file
 n_lambdas = 2 # Number of lambda parameters to vary, starting with 2s
 
 
@@ -47,7 +47,7 @@ x_res_structure = np.array([grid_size_structure]*n_lambdas)
 nist_cutoff = 0.05 # Tolerance for computed energies relative to NIST values
 
 # Computes level energies over lambda grid, generates lambda distribution, and then samples from distribution using MCMC
-lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, n_lambdas=n_lambdas, nist_cutoff=nist_cutoff)
+lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff)
 
 
 

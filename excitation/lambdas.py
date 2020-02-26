@@ -96,7 +96,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3):
     return np.array(Rates), df_base
 
 
-def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, n_walkers=10, n_steps=10000, nist_cutoff=0.05, outfile=None):
+def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=10000, nist_cutoff=0.05, outfile=None):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
