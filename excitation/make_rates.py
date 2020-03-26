@@ -45,16 +45,29 @@ grid_size_structure = 5 # Number of points per lambda used in autostructure runs
 x_res_structure = np.array([grid_size_structure]*n_lambdas)
 
 nist_cutoff = 0.05 # Tolerance for computed energies relative to NIST values
-potential_type = -1 # Central field potential used by autostructure. +1 for Thomas-Fermi potential, -1 for Slater-type
-
-# Computes level energies over lambda grid, generates lambda distribution, and then samples from distribution using MCMC
-lambda_samples = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff, potential_type=potential_type)
-
-
+potential_type = 1 # Central field potential used by autostructure. +1 for Thomas-Fermi potential, -1 for Slater-type
 
 grid_size_rates = 5 # Number of points per lambda used in full R-matrix runs to generate rate interpolators
 x_res_rates = np.array([grid_size_rates]*n_lambdas)
 
-# Compute excitation rates for each sample set of lambdas using interpolators
-rate_samples = make_rates_distribution(ion=ion, lambda_samples=lambda_samples, x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas, potential_type=potential_type)
 
+lambda_samples_tf = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, 
+                                                 n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff, potential_type=1)
+
+T, rate_samples_tf, df_base = make_rates_distribution(ion=ion, lambda_samples=lambda_samples_tf, 
+                                                          x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas, potential_type=1)
+
+# Computes level energies over lambda grid, generates lambda distribution, and then samples from distribution using MCMC
+lambda_samples_slater = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_structure, 
+                                                 n_lambdas=n_lambdas, nmax=nmax, nist_cutoff=nist_cutoff, potential_type=-1)
+
+
+# Compute excitation rates for each sample set of lambdas using interpolators
+T, rate_samples_slater, df_base = make_rates_distribution(ion=ion, lambda_samples=lambda_samples_slater, 
+                                                          x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas, potential_type=-1)
+
+
+lambda_samples = np.r_[lambda_samples_tf, lambda_samples_slater]
+np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/lambda_samples.npy", arr=lambda_samples)
+
+np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rate_samples.npy", np.array([T, rate_samples_tf, rate_samples_slater]))

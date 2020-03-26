@@ -65,7 +65,7 @@ def time_evol_euler(matrix, t_final, t_steps):
             print(np.dot(matrix, N[i-1,:])*delta_t)
         N[i, :] = N[i-1, :] + np.dot(matrix, N[i-1, :]) * delta_t
     return (time, N)
-
+"""
 def exact_soln(eig, coeff, initial, t):
     eig_vals = eig[0]
     eig_vecs = eig[1]
@@ -73,7 +73,7 @@ def exact_soln(eig, coeff, initial, t):
     for i in range(n_states):
         solution += coeff[i] * eig_vecs[:,i] * exp(eig_vals[i]*t)
     return solution
-
+"""
 state_vectors = np.zeros((n_temps, n_states))
 for i in range(n_temps):
     state_vectors[i,:] = steady_state(generate_matrix(i,0, scd_dat, acd_dat))
@@ -88,7 +88,7 @@ plt.figure()
 for i in range(n_states):
     plt.semilogx(time, N[:,i])
 
-print(generate_matrix(27, 0, scd_dat, acd_dat))
+matrix = generate_matrix(27, 0, scd_dat, acd_dat)
 """
 frac = 0.1
 t_final = 10000000000
@@ -120,7 +120,7 @@ axes[1].semilogx(time_arr, err)
 axes[0].legend(states)
 axes[1].legend(states)
 """
-"""
+
 def exact_soln(matrix, t):
     eig = np.linalg.eig(matrix)
     eig_vals = eig[0]
@@ -132,9 +132,9 @@ def exact_soln(matrix, t):
     for i in range(n_states):
         solution += coeff[i] * eig_vecs[:,i] * exp(eig_vals[i]*t)
     return solution
-"""
 
 
+print(exact_soln(matrix, 0))
 
 """
 fig, axes = plt.subplots(2, 1)

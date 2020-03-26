@@ -160,7 +160,7 @@ def compare_ground(file_1, file_2):
     
     
 if __name__ == "__main__":
-    
+    """
     import matplotlib.pyplot as plt
     
     slater = rates_dataframe("graphs/slater.dat")
@@ -184,6 +184,9 @@ if __name__ == "__main__":
     n = np.arange(1, 17)
     plt.scatter(n, slater.values[:, 2])
     plt.scatter(n, tf.values[:, 2])
+    """
     
+    levels = read_adf04("graphs/slater.dat")[0]
+    print(levels)
         
     

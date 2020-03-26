@@ -94,7 +94,7 @@ def make_rates_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1):
     return np.array(Rates), df_base
 
 
-def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=10000, nist_cutoff=0.05, potential_type=1, outfile="lambda_samples.npy"):
+def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=10, n_steps=10000, nist_cutoff=0.05, potential_type=1):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
@@ -139,11 +139,11 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     corner.corner(lambda_samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
     plt.show()
     
-    np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/" + outfile, arr=lambda_samples)
+    
     
     return lambda_samples
 
-def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, potential_type=1, rates_file="rates.npy"):
+def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, potential_type=1):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     n_samples = lambda_samples.shape[0]
@@ -166,7 +166,6 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, pote
                 rate_samples[i,j,k] = rate_interpolators[j][k](lambda_samples[i]) 
         
 
-    np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/" + rates_file, np.array([T, rate_samples]))
         
     return T, rate_samples, df_base
 
