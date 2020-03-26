@@ -107,7 +107,7 @@ def run_r_matrix(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50, potential_
 
 if __name__ == "__main__":
     
-    seq = "he"
+    seq = "be"
     atom = "o"
     
     ion = State(atom, seq)
@@ -123,5 +123,5 @@ if __name__ == "__main__":
     lambdas = [1.0]*len(orbs)
 
     direc = create_directories(ion)
-    #run_r_matrix(ion, lambdas=lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc, potential_type=-1)
+    run_r_matrix(ion, lambdas=lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc, potential_type=-1)
     

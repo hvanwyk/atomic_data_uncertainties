@@ -58,4 +58,45 @@ if __name__ == "__main__":
     shell="1-2"
     
     ion = State(atom, seq, shell)
-    graph_rates(ion, "rates.npy")
+    graph_rates(ion, f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_hartree.npy")
+    
+    
+    
+    
+    """
+    T, rates_tf = np.load(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_thomasfermi.npy")
+    T, rates_h = np.load(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rates_hartree.npy")
+    
+    T = T[1:-1].astype(np.float)
+    
+    avg_tf = np.mean(rates_tf, axis=0)[5, 1:-1]
+    err_tf = np.std(rates_tf, axis=0)[5, 1:-1]
+    
+    avg_h = np.mean(rates_h, axis=0)[5, 1:-1]
+    err_h = np.std(rates_h, axis=0)[5, 1:-1]
+    
+    plt.figure()
+    
+    plt.plot(T, avg_h, "k")
+    plt.fill_between(T, avg_h-err_h, avg_h+err_h, color="blue", label="1 sigma")
+    plt.fill_between(T, avg_h-2*err_h, avg_h-err_h, color="deepskyblue", label="2 sigma")
+    plt.fill_between(T, avg_h+err_h, avg_h+2*err_h, color="deepskyblue")
+    plt.fill_between(T, avg_h-3*err_h, avg_h-2*err_h, color="lightskyblue", label="3 sigma")
+    plt.fill_between(T, avg_h+2*err_h, avg_h+3*err_h, color="lightskyblue")
+    plt.title("7-1 Transition Epsilon")
+    
+    
+    plt.errorbar(T, avg_tf, yerr=err_tf, label="Thomas-Fermi")
+    plt.errorbar(T, avg_h, yerr=err_h, label="Hartree")
+    plt.title("Effect of Central Field Potential on 2-1 Epsilon")
+    
+    
+    plt.xlabel("Temperature (K)")
+    plt.ylabel("Epsilon")
+    plt.legend()
+    plt.xscale('log')
+    
+    plt.savefig("7-1 Error Plot - Hartree.eps")
+    #plt.savefig("2-1 Thomas-Fermi vs. Hartree.eps")
+    """
+    
