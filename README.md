@@ -7,7 +7,7 @@ Systematic treatment of uncertainties in atomic structure.
 ## Structure of the code
 
 
-## Third Party Software Packages
+## Software Dependencies
 
 [ ] Add detail
 
