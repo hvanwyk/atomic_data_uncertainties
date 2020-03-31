@@ -9,6 +9,7 @@ Systematic treatment of uncertainties in atomic structure.
 
 ## Software Dependencies
 
-[ ] Add detail
-
-We use the Bayesian analysis package ```emcee``` to estimate the distribution of the input parameters.
+- ```emcee```: Bayesian analysis package ```emcee``` to estimate the distribution of the input parameters.
+- ```ColRadPy```: Collisional radiative models
+- ```pyatomdb```: Python interface for downloading astrophysical data from the ATOMDB
+- ```Autostructure```: 
