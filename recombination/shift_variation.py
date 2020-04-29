@@ -172,6 +172,7 @@ def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
     
     fig.tight_layout()
     fig.savefig(".".join(rates_file.split(".")[:-1]) + ".png")
+    plt.show()
     
     if xsec_file != "":
         plt.figure()
@@ -201,7 +202,7 @@ def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
         plt.ylim((0, None))
         plt.xlim(1e2, 1e7)
         plt.savefig(direc + f"experiment_vs_theory_shift_{max_shift}" +  ("" if ECORIC==0 else f"_ECORIC{ECORIC}") + ".png")
-    
+        plt.show()
 
 
 atom = "o"
