@@ -76,12 +76,13 @@ def gen_input(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50):
             file.write(f"{orb} = {lambdas[i]}\n")
 
 def run_r_matrix(ion, lambdas, nmax=3, max_ex=30, max_nx=70, maxc=50, potential_type=1, born_only=False):
+    rmatrix_dir = "/home/hans-werner/rmatrix2"
     direc = create_directories(ion)
     gen_input(ion, lambdas, nmax=nmax, max_ex=max_ex, max_nx=max_nx, maxc=maxc)
     if "pp" not in os.listdir(direc):
-        os.system("cp ../../r_matrix/bin/parallel_procfile " + direc+"pp")
+        os.system("cp " + rmatrix_dir + "/bin/parallel_procfile " + direc + "pp")
     if "adas803.pl" not in os.listdir(direc):
-        os.system("cp ../../r_matrix/adas803.pl " + direc+"adas803.pl")
+        os.system("cp " + rmatrix_dir + "/adas803.pl " + direc+"adas803.pl")
     os.chdir(direc)
     
     #delete all the subdirectories before doing new run
