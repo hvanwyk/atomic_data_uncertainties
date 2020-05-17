@@ -211,6 +211,7 @@ shell = "2-2"
 
 
 ion = State(atom, seq, shell)
+print(ion)
 
 max_shift = 1.5
 n_points = 50
