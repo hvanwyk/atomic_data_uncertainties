@@ -9,7 +9,7 @@ Created on Fri Aug 31 16:33:41 2018
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from recombination import State, structure
+from recombination_methods import State, structure
 
 def nist_compare(seq, atom, lambdas):
     
@@ -75,7 +75,7 @@ def graph_shifts(seq, atom, shifts):
     
     fig.tight_layout()
     fig.savefig("O4 NIST shifts")
-
+    plt.show()
 """
 seq = "li"
 atom = "c"
