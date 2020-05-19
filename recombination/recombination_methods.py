@@ -14,11 +14,30 @@ from utilities import create_directories, get_nist_energy, read_levels, compare_
 from state import State
     
 def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, EMAX=2, E_absolute=False):
-        
     """
     Run the autostructure code and generate LEVELS file with energies.
-    lambdas - array of lambda parameters
-    E_absolute - if True, use absolute energies instead of relative to ground level.
+    
+    Inputs:
+    
+        method: str, specify uncertainty propagation method  
+        
+        lambdas: list, array of lambda parameters
+        
+        potential: int, potential type used to specify NZION in AS
+            NZION >0: nl-dependent Thomas-Fermi DA potential. The orbitals are Schmidt 
+                orthogonalized. 
+                
+            NZION <0: nl-depdendent Hartree potential evaluated with Slater type 
+                orbitals (NOT Schmidt orthogonalized).
+                
+        MENG: 
+        
+        EMIN, EMAX: 
+        
+        E_absolute: bool, if True, use absolute energies instead of relative to 
+            ground level.
+            
+        
     """
     
     # checks if directory exists, creates it if not
@@ -69,6 +88,45 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
 
 def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
                  MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
+    """
+    Structure run for dielectronic radiation
+    
+    Inputs:
+    
+        ion: State, 
+        
+        method: str, 'lambdas', 'combined'
+        
+        lambdas: list, of lambda tuples 
+        
+        potential: int, potential type used to specify NZION in AS
+            NZION >0: nl-dependent Thomas-Fermi DA potential. The orbitals are Schmidt 
+                orthogonalized. 
+                
+            NZION <0: nl-depdendent Hartree potential evaluated with Slater type 
+                orbitals (NOT Schmidt orthogonalized).
+                
+        
+        NMIN, NMAX: int, DRR NAMELIST, min/max n-value of Rydberg electron.
+        
+        JND: int, AS NAMELIST,
+        
+        LMIN, LMAX: int, DRR NAMELIST, min/max l-value of Rydberg electron.
+        
+        MENG: signed int, MENG is the number of interpolation energies (in Rydbergs). 
+            MENG energies follow and the continuum orbitals are calculated at those 
+            energies. 
+
+            = 0 (default) uses 0, DE/3, DE, 3*DE (& 8*DE if MAXLT/JT.gt.35/70) 
+                where DE=max(TEAPOT, DELTAX) and TEAPOT is the estimated ionization 
+                potential and DELTAX is the highest (spectroscopic) term energy.
+            > 0 reads MENG final scattered energies following the NAMELIST.
+            < 0 internally sets -MENG energies between a user specified range:
+        
+        EMIN, EMAX: 
+        
+        ECORIC:  
+    """
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
     ion_name = f"{ion.species}{ion.ion_charge}"
@@ -116,7 +174,48 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
 
 def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=[], NTAR1=1, 
                          compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, EMAX=2.0):
+    """
+    Write input deck for ADASDR postprocessor and run ADASDR 
     
+    Inputs:
+    
+        ion: State, specify ion
+        
+        E: double, energy
+        
+        E_nist: list, 
+        
+        method: str,
+        
+        lambdas: list, 
+        
+        shift: list, 
+        
+        NTAR1: int, AS NAMELIST input,
+        
+        compute_xsec: bool, 
+        
+        EWIDTH: double, AS NAMELIST input,
+        
+        NBIN: int, AS NAMELIST input,
+        
+        EMIN, EMAX: double, AS NAMELIST input, 
+        
+        
+    Outputs:
+    
+        If compute_xsec = True, return 
+        
+            energy, 
+            
+            cross-sections
+            
+        If compute_xsec = False, return
+        
+            T: temperature, 
+            
+            rate: DR rate for each point on the temperature grid 
+    """
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
 
