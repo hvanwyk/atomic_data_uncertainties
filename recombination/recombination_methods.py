@@ -19,7 +19,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     
     Inputs:
     
-        method: str, specify uncertainty propagation method  
+        method: str, specify uncertainty propagation method ('lambdas', 'combined') 
         
         lambdas: list, array of lambda parameters
         

@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 import corner
 import emcee
  
-from state import State
-from recombination_methods import structure, structure_dr, postprocessing_rates
+from recombination_methods import State, structure, structure_dr, postprocessing_rates
 from bayesian_methods import log_posterior, interpolators
 from lambda_variation import lambda_distribution, energy_optimization
 from graphing import graph_experimental, graph_rates_from_file
