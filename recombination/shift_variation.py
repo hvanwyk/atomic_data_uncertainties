@@ -8,8 +8,9 @@ Created on Tue Sep 18 12:03:40 2018
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import corner
 import emcee
-import corner 
+ 
 from recombination_methods import State, structure, structure_dr, postprocessing_rates
 from bayesian_methods import log_posterior, interpolators
 from lambda_variation import lambda_distribution, energy_optimization
@@ -17,34 +18,8 @@ from graphing import graph_experimental, graph_rates_from_file
 import time
 
 """
-This code snippet illustrates how to wrap a Bayesian sampler around
-the mapping from lambda's to the quantities to be used for calibration. 
-We want to use the EMCEE package for calibration, which is based on Monte Carlo
-sampling. To accommodate a possibly large sample size, we first build a 
-surrogate model by creating a linear interpolant over a regular lambda grid.   
-In particular, we want to achieve the following.
-
-    1. Interpolate a multivariate mapping f from R^d to R^n, i.e. 
-        Mapping x=[x1,x2,...,xd] to y=[f1(x), f2(x), ..., fn(x)]
-        based on a regular x-grid. In this implementation, I have split
-        the forward mapping into two separate functions (you can combine them
-        if you want):
-        
-            a. fake_autostructure_and_postprocessing works out the quantities
-                interest (in this case energies). 
-                
-            b. fake error function takes the output from the autostructure run
-                and computes the deviation from observed values. 
-            
-    2. Use the python package emcee to generate a MCMC sample of the 
-        x vectors in R^d from the posterior distribution, p_post, 
-        where 
-        
-            p_post(x) ~ p_prior(x) p_likelihood(x)
-            
-    3. Construct a multivariable histogram from the prior
-    
-    4. Sample from the histogram.
+Set of codes for implementing the energy shift method for computing uncertainties
+on the Dielectronic recombination rates at low temperatures. 
 """
 
 
@@ -125,12 +100,61 @@ def variable_shift_method(ion, n_points, max_shift, res):
     
 def simple_shift_method(ion, n_samples, max_shift, rates_file, xsec_file="", ECORIC=0, NMIN=3, NMAX=15, LMIN=0, LMAX=7,
                         compute_xsec=False, EWIDTH=0.0001, NBIN=1000, EMIN=0.0, EMAX=2.0):
+    """
+    Calculate the Dielectronic Radiation cross-sections and rates by means of the simple shift method. 
+    
+    
+    Inputs:
+    
+        ion: State, specified by atom, isoelectronic sequence, and shell
+    
+        n_samples: int, sample size (number of lambdas)
+    
+        max_shift: double, maximum amount to shift by
+    
+        rates_file: str, file name for storing DR rates
+    
+        xsec_file: str, file name for storing cross-sections
+    
+        ECORIC: str, AS namelist input, correction energy added to continuum energy
+    
+        NMIN, NMAX: int, DRR NAMELIST input, min/max n-value of Rydberg electron
+    
+        LMIN, LMAX: int, DRR NAMELIST input, min/max l-value of Rydberg electron
+        
+        compute_xsec: bool, whether cross-sections should be computed 
+    
+        EWIDTH: double, AS namelist input,
+            >0 Convolute the (bin) energy-averaged cross sections with a Gaussian
+                of FWHM EWIDTH UNITS.
+            =-0.5 (actually any non-integer negative number) convolute with a
+                Maxwellian distribution.
+            =0.0 Convolute with a cooler distribution,
+    
+        NBIN: int, AS namelist input, number of bin energies (number of bins=NBIN-1). 
+            The bin width, (EMAX-EMIN)/(NBIN-1) should be smaller than the convolution 
+            width and larger than the natural width of the resonances.
+
+        EMIN, EMAX: double, AS NAMELIST, specify the energy range (in Rydbergs)
+    
+    """
+    #
+    # Run Structure Calculation to get energies and LEVELS file
+    # 
     E = structure(ion, method="shift")
+    
+    #
+    # 
+    # 
     structure_dr(ion, method="shift", ECORIC=ECORIC, NMIN=NMIN, NMAX=NMAX, LMIN=LMIN, LMAX=LMAX)
     
+    #
+    # Run ADASDR postprocessor to produce temperatures at which 
+    # 
     T = postprocessing_rates(ion, E, method="shift", shift=np.zeros(E.shape))[0]
     n_rates = T.size
     rates = np.zeros((n_samples, n_rates))
+    
     
     energy = postprocessing_rates(ion, E, method="shift", shift=np.zeros(E.shape), compute_xsec=True,
                 EWIDTH=EWIDTH, NBIN=NBIN, EMIN=EMIN, EMAX=EMAX)[0]
@@ -138,6 +162,9 @@ def simple_shift_method(ion, n_samples, max_shift, rates_file, xsec_file="", ECO
     xsec = np.zeros((n_samples, n_points))
     
     for i in range(n_samples):
+        #
+        # Vary shifts randomly around reference energies
+        # 
         shifts = (np.random.rand(*E.shape) * 2 - 1)*max_shift / 13.6
         rates[i,:] = postprocessing_rates(ion, E, method="shift", shift=shifts)[1]
         if compute_xsec:
@@ -150,7 +177,17 @@ def simple_shift_method(ion, n_samples, max_shift, rates_file, xsec_file="", ECO
 
     
 def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
+    """
+    Plot temperature vs DR rate and energy vs cross section graphs for given
     
+    Inputs:
+    
+        rates_file: str, location of file storing rates
+        
+        xsec_file: str, location of cross-sections file.
+        
+    
+    """
     T, rates = np.load(rates_file)    
     avg = np.mean(rates, axis=0)
     err = np.std(rates, axis=0)
@@ -172,6 +209,7 @@ def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
     
     fig.tight_layout()
     fig.savefig(".".join(rates_file.split(".")[:-1]) + ".png")
+    plt.show()
     
     if xsec_file != "":
         plt.figure()
@@ -201,7 +239,7 @@ def graph_rates_shift(rates_file, xsec_file="", ECORIC=0):
         plt.ylim((0, None))
         plt.xlim(1e2, 1e7)
         plt.savefig(direc + f"experiment_vs_theory_shift_{max_shift}" +  ("" if ECORIC==0 else f"_ECORIC{ECORIC}") + ".png")
-    
+        plt.show()
 
 
 atom = "o"
@@ -210,6 +248,7 @@ shell = "2-2"
 
 
 ion = State(atom, seq, shell)
+print(ion)
 
 max_shift = 1.5
 n_points = 50
