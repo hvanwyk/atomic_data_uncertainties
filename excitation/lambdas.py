@@ -173,8 +173,8 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, pote
 if __name__ == "__main__":
     
     atom = "o"
-    seq = "he"
-    shell = "1-2"
+    seq = "be"
+    shell = "2-2"
     
     ion = State(atom, seq, shell)
     
@@ -188,15 +188,15 @@ if __name__ == "__main__":
     x_bnd = np.array(x_bnd)
     
     
-    """
+    
     
     
     # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, potential_type=-1)
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, nist_cutoff=0.1, potential_type=-1)
     
-    
+    """
     # Resolution in each dimension for rates interpolation grid
     grid_size_rates = 2
     x_res_rates = np.array([grid_size_rates]*n_lambdas)

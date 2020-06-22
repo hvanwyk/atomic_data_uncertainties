@@ -13,9 +13,6 @@ from state import State
 import numpy as np
 from lambdas import make_lambda_distribution, make_rates_distribution
 
-"""
-
-"""
 
 atom = "o" # nucleus
 seq = "he" # isoelectronic sequence
@@ -67,7 +64,7 @@ T, rate_samples_slater, df_base = make_rates_distribution(ion=ion, lambda_sample
                                                           x_bnd=x_bnd, x_res=x_res_rates, n_lambdas=n_lambdas, potential_type=-1)
 
 
-lambda_samples = np.r_[lambda_samples_tf, lambda_samples_slater]
+lambda_samples = np.array([lambda_samples_tf, lambda_samples_slater])
 np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/lambda_samples.npy", arr=lambda_samples)
 
 np.save(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rate_samples.npy", np.array([T, rate_samples_tf, rate_samples_slater]))

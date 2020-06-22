@@ -109,3 +109,5 @@ ENV/
 
 #Ignore r-matrix directory
 /r_matrix
+
+ml_exc.py
