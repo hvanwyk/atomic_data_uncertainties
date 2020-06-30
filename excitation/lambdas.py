@@ -194,7 +194,7 @@ if __name__ == "__main__":
     # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, nist_cutoff=0.1, potential_type=-1)
+    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, nist_cutoff=0.05, potential_type=-1)
     
     """
     # Resolution in each dimension for rates interpolation grid

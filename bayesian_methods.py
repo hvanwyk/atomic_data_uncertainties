@@ -48,7 +48,7 @@ def log_prior(x, x_bnd, prior_shape="uniform"):
     
     
 
-def log_likelihood(x, interpolators, y_bnd, likelihood_shape="uniform"):
+def log_likelihood(x, interpolators, y_bnd, likelihood_shape="gaussian"):
     """
     Logarithm of the likelhood function (using uniform bounds on the error).
     
@@ -88,7 +88,7 @@ def log_likelihood(x, interpolators, y_bnd, likelihood_shape="uniform"):
 
     
     
-def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelihood_shape="uniform"):
+def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelihood_shape="gaussian"):
     """
     Compute the log of the posterior density, formed from the logs of the
     likelihood and prior density functions. 

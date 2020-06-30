@@ -187,8 +187,8 @@ if __name__ == "__main__":
     plt.scatter(n, tf.values[:, 2])
     """
     
-    f1 = "isoelectronic/be-like/o4/adf04_20000"
-    f2 = "isoelectronic/be-like/o4/adf04_40000"    
+    f1 = "isoelectronic/li-like/o5/adf04_40000"
+    f2 = "isoelectronic/li-like/o5/adf04_30000"    
     
     diff = compare_ground(f1, f2)
     

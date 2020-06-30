@@ -16,16 +16,14 @@ if ".." not in sys.path:
 from state import State
 
 def graph_rates(ion, file):
-    T, rate_samples_tf, rate_samples_hartree = np.load(file)
+    T, rate_samples_tf, rate_samples_hartree = np.load(file, allow_pickle=True)
     rate_samples_tf = np.abs(rate_samples_tf)
     rate_samples_hartree = np.abs(rate_samples_hartree)
     
     n_samples, n_rates, n_temperatures = rate_samples_tf.shape
     finite_T = T[1:-1].values.astype(np.float)
     
-    print(rate_samples_hartree.shape)
-    print(rate_samples_tf.shape)
-    """
+    
     levels = read_adf04(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/adas/adf04")[0]
     
     for j in range(n_rates):
@@ -91,12 +89,12 @@ def graph_rates(ion, file):
         fig.savefig(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/excitation_graph_hartree_{j+2}_to_1.eps")
         plt.close()
 
-    """
+    
 if __name__ == "__main__":
     
-    atom="o"
-    seq="be"
-    shell="2-2"
+    atom="c"
+    seq="he"
+    shell="1-2"
     
     ion = State(atom, seq, shell)
     graph_rates(ion, f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/rate_samples.npy")
