@@ -28,7 +28,8 @@ from mpl_toolkits.mplot3d import Axes3D
 def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1, include_einstein=False):
     # Generate error data 
     # 
-    y_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
+    df_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
+    y_nist = df_nist["E"].values
     orbs = orbitals(ion, nmax)
 
     if include_einstein:
@@ -50,11 +51,12 @@ def make_energy_grid(ion, x_ravel, x_res, n_lambdas=2, nmax=3, potential_type=1,
         else:
             x = np.r_[1.0, x]
         run_r_matrix(ion, lambdas=x, potential_type=potential_type, born_only=True)
-        y_comp,ground = read_levels(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/str/LEVELS")
+        df_comp, ground = read_levels(f"isoelectronic/{ion.isoelec_seq}-like/{ion.species}{ion.ion_charge}/str/LEVELS")
+        y_comp = df_comp["E"].values
         if include_einstein:
             einstein = rates_dataframe("isoelectronic/he-like/o6/born/adf04ic")
             einstein = einstein[einstein["final"]==1.0]
-        err[i,:] = compare_to_nist(y_comp, y_nist)
+        err[i,:] = compare_to_nist(df_comp, df_nist)
         erg[i, :] = y_comp
     
     Err = [np.reshape(err[:,j], x_res) for j in range(n)]
@@ -99,7 +101,8 @@ def make_lambda_distribution(ion, x_bnd, x_res, n_lambdas=2, nmax=3, n_walkers=1
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
     # NIST data
-    y_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
+    df_nist = get_nist_energy(f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}_n={nmax}.nist")
+    y_nist = df_nist["E"].values
     
     # Construct interpolators
     n_energies = y_nist.size
@@ -172,9 +175,9 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, pote
     
 if __name__ == "__main__":
     
-    atom = "o"
-    seq = "be"
-    shell = "2-2"
+    atom = "fe"
+    seq = "he"
+    shell = "1-2"
     
     ion = State(atom, seq, shell)
     

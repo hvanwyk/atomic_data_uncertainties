@@ -62,17 +62,19 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
         
     os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
 
-    y, ground = read_levels("LEVELS") 
-            
-    #nist = np.transpose(np.genfromtxt(up_dir +f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist", skip_header=1))
-    #y_nist = nist[-1]
+    df_comp, ground = read_levels("LEVELS") 
+    
     if method=="lambdas" or method=="combined":
-        y_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+        df_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+        y_nist = df_nist["E"].values
     if E_absolute == True:
-        y += ground
+        df_comp["E"] += ground
         if method == "lambdas" or method=="combined":
-            y_nist += ion.nist_ground
-            
+            df_nist["E"] += ion.nist_ground
+    
+    y = df_comp["E"].values
+    y_nist = df_nist["E"].values
+    
     os.remove("oic")
     os.remove("olg")
     os.remove("ols")
@@ -81,7 +83,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     os.chdir(up_dir)
     
     if method=="lambdas" or method=="combined":
-        y_shift = compare_to_nist(y, y_nist)
+        y_shift = compare_to_nist(df_comp, df_nist)
         return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
     else:
         return np.array([y]).flatten()

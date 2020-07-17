@@ -8,6 +8,7 @@ Created on Wed Oct 16 15:31:24 2019
 
 import os
 import numpy as np
+import pandas as pd
 
 
 def create_directories(ion, method="lambdas"):
@@ -69,7 +70,7 @@ def create_directories(ion, method="lambdas"):
     
 def get_nist_energy(fname):
     """
-    Look up energy from file
+    Look up NIST energies from file
     
     Inputs:
     
@@ -78,11 +79,13 @@ def get_nist_energy(fname):
     
     Outputs:
     
-        E_nist: double, NIST energy
+        df: Pandas.DataFrame, NIST energies (Ryd) of each level, ordered by 
+        configuration, L, S, J
     """
     nist = np.transpose(np.genfromtxt(fname, skip_header=1))
-    E_nist = nist[-1]
-    return E_nist
+    df = pd.DataFrame(np.abs(nist.T), columns=['2J', 'P', 'S', 'L', 'CF', 'NI', 'E'])
+    df = df.sort_values(["CF", "L", "S", "2J"])
+    return df
 
 
 def read_levels(levels_file):
@@ -95,32 +98,46 @@ def read_levels(levels_file):
         
     Output:
     
-        y:
+        df: Pandas.DataFrame, energies (Ryd) of each level, ordered by 
+        configuration, L, S, J
         
-        ground: 
+        ground: energy (Ryd) of ground state computed by Autostructure
     """
     data = np.transpose(np.genfromtxt(levels_file, skip_header=1))
-    y = data[-1][:len(data[-1])-1]
+    df = pd.DataFrame(np.abs(data.T[:-1,:]), columns=['2J', 'P', 'S', 'L', 'CF', 'NI', 'E'])
+    df = df.sort_values(["CF", "L", "S", "2J"])
     ground = data[-1][-1]
     
-    return y, ground
+    return df, ground
 
 
-def compare_to_nist(y_comp, y_nist):
+def compare_to_nist(df_comp, df_nist):
     """
     Compute signed relative error based on NIST value.
     
     Inputs:
         
-        y_comp: double, array of values to compare with NIST
+        df_comp: Pandas.DataFrame, computed energies of each level, ordered by 
+        configuration, L, S, J
         
-        y_nist: double, NIST reference value
+        df_nist: Pandas.DataFrame, NIST energies of each level, ordered by 
+        configuration, L, S, J
         
     
     Outputs:
     
         err: double, relative error
     """
+    y_comp = df_comp["E"].values
+    y_nist = df_nist["E"].values
+    
+    
     err = ((y_comp - y_nist) / (1+y_nist))
     err[err==0]=1e-30
     return err
+
+if __name__ == "__main__":
+    df_nist = get_nist_energy("excitation/NIST/isoelectronic/he/he0_n=3.nist")
+    df_comp, ground = read_levels("excitation/LEVELS_backup")
+    
+    print(df_comp)

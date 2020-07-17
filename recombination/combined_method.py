@@ -85,9 +85,9 @@ if __name__ == "__main__":
     
     start = time.time()
     
-    shell = "2-2" #core excitation shells
+    shell = "1-2" #core excitation shells
     atom = "o"
-    seq = "li" #isoelectronic sequence
+    seq = "he" #isoelectronic sequence
     nist_cutoff = 0.01
 
     
