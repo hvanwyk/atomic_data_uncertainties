@@ -36,7 +36,7 @@ def get_them_rates_boi(atom):
     
     n_samples = 50
     
-    if "lambdas.npy" in os.listdir(direc):
+    if False: #"lambdas.npy" in os.listdir(direc):
         lambda_samples = np.load(lambdas_file)
     else:
         lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape,

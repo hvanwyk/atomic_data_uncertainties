@@ -297,14 +297,52 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    atom = "o"
-    seq = "li"
+    atom = "c"
+    seq = "be"
     shell = "2-2"
     ion = State(atom, seq, shell)
+    
+    lmd_bnd = np.array([[0.5,1.5],[0.5,1.5]])
+    lmd_res = np.array([500,500])
+    
+    lmd_points_1d, lmd_points_2d = lambdas_grid(lmd_bnd, lmd_res)
+    
+    err, en = energy_grid(ion, lmd_points_2d, lmd_res)
+    
+    print(en[0].shape)
+    print(len(err))
+    
+    
+    # Create four polar axes and access them through the returned array
+    fig, axs = plt.subplots(2,5,sharey=True, sharex=True, constrained_layout=True)
+  
+    count = 0
+    for row in range(2):
+        for col in range(5):
+            # Label Axes
+            if col == 0:
+                axs[row,col].set_ylabel('2p')
+            if row == 1:
+                axs[row,col].set_xlabel('2s')
+             
+            # Get Energy
+            E = en[count]
+            Lmd = np.meshgrid(*lmd_points_1d, indexing='ij')
+            
+            # Contour plot
+            pos = axs[row, col].contourf(Lmd[0],Lmd[1],E)
+            
+            #pos = axs[row,col].imshow(E, interpolation='none')
+            fig.colorbar(pos,ax=axs[row,col])
+            
+            count += 1
+    plt.show()
+    print([lmd_points_1d[i].shape for i in range(2)])
+    print(lmd_points_2d.shape)
     
     nist_cutoff=0.01
     prior_shape="uniform"
     likelihood_shape="gaussian"
     
-    main()
+    #main()
     

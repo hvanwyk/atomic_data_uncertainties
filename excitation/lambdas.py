@@ -175,7 +175,7 @@ def make_rates_distribution(ion, lambda_samples, x_bnd, x_res, n_lambdas=2, pote
     
 if __name__ == "__main__":
     
-    atom = "fe"
+    atom = "o"
     seq = "he"
     shell = "1-2"
     
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     # Interval endpoints for each input component
     grid_size_energies = 5
     x_res_energies = np.array([grid_size_energies]*n_lambdas)
-    lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, nist_cutoff=0.05, potential_type=-1)
+    #lambdas = make_lambda_distribution(ion=ion, x_bnd=x_bnd, x_res=x_res_energies, n_lambdas=n_lambdas, nist_cutoff=0.05, potential_type=-1)
     
     """
     # Resolution in each dimension for rates interpolation grid
