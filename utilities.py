@@ -105,6 +105,9 @@ def read_levels(levels_file):
     """
     data = np.transpose(np.genfromtxt(levels_file, skip_header=1))
     df = pd.DataFrame(np.abs(data.T[:-1,:]), columns=['2J', 'P', 'S', 'L', 'CF', 'NI', 'E'])
+    
+    print(df)
+    
     df = df.sort_values(["CF", "L", "S", "2J"])
     ground = data[-1][-1]
     

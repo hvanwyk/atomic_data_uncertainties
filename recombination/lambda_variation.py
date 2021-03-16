@@ -35,12 +35,13 @@ def energy_grid(ion, x_ravel, x_res):
             x=np.r_[1.0,x]
         potential = np.random.choice([-1, 1])
         data = structure(ion=ion, lambdas=x, potential=potential)
+        
         err[i,:] = data[2]
         erg[i, :] = data[0]
     
     Err = [np.reshape(err[:,j], x_res) for j in range(n)]
     Erg = [np.reshape(erg[:,j], x_res) for j in range(n)]
-
+    
     return Err, Erg
 
 def rates_grid(ion, x_ravel, x_res, parallel=False):
@@ -302,8 +303,8 @@ if __name__ == "__main__":
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    lmd_bnd = np.array([[0.5,1.5],[0.5,1.5]])
-    lmd_res = np.array([500,500])
+    lmd_bnd = np.array([[0.1,2],[0.1,2]])
+    lmd_res = np.array([2,2])
     
     lmd_points_1d, lmd_points_2d = lambdas_grid(lmd_bnd, lmd_res)
     
