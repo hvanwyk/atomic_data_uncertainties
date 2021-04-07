@@ -7,7 +7,7 @@ from scipy.stats import uniform
 from scipy.stats import beta
 
 #
-# TODO: Test
+# TODO: Move to bayesian_methods
 # 
 def log_likelihood(x, y_obs, interpolators, rvs, error_type='mixed'):
     """

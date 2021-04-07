@@ -1,6 +1,10 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+"""
+NOTE: Currently not used in code
+"""
+
 
 """
 Fit a 'sum of exponentials' function y=h(x,a,b) to a series of 
@@ -93,10 +97,10 @@ if __name__=="__main__":
             b0 = np.zeros(n)
         else:
             a0 = np.ones(n)
-            a0[0:n-1] = af
+            #a0[0:n-1] = af
             
             b0 = np.zeros(n)
-            b0[0:n-1] = bf
+            #b0[0:n-1] = bf
             
         af, bf = fit(x,y,a0,b0)
         plt.plot(x, y, ':', x, h(x,af, bf), '--')
