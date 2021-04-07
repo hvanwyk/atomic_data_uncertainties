@@ -818,7 +818,7 @@ class GridFunction():
         # 
         V = V.transpose().tocsr()
         row_sums = np.array(V.sum(axis=1)).ravel()
-        ri, _ = V.nonzero()
+        ri = V.nonzero()
         V.data = V.data/row_sums[ri]
         
         #print(V.toarray())

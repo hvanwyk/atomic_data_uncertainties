@@ -303,8 +303,8 @@ if __name__ == "__main__":
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    lmd_bnd = np.array([[0.1,2],[0.1,2]])
-    lmd_res = np.array([2,2])
+    lmd_bnd = np.array([[0,3],[0,3]])
+    lmd_res = np.array([20,20])
     
     lmd_points_1d, lmd_points_2d = lambdas_grid(lmd_bnd, lmd_res)
     
