@@ -4,6 +4,7 @@ Created on Tue Jun 27 13:16:13 2017
 
 @author: hans-werner
 
+NOTE: We no longer use the inverse density estimation in our work.
 """
 
 # ============================================================================
