@@ -8,7 +8,6 @@ Created on Fri Nov 30 13:19:15 2018
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-import multiprocessing as mp
 
 
 def log_prior(x, x_bnd, prior_shape="uniform"):
