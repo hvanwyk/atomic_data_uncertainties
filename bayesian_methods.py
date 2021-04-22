@@ -199,3 +199,6 @@ def sample_from_histogram(H, edges, n_samples):
         i_binsj = i_bins[:,j]
         X[:,j] = edges[j][i_binsj] + V[:,j]*dxj[i_binsj]
     return X
+
+if __name__=='__main__':
+    pass
