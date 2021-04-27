@@ -53,7 +53,7 @@ def read_oic(directory):
 
   """
 
-  if os.path.isfile(directory)
+  if os.path.isfile(directory):
     oicfile = directory
   else:
     oicfile = "%s/oic"%(directory)
