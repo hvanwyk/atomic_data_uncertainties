@@ -5,6 +5,7 @@ Created on Wed Oct 16 17:15:32 2019
 
 @author: kyle
 """
+import utilities
 
 class State:
     """
@@ -17,10 +18,35 @@ class State:
     ionized = True
 
     def __init__(self, species="c", isoelec_seq="li", shell="2-2"):
+        """
+        Constructor
+        
+        Inputs:
+            
+            species: str, the atom
+            
+            isolec_seq: str, ion stage
+            
+            shell: str, shell considered
+        
+        """
+        
         self.species = species
         self.isoelec_seq = isoelec_seq
         self.shell = shell
-        with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
+        
+        # Get root directory
+        rootdir= utilities.root_directory()
+        
+        #
+        # Get Sequence-level information from adf00 file
+        # 
+        
+        # Set sequence path
+        seq_path = f'{rootdir}/adf00/{self.isoelec_seq}.dat'
+        
+        #with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
+        with open(seq_path, "r") as seq_file:
             lines = seq_file.read().splitlines()
             self.seq_num_electrons = abs(int(lines[0].split()[1]))
             line = lines[1].split()
@@ -28,7 +54,13 @@ class State:
                 if line[i] == "(":
                     self.seq_config = line[i-1][:2]
                     break
-        with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
+                
+        #
+        # Get species-level information from adf00 file
+        #
+        species_path = f'{rootdir}/adf00/{self.species.lower()}.dat'
+        #with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
+        with open(species_path,'r') as adf00: 
             lines = adf00.read().splitlines()
             self.nuclear_charge = abs(int(lines[0].split()[1]))
             self.ion_charge = self.nuclear_charge - self.seq_num_electrons
@@ -47,8 +79,8 @@ class State:
             
     def __repr__(self):
         formatted = f"{self.isoelec_seq.capitalize()}-like {self.species.capitalize()}:\n"
-        formatted += "\t Z: {self.nuclear_charge}\n"
-        formatted += "\t Charge: {self.ion_charge}+\n"
-        formatted += "\t Ground-state energy (NIST): {self.nist_ground}\n"
-        formatted += "\t Core Excitation: {self.shell}\n"
+        formatted += f"\t Z: {self.nuclear_charge}\n"
+        formatted += f"\t Charge: {self.ion_charge}+\n"
+        formatted += f"\t Ground-state energy (NIST): {self.nist_ground}\n"
+        formatted += f"\t Core Excitation: {self.shell}\n"
         return formatted
