@@ -8,14 +8,22 @@ Created on Fri Nov 15 10:59:57 2019
 
 # Internal modules
 from bayesian_methods import lambdas_grid, interpolators
-
+from interpolation import Interpolator
 import numpy as np
 import Tasmanian
 from scipy.interpolate import RegularGridInterpolator
 from time import time
 import matplotlib.pyplot as plt
 
-
+def test01():
+    """
+    Interpolate the function f(x) = exp(x1)*cos(x2) on [-1,1]^2 and compare 
+    """
+    f = lambda x: np.array([np.exp(x[0])*np.cos(x[1]), np.sin(x[0])])
+    domain = np.array([[0,1],[-1,1]])
+    p = Interpolator(domain, f, resolution=5)
+    
+    
 def time_grid_interpolators():
     """
     
