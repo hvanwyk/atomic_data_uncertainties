@@ -10,6 +10,12 @@ import os
 import numpy as np
 import pandas as pd
 
+def root_directory():
+    """
+    Returns the name of the project's root directory as a string
+    """
+    return os.path.abspath(os.curdir)
+    
 
 def create_directories(ion, method="lambdas"):
     """
