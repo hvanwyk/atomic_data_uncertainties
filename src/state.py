@@ -45,7 +45,6 @@ class State:
         # Set sequence path
         seq_path = f'{rootdir}/adf00/{self.isoelec_seq}.dat'
         
-        #with open(f"../adf00/{self.isoelec_seq}.dat", "r") as seq_file:
         with open(seq_path, "r") as seq_file:
             lines = seq_file.read().splitlines()
             self.seq_num_electrons = abs(int(lines[0].split()[1]))
@@ -59,7 +58,6 @@ class State:
         # Get species-level information from adf00 file
         #
         species_path = f'{rootdir}/adf00/{self.species.lower()}.dat'
-        #with open(f"../adf00/{self.species.lower()}.dat", "r") as adf00:
         with open(species_path,'r') as adf00: 
             lines = adf00.read().splitlines()
             self.nuclear_charge = abs(int(lines[0].split()[1]))

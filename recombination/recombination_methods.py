@@ -13,7 +13,8 @@ if ".." not in sys.path:
 from utilities import create_directories, get_nist_energy, read_levels, compare_to_nist
 from state import State
     
-def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, EMAX=2, E_absolute=False):
+def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
+              EMIN=0, EMAX=2, E_absolute=False):
     """
     Run the autostructure code and generate LEVELS file with energies.
     
@@ -91,7 +92,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
 def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
                  MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
     """
-    Structure run for dielectronic radiation
+    Structure run for dielectronic recombination
     
     Inputs:
     
