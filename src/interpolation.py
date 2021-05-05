@@ -3,6 +3,7 @@
 
 import Tasmanian
 from scipy.interpolate import RegularGridInterpolator
+import numpy as np
 
 """
 Interpolation Module
@@ -22,7 +23,7 @@ class Interpolator:
     """
     """
     def __init__(self, domain, function, n_outputs, output_labels=None, 
-                 resolution='auto', tol=1e-6):
+                 input_labels=None, resolution='auto', tol=1e-6):
         """
         Constructor
         
@@ -43,44 +44,95 @@ class Interpolator:
             
             output_labels: str/int, list of n_output output labels
             
+            input_labels: str/int, list of descriptions for input variables
+            
             interpolation_type: str, type of interpolant to use
                 'global-polynomial', 'local-polynomial', 'wavelet'
                 
             interpolation_degree: int, 
             
-            tensorization:  
+            tensorization: str, way in which one-dimensional components are
+                combined, 'sparse', 'full'.
                         
             resolution: int/str, mesh resolution for the interpolator
                 
         """
-        # Dimension of hypercube
-        d = domain.shape[0]
+        #
+        # Input/Output Dimensions
+        # 
+        self.__n_inputs = domain.shape[0]  # dimension of hypercube
+        self.__n_outputs = n_outputs  # number of outputs
         
-        
+        #
+        # Construct the interpolant
+        # 
         if type(resolution) is int:
             # Uniform resolution in all directions. 
             p = Tasmanian.makeLocalPolynomialGrid()
-        pass
+            
+        elif type(resolution) is list or type(resolution) is np.ndarray:
+            #
+            # Different resolution in each direction
+            # 
+            pass
+        elif type(resolution) is str:
+            #
+            # Automatically determine the resolution
+            # 
+            assert resolution=='auto', \
+                'Unknown string for variable "resolution" '
+        
     
     def add_labels(self, inputs=None, outputs=None):
         """
-        Labels inputs and outputs
+        Labels for inputs and outputs
+        
+        Inputs:
+            
+            inputs: str, list of length n_inputs containing the 
+                labels for the input variables
+                
+            outputs: list of length n_outputs containing the
+                labels for the output variables.
         """
-        pass
-    
-    
+        self.__labels = {}
+        n_inputs,n_outputs = self.shape()  # Number of inputs and outputs
+        
+        #
+        # Add labels for the input variables
+        # 
+        if inputs is not None:
+            # Check that the dimensions match 
+            assert len(inputs)==n_inputs, 'The number of input labels'+\
+                'does not match the number of inputs.'
+                
+        # Store input labels            
+        self.__labels[inputs] = inputs
+            
+        #
+        # Add labels for the output variables
+        # 
+        if outputs is not None:
+            # Check that dimensions match
+            assert len(outputs)==n_outputs, 'The number of output labels'+\
+                'does not match the number of outputs'
+        
+        # Store output labels
+        self.__labels[outputs] = outputs    
+            
+            
     def labels(self):
         """
-        Get 
+        Returns the labels 
         """
-        pass
+        return self.__labels
     
     
-    def shape(self,):
+    def shape(self):
         """
-        Determine 
+        Returns the number of inputs and outputs
         """
-        pass
+        return self.__n_inputs, self.__n_outputs
     
     
     def evaluate(self):
