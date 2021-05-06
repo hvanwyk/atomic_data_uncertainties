@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 import emcee
 import corner 
 from recombination_methods import State, structure, structure_dr, postprocessing_rates, get_rate
-if ".." not in sys.path:
-    sys.path.append("..")
+
 from bayesian_methods import log_posterior, interpolators, lambdas_grid
 import time
 from graphing import graph_rates_from_file
