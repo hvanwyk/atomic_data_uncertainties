@@ -22,7 +22,7 @@ Created on Tue Apr 27 11:00:57 2021
 class Interpolator:
     """
     """
-    def __init__(self, domain, function, n_outputs, output_labels=None, 
+    def __init__(self, function, domain, n_outputs, output_labels=None, 
                  input_labels=None, resolution='auto', tol=1e-6):
         """
         Constructor
@@ -68,7 +68,7 @@ class Interpolator:
         # 
         if type(resolution) is int:
             # Uniform resolution in all directions. 
-            p = Tasmanian.makeLocalPolynomialGrid()
+            grid = Tasmanian.makeLocalPolynomialGrid()
             
         elif type(resolution) is list or type(resolution) is np.ndarray:
             #
@@ -107,7 +107,7 @@ class Interpolator:
                 'does not match the number of inputs.'
                 
         # Store input labels            
-        self.__labels[inputs] = inputs
+        self.__labels['inputs'] = inputs
             
         #
         # Add labels for the output variables
@@ -118,7 +118,7 @@ class Interpolator:
                 'does not match the number of outputs'
         
         # Store output labels
-        self.__labels[outputs] = outputs    
+        self.__labels['outputs'] = outputs    
             
             
     def labels(self):
@@ -135,8 +135,13 @@ class Interpolator:
         return self.__n_inputs, self.__n_outputs
     
     
-    def evaluate(self):
+    def evaluate(self,x):
         """
+        Evaluate the interpolant at an array of points
+        
+        Inputs:
+            
+            x: double, (n_points, n_inputs)
         """
         pass
     
