@@ -9,14 +9,14 @@ Created on Wed Oct 16 15:31:24 2019
 import os
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 def root_directory():
     """
     Returns the name of the project's root directory as a string
     """
-    return os.path.abspath(os.curdir)
+    return Path(__file__).parent.parent
     
-
 def create_directories(ion, method="lambdas"):
     """
     Create Directory based on the ion, and method in the 'results' folder 
