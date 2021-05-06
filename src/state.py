@@ -44,7 +44,7 @@ class State:
         
         # Set sequence path
         seq_path = f'{rootdir}/adf00/{self.isoelec_seq}.dat'
-        
+        print(seq_path)
         with open(seq_path, "r") as seq_file:
             lines = seq_file.read().splitlines()
             self.seq_num_electrons = abs(int(lines[0].split()[1]))
