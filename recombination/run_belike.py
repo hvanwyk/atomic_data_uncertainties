@@ -64,7 +64,6 @@ x_res = np.array([grid_resolution, grid_resolution])
     
 X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
-
 n_walkers=100
 n_steps=3000
 
@@ -95,8 +94,8 @@ for i in range(len(atoms)):
     data_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
     cent_pot=-1
     data_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
-    pos_name=ion+'_pos'
-    neg_name=ion+'_neg'
+    pos_name=seq+'_like_'+atom+'_pos'
+    neg_name=seq+'_like_'+atom+'_neg'
     tmp1={pos_name:data_pos}
     tmp2={neg_name:data_neg}
     data.update(tmp1)
@@ -107,43 +106,43 @@ for i in range(len(atoms)):
 
 
 #%%
-    np.savez('be_like_c_0.6_1.4',data_li_like_c_pos=data_li_like_c_pos,data_li_like_c_neg=data_li_like_c_neg)
+    np.savez('be_like_c_0.6_1.4',data=data)
 
-#Li-like C
-rate_avg_pos=data_li_like_c_pos['rate_avg']
-rate_avg_neg=data_li_like_c_neg['rate_avg']
-rate_std_pos=data_li_like_c_pos['rate_std']
-rate_std_neg=data_li_like_c_neg['rate_std']
-rate_percent_pos=data_li_like_c_pos['rate_percent']
-rate_percent_neg=data_li_like_c_neg['rate_percent']
-rate_samples_pos=data_li_like_c_pos['rate_samples']
-rate_samples_neg=data_li_like_c_neg['rate_samples']
-T=data_li_like_c_pos['T']
+#Be-like C
+rate_avg_pos=data.be_like_c_pos['rate_avg']
+rate_avg_neg=data.be_like_c_neg['rate_avg']
+rate_std_pos=data.be_like_c_pos['rate_std']
+rate_std_neg=data.be_like_c_neg['rate_std']
+rate_percent_pos=data.be_like_c_pos['rate_percent']
+rate_percent_neg=data.be_like_c_neg['rate_percent']
+rate_samples_pos=data.be_like_c_pos['rate_samples']
+rate_samples_neg=data.be_like_c_neg['rate_samples']
+T=data.be_like_c_pos['T']
 
 
 
 #Li-like N
-#rate_avg_pos=data_li_like_onpos['rate_avg']
-#rate_avg_neg=data_li_like_n_neg['rate_avg']
-#rate_std_pos=data_li_like_n_pos['rate_std']
-#rate_std_neg=data_li_like_n_neg['rate_std']
-#rate_percent_pos=data_li_like_n_pos['rate_percent']
-#rate_percent_neg=data_li_like_n_neg['rate_percent']
-#rate_samples_pos=data_li_like_n_pos['rate_samples']
-#rate_samples_neg=data_li_like_n_neg['rate_samples']
-#T=data_li_like_n_pos['T']
+#rate_avg_pos=data.be_like_n_pos['rate_avg']
+#rate_avg_neg=data.be_like_n_neg['rate_avg']
+#rate_std_pos=data.be_like_n_pos['rate_std']
+#rate_std_neg=data.be_like_n_neg['rate_std']
+#rate_percent_pos=data.be_like_n_pos['rate_percent']
+#rate_percent_neg=data.be_like_n_neg['rate_percent']
+#rate_samples_pos=data.be_like_n_pos['rate_samples']
+#rate_samples_neg=data.be_like_n_neg['rate_samples']
+#T=data.be_like_n_pos['T']
 
 
 #Li-like O
-#rate_avg_pos=data_li_like_o_pos['rate_avg']
-#rate_avg_neg=data_li_like_o_neg['rate_avg']
-#rate_std_pos=data_li_like_o_pos['rate_std']
-#rate_std_neg=data_li_like_o_neg['rate_std']
-#rate_percent_pos=data_li_like_o_pos['rate_percent']
-#rate_percent_neg=data_li_like_o_neg['rate_percent']
-#rate_samples_pos=data_li_like_o_pos['rate_samples']
-#rate_samples_neg=data_li_like_o_neg['rate_samples']
-#T=data_li_like_o_pos['T']
+#rate_avg_pos=data.be_like_o_pos['rate_avg']
+#rate_avg_neg=data.be_like_o_neg['rate_avg']
+#rate_std_pos=data.be_like_o_pos['rate_std']
+#rate_std_neg=data.be_like_o_neg['rate_std']
+#rate_percent_pos=data.be_like_o_pos['rate_percent']
+#rate_percent_neg=data.be_like_o_neg['rate_percent']
+#rate_samples_pos=data.be_like_o_pos['rate_samples']
+#rate_samples_neg=data.be_like_o_neg['rate_samples']
+#T=data.be_like_o_pos['T']
 
 rate_samples_combined=np.concatenate((rate_samples_pos,rate_samples_neg))
 rate_avg_combined = np.average(rate_samples_combined,axis=0)
