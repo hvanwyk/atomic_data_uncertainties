@@ -39,6 +39,7 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
             
         
     """
+#    print('Calculating atomic structure for lambda optimization:',' pot=',potential,' lambdas=',lambdas)
     
     # checks if directory exists, creates it if not
     direc = create_directories(ion, method)
@@ -55,12 +56,18 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     os.chdir(direc)
     
     with open(asdeck_file, "a+") as asdeckin:
-        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+        if (potential == 1):
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+        else:
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='FORM' &END\n")
+            
         lam = [str(lambd) for lambd in lambdas]
         asdeckin.write("  " + ' '.join(lam) + "\n")
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} &END\n\n")
         
     os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
+#    print("ion",ion)
+#    print("potential",potential)
 
     y, ground = read_levels("LEVELS") 
             
@@ -130,7 +137,8 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
     ion_name = f"{ion.species}{ion.ion_charge}"
-
+#    print('Calculating DR rates oic file:',' pot=',potential,' lambdas=',lambdas)
+    
     if method == "lambdas" and lambdas != []:
         direc += "_".join([str(x) for x in lambdas])
         up_dir = "../../../../../../"
@@ -142,7 +150,10 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
     os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like.dr {direc}/{asdeck_file}")
     os.chdir(direc)
     
+#    print('number of lambdas',np.shape(lambdas))
+    
     with open(asdeck_file, "a") as asdeckin:       
+
         """
         Write the DRR namelist.
         NMIN, NMAX - n shells used
@@ -158,9 +169,16 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
         NLAM - # of lambda parameters used
         """
         lam = [str(lambd) for lambd in lambdas]
-        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+#        print('lam=',lam)
+        if (potential == 1):
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+        else:
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           
+            
         asdeckin.write("  " + ' '.join(lam) + "\n")
         
+                
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} ")
         if ECORIC != 0:
             asdeckin.write(f"ECORIC={ECORIC} ")
@@ -216,6 +234,8 @@ def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=
             
             rate: DR rate for each point on the temperature grid 
     """
+#    print('Post-processing:', ' lambdas=',lambdas)
+#    print("Lambdas",lambdas)
     direc = create_directories(ion, method)
     up_dir = "../../../../../"
 
