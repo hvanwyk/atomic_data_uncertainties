@@ -1,0 +1,2 @@
+gfortran -O3 asdeck.f -o asdeck.x
+gfortran -O3 adasdr.f -o adasdr.x
