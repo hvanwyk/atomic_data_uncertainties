@@ -174,8 +174,8 @@ def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walk
     ax2.show()
     """
     
-    if outfile is not None:
-        np.save(outfile, arr=lambda_samples,allow_pickle=True)
+#    if outfile is not None:
+#        np.save(outfile, arr=lambda_samples,allow_pickle=True)
     
     return lambda_samples, Err, Erg, err_interpolators,y_nist
     
@@ -238,8 +238,8 @@ def rates_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot,outfile=None)
         for j in range(n_points):
             rate_samples[i,j] = rate_interpolators[j](lambda_samples[i]) 
         
-    if outfile:
-        np.save(outfile, np.array([T, rate_samples]),allow_pickle=True)
+#    if outfile:
+#        np.save(outfile, np.array([T, rate_samples]),allow_pickle=True)
         
     return T, rate_samples
     
