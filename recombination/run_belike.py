@@ -43,8 +43,9 @@ import time
 from run_case import run_case
 
 
-atoms=['c','n']
-#,'n','o','f','ne','na','mg','al','si','ar','fe']
+#atoms=['c','n']
+atoms=['b','o','f','ne']
+#atoms=['na','mg','al','si','ar','fe']
 
 seq = "be"
 shell = "2-2"
@@ -90,8 +91,10 @@ for i in range(len(atoms)):
     print('number of walkers = ', n_walkers)
     print('number of steps per walker = ', n_steps)
 
+
     cent_pot=1
     data_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
+    print(' ')
     cent_pot=-1
     data_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
     pos_name=seq+'_like_'+atom+'_pos'
@@ -103,46 +106,24 @@ for i in range(len(atoms)):
     print('updating dictionary')
     end = time.time()
     print(f"Runtime: {int(end-start)}s")
-
+    print(' ')
+    print(' ')
 
 #%%
-    np.savez('be_like_c_0.6_1.4',data=data)
+
+np.savez('be_like_0.6_1.4',data=data)
 
 #Be-like C
-rate_avg_pos=data.be_like_c_pos['rate_avg']
-rate_avg_neg=data.be_like_c_neg['rate_avg']
-rate_std_pos=data.be_like_c_pos['rate_std']
-rate_std_neg=data.be_like_c_neg['rate_std']
-rate_percent_pos=data.be_like_c_pos['rate_percent']
-rate_percent_neg=data.be_like_c_neg['rate_percent']
-rate_samples_pos=data.be_like_c_pos['rate_samples']
-rate_samples_neg=data.be_like_c_neg['rate_samples']
-T=data.be_like_c_pos['T']
+rate_avg_pos=data['be_like_c_pos']['rate_avg']
+rate_avg_neg=data['be_like_c_neg']['rate_avg']
+rate_std_pos=data['be_like_c_pos']['rate_std']
+rate_std_neg=data['be_like_c_neg']['rate_std']
+rate_percent_pos=data['be_like_c_pos']['rate_percent']
+rate_percent_neg=data['be_like_c_neg']['rate_percent']
+rate_samples_pos=data['be_like_c_pos']['rate_samples']
+rate_samples_neg=data['be_like_c_neg']['rate_samples']
+T=data['be_like_c_pos']['T']
 
-
-
-#Li-like N
-#rate_avg_pos=data.be_like_n_pos['rate_avg']
-#rate_avg_neg=data.be_like_n_neg['rate_avg']
-#rate_std_pos=data.be_like_n_pos['rate_std']
-#rate_std_neg=data.be_like_n_neg['rate_std']
-#rate_percent_pos=data.be_like_n_pos['rate_percent']
-#rate_percent_neg=data.be_like_n_neg['rate_percent']
-#rate_samples_pos=data.be_like_n_pos['rate_samples']
-#rate_samples_neg=data.be_like_n_neg['rate_samples']
-#T=data.be_like_n_pos['T']
-
-
-#Li-like O
-#rate_avg_pos=data.be_like_o_pos['rate_avg']
-#rate_avg_neg=data.be_like_o_neg['rate_avg']
-#rate_std_pos=data.be_like_o_pos['rate_std']
-#rate_std_neg=data.be_like_o_neg['rate_std']
-#rate_percent_pos=data.be_like_o_pos['rate_percent']
-#rate_percent_neg=data.be_like_o_neg['rate_percent']
-#rate_samples_pos=data.be_like_o_pos['rate_samples']
-#rate_samples_neg=data.be_like_o_neg['rate_samples']
-#T=data.be_like_o_pos['T']
 
 rate_samples_combined=np.concatenate((rate_samples_pos,rate_samples_neg))
 rate_avg_combined = np.average(rate_samples_combined,axis=0)
@@ -164,9 +145,8 @@ print('Standard Deviation: TF + STO = ', rate_std_combined[indx])
 print('Percent uncertainty: TF       = ', np.around(rate_percent_pos[indx],decimals=3))
 print('Percent uncertainty: STO      = ', np.around(rate_percent_neg[indx],decimals=3))
 print('Percent uncertainty: TF + STO = ', np.around(rate_percent_combined[indx],decimals=3))
+print(' ')
 
-
-indx=4
 title='Results for Be-like ' + atom + ' for T='+T.astype(str)[indx]+' K or '+(T_ev.astype(str)[indx])+' eV'
 fig1, ax1 = plt.subplots(1,1)
 ax1.set_ylabel('Number of counts')
@@ -187,7 +167,7 @@ print('Standard Deviation: TF + STO = ', rate_std_combined[indx])
 print('Percent uncertainty: TF       = ', np.around(rate_percent_pos[indx],decimals=3))
 print('Percent uncertainty: STO      = ', np.around(rate_percent_neg[indx],decimals=3))
 print('Percent uncertainty: TF + STO = ', np.around(rate_percent_combined[indx],decimals=3))
-
+print(' ')
 
 
 indx=10
