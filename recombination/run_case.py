@@ -83,8 +83,8 @@ def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,
    print('Calculating rate distributions using cent_pot=',cent_pot)
    T, rate_samples = rates_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot,outfile=rates_file)
     
-   graph_file=direc + "rates"+file_name_common + ".png"
-   graph_rates_from_file(ion, infile = rates_file, outfile=graph_file)
+#   graph_file=direc + "rates"+file_name_common + ".png"
+#   graph_rates_from_file(ion, infile = rates_file, outfile=graph_file)
 
    rate_avg = np.empty(19)
    rate_std = np.empty(19)
