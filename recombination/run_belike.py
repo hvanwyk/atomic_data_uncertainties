@@ -40,12 +40,14 @@ if ".." not in sys.path:
     sys.path.append("..")
 from bayesian_methods import log_posterior, interpolators, lambdas_grid
 import time
+import pickle
+import os
+from utilities import create_directories, get_nist_energy, read_levels, compare_to_nist
 from run_case import run_case
 
 
-#atoms=['c','n']
-atoms=['b','o','f','ne']
-#atoms=['na','mg','al','si','ar','fe']
+atoms=['b','c','n','o','f','ne','na','mg','al','si','k','ti','cr','fe']
+#atoms=['fe']
 
 seq = "be"
 shell = "2-2"
@@ -68,13 +70,17 @@ X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
 n_walkers=100
 n_steps=3000
 
+up_dir=res=os.getcwd()
+
+
+
 
 
 #%%
 
 
-data={"seq":seq,"shell":shell,"x_bnd":x_bnd, 
-                 "grid_resolution":grid_resolution,"n_walkers":n_walkers,"n_steps":n_steps}
+data={"seq":seq,"shell":shell,"x_bnd":x_bnd,"nist_cutoff":nist_cutoff,"prior_shape":prior_shape,"likelihood_shape":likelihood_shape,
+                 "x_bnd":x_bnd,"x_res":x_res,"X_1D":X_1D,"x_ravel":x_ravel,"grid_resolution":grid_resolution,"n_walkers":n_walkers,"n_steps":n_steps}
 
 for i in range(len(atoms)):
     start = time.time()
@@ -82,6 +88,8 @@ for i in range(len(atoms)):
     ion = State(atom, seq, shell)
     direc = f"results/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}/"    
     file_name_common = f"_{int(nist_cutoff*100)}_{prior_shape}P_{likelihood_shape}L"
+    nist_vals = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+    emax=nist_vals[-1]*1.1  
     print('Calculation for ',seq,'-like',atom)
     print('Core excitation : ' , shell)
     print('nist cutoff = ',nist_cutoff)
@@ -90,13 +98,15 @@ for i in range(len(atoms)):
     print('Lambda range', x_bnd)
     print('number of walkers = ', n_walkers)
     print('number of steps per walker = ', n_steps)
+    print('EMAX=',emax)
+    print('up_dir=',up_dir)
 
 
     cent_pot=1
-    data_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
+    data_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir)
     print(' ')
     cent_pot=-1
-    data_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
+    data_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir)
     pos_name=seq+'_like_'+atom+'_pos'
     neg_name=seq+'_like_'+atom+'_neg'
     tmp1={pos_name:data_pos}
@@ -109,11 +119,18 @@ for i in range(len(atoms)):
     print(' ')
     print(' ')
 
+
+a_file = open("be_like_k_fe.pkl", "wb")
+pickle.dump(data, a_file)
+a_file.close()
+
+#np.savez('be_like_si_ar_fe_0.6_1.4',data=data)
+
 #%%
 
-np.savez('be_like_0.6_1.4',data=data)
 
 #Be-like C
+atom='c'
 rate_avg_pos=data['be_like_c_pos']['rate_avg']
 rate_avg_neg=data['be_like_c_neg']['rate_avg']
 rate_std_pos=data['be_like_c_pos']['rate_std']
@@ -130,11 +147,26 @@ rate_avg_combined = np.average(rate_samples_combined,axis=0)
 rate_std_combined = np.std(rate_samples_combined,axis=0)
 rate_percent_combined = rate_std_combined/rate_avg_combined*100.
 
+atom='fe'
+rate_avg_pos=data['be_like_fe_pos']['rate_avg']
+rate_avg_neg=data['be_like_fe_neg']['rate_avg']
+rate_std_pos=data['be_like_fe_pos']['rate_std']
+rate_std_neg=data['be_like_fe_neg']['rate_std']
+rate_percent_pos=data['be_like_fe_pos']['rate_percent']
+rate_percent_neg=data['be_like_fe_neg']['rate_percent']
+rate_samples_pos=data['be_like_fe_pos']['rate_samples']
+rate_samples_neg=data['be_like_fe_neg']['rate_samples']
+T=data['be_like_fe_pos']['T']
+
+rate_samples_combined=np.concatenate((rate_samples_pos,rate_samples_neg))
+rate_avg_combined = np.average(rate_samples_combined,axis=0)
+rate_std_combined = np.std(rate_samples_combined,axis=0)
+rate_percent_combined = rate_std_combined/rate_avg_combined*100.
 
 
 T_ev=T/11604.
 
-indx=4
+indx=1
 print('Results for T(K)=' ,T[indx], 'K :  T(eV)= ', np.around(T_ev[indx],decimals=2), ' eV')
 print('Average: TF       = ', rate_avg_pos[indx])
 print('Average: STO      = ', rate_avg_neg[indx])
