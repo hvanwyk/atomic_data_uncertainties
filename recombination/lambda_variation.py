@@ -21,11 +21,11 @@ from graphing import graph_rates_from_file
 from scipy.optimize import minimize
 import multiprocessing as mp
 
-def energy_grid(ion, x_ravel, x_res,cent_pot):
+def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
     #
     # Generate error data 
     # 
-    n = structure(ion=ion)[0].shape[0]
+    n = structure(up_dir,ion)[0].shape[0]
     n_points = x_ravel.shape[0]
     err = np.empty((n_points,n))
     erg = np.empty((n_points, n))
@@ -38,7 +38,7 @@ def energy_grid(ion, x_ravel, x_res,cent_pot):
             x=np.r_[1.0,x]
 #        potential = np.random.choice([-1, 1])
 
-        data = structure(ion=ion, lambdas=x, potential=potential)
+        data = structure(up_dir,ion,lambdas=x, potential=potential,emax=emax)
         err[i,:] = data[2]
         erg[i, :] = data[0]
     
@@ -47,11 +47,12 @@ def energy_grid(ion, x_ravel, x_res,cent_pot):
 
     return Err, Erg
 
-def rates_grid(ion, x_ravel, x_res, cent_pot, parallel=False):
+def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0):
     
-    E, E_nist, shift = structure(ion,potential=cent_pot)
-    structure_dr(ion,potential=cent_pot)
-    T = postprocessing_rates(ion, E, E_nist)[0]
+    print('In rates_grid: emax=',emax)
+    E, E_nist, shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
+    structure_dr(ion,up_dir,potential=cent_pot, emax=emax)
+    T = postprocessing_rates(up_dir,ion, E, E_nist,emax=emax)[0]
     n_rates = T.size
     n_points = x_ravel.shape[0]
     
@@ -70,26 +71,26 @@ def rates_grid(ion, x_ravel, x_res, cent_pot, parallel=False):
             x = x_ravel[i,:]
             if ion.isoelec_seq == "he":
                 x=np.r_[1.0,x]
-            E, E_nist, delta_E = structure(ion, lambdas=x,potential=cent_pot)
-            structure_dr(ion, lambdas=x,potential=cent_pot)
-            rates[i, :] = postprocessing_rates(ion, E, E_nist, lambdas=x)[1]
+            E, E_nist, delta_E = structure(up_dir,ion,lambdas=x,potential=cent_pot, emax=emax)
+            structure_dr(ion, up_dir,lambdas=x,potential=cent_pot, emax=emax)
+            rates[i, :] = postprocessing_rates(up_dir,ion, E, E_nist, lambdas=x,emax=emax)[1]
     
     
     Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
     return Rates
 
-def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=100, n_steps=1000, 
-                      prior_shape="uniform", likelihood_shape="uniform", plot=True, outfile=None,cent_pot=1):
+def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=100, n_steps=1000, 
+                      prior_shape="uniform", likelihood_shape="uniform", plot=True, outfile=None,cent_pot=1,emax=2.0):
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
     # NIST data
-    y_nist = structure(ion, lambdas=[])[1]
+    y_nist = structure(up_dir,ion, lambdas=[])[1]
     
     # Construct interpolators
     n_energies = y_nist.size
     
-    Err, Erg = energy_grid(ion, x_ravel, x_res,cent_pot)
+    Err, Erg = energy_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax)
     
     err_interpolators = interpolators(X_1D, Err)
     
@@ -131,62 +132,20 @@ def lambda_distribution(ion, x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walk
     lambda_samples = sampler.chain[:, 50:, :].reshape((-1, n_lambdas))
     
     
-    # -----------------------------------------------------------------------------
-    # Visualize the posterior density ??SDL : Isn't this the prior density??
-    # -----------------------------------------------------------------------------
-    
-#    if plot:
-#        fig = plt.figure(figsize=(10,6))
-#        ax = plt.axes()
-#        plt.figure()
-#        fig=corner.corner(lambda_samples, labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
-        #plt.show()
-#        plt.savefig("lambdas.jpg")
-#        ax.legend()
-#        ax.show()
-        
-    
-    # -----------------------------------------------------------------------------
-    # Plug the Monte Carlo samples from the posterior into the function and comput
-    # a histogram for the output. Make sure the point [0,0,0] has nonzero density   
-    # -----------------------------------------------------------------------------
-    
-
-    
-    # =============================================================================
-    # Compute histogram
-    # =============================================================================
-    """
-    fig2 = plt.figure(figsize=(10,6))
-    H, edges = np.histogramdd(lambda_samples, bins=(20,20,20), normed=True)
-    CH = np.cumsum(H.ravel())
-    ax2 = plt.axes()
-    ax2.plot(CH)
-    """
-    
-    # =============================================================================
-    # Sample from histogram
-    # =============================================================================
-    """
-    y = sample_from_histogram(H, edges, 10000)
- 
-    corner.corner(y, labels=["$\lambda_1$", "$\lambda_2$"], truths=[1,1] )
-    ax2.show()
-    """
     
 #    if outfile is not None:
 #        np.save(outfile, arr=lambda_samples,allow_pickle=True)
     
     return lambda_samples, Err, Erg, err_interpolators,y_nist
     
-def energy_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot, plot=True, outfile=None):
+def energy_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot, plot=True, outfile=None):
     
-    y_nist = structure(ion, lambdas=[])[1]
+    y_nist = structure(up_dir,ion,lambdas=[])[1]
     n_energies = y_nist.size
     
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
-    Err, Erg = energy_grid(ion, x_ravel, x_res, cent_pot)
+    Err, Erg = energy_grid(ion, up_dir, x_ravel, x_res, cent_pot,emax)
     energy_interpolators = interpolators(X_1D, Erg)
     
     n_samples = lambda_samples.shape[0]
@@ -196,13 +155,7 @@ def energy_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot, plot=True, 
         for j in range(n_energies):
             E_samples[i,j] = energy_interpolators[j](lambda_samples[i])         
         
-#    if plot:
-#        ax3 = plt.figure(figsize=(10,6))
-#        ax3 = plt.axes()
-#        fig2=corner.corner(E_samples[:,1:], labels=[f"$E_{i+1}$" for i in range(n_energies-1)], truths=[0 for i in range(n_energies-1)])
-#        ax3.show()
-#        plt.savefig("Energies.jpg")
-    
+
     return E_samples, Err, Erg
 
 """
@@ -216,19 +169,23 @@ def xsec_data(lambda_samples):
         xsec_samples[i,:] = postprocessing_rates(ion, lambdas=lambdas[i,:], xsec=True)[1]
 """
 
-def rates_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot,outfile=None):
+def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=None):
         
-    
+    print('In rates_distribution: emax=',emax)
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
-    print('cent_pot in rates_distribution before structure ',cent_pot)
-    E, E_nist, E_shift = structure(ion,potential=cent_pot)
+    print('cent_pot in rates_distribution before structure ',cent_pot,'shape X_1D,x_ravel',np.shape(X_1D),np.shape(x_ravel))
+    E, E_nist, E_shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
+
     print('cent_pot in rates_distribution before DR',cent_pot)
-    structure_dr(ion,potential=cent_pot)
-    T = postprocessing_rates(ion, E, E_nist)[0]
+    structure_dr(ion,up_dir,potential=cent_pot,emax=emax)
+
+    T = postprocessing_rates(up_dir,ion,E, E_nist,emax=emax)[0]
     n_points = T.size
+    print('n_points=',n_points,'lambda_samples',np.shape(lambda_samples),'emax=',emax)
+
     n_samples = lambda_samples.shape[0]
     
-    Rates = rates_grid(ion, x_ravel, x_res,cent_pot)
+    Rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax)
     
     rate_interpolators = interpolators(X_1D, Rates)
     
@@ -244,10 +201,10 @@ def rates_distribution(ion, lambda_samples, x_bnd, x_res, cent_pot,outfile=None)
     return T, rate_samples
     
 
-def energy_optimization(ion, lambda_samples, x_bnd, x_res):    
+def energy_optimization(ion, lambda_samples, x_bnd, x_res,up_dir):    
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
-    Err, Erg = energy_grid(ion, x_ravel, x_res)
+    Err, Erg = energy_grid(ion, up_dir, x_ravel, x_res)
     energy_interpolators = interpolators(X_1D, Erg)
     def func(x): 
         mean = 0
