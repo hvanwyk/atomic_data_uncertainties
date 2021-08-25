@@ -47,12 +47,12 @@ def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
 
     return Err, Erg
 
-def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0):
+def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0,nist_shift=False):
     
     print('In rates_grid: emax=',emax)
     E, E_nist, shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
     structure_dr(ion,up_dir,potential=cent_pot, emax=emax)
-    T = postprocessing_rates(up_dir,ion, E, E_nist,emax=emax)[0]
+    T = postprocessing_rates(up_dir,ion, E, E_nist,emax=emax,nist_shift=nist_shift)[0]
     n_rates = T.size
     n_points = x_ravel.shape[0]
     
@@ -73,7 +73,7 @@ def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0):
                 x=np.r_[1.0,x]
             E, E_nist, delta_E = structure(up_dir,ion,lambdas=x,potential=cent_pot, emax=emax)
             structure_dr(ion, up_dir,lambdas=x,potential=cent_pot, emax=emax)
-            rates[i, :] = postprocessing_rates(up_dir,ion, E, E_nist, lambdas=x,emax=emax)[1]
+            rates[i, :] = postprocessing_rates(up_dir,ion, E, E_nist, lambdas=x,emax=emax,nist_shift=nist_shift)[1]
     
     
     Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
@@ -169,9 +169,9 @@ def xsec_data(lambda_samples):
         xsec_samples[i,:] = postprocessing_rates(ion, lambdas=lambdas[i,:], xsec=True)[1]
 """
 
-def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=None):
+def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=None,nist_shift=False):
         
-    print('In rates_distribution: emax=',emax)
+    print('In rates_distribution: emax,nist_shift=',emax,nist_shift)
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     print('cent_pot in rates_distribution before structure ',cent_pot,'shape X_1D,x_ravel',np.shape(X_1D),np.shape(x_ravel))
     E, E_nist, E_shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
@@ -179,13 +179,13 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
     print('cent_pot in rates_distribution before DR',cent_pot)
     structure_dr(ion,up_dir,potential=cent_pot,emax=emax)
 
-    T = postprocessing_rates(up_dir,ion,E, E_nist,emax=emax)[0]
+    T = postprocessing_rates(up_dir,ion,E, E_nist,emax=emax,nist_shift=nist_shift)[0]
     n_points = T.size
     print('n_points=',n_points,'lambda_samples',np.shape(lambda_samples),'emax=',emax)
 
     n_samples = lambda_samples.shape[0]
     
-    Rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax)
+    Rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
     
     rate_interpolators = interpolators(X_1D, Rates)
     
