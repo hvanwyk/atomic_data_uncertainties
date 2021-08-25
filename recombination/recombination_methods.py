@@ -200,7 +200,7 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
     
 
 def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[], shift=[], NTAR1=1, 
-                         compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, emax=2.0):
+                         compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, emax=2.0,nist_shift=False):
     """
     Write input deck for ADASDR postprocessor and run ADASDR 
     
@@ -262,7 +262,13 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
         with open(levels_file, "r") as levels:
             lines = levels.read().splitlines()
             NTAR2 = len(E)
-            NECOR=NTAR2
+            if nist_shift:
+               NECOR=NTAR2
+            else:
+               NECOR=0
+               
+#            print('NIST shifts are set to',nist_shift,NTAR2,NECOR)
+             
             adasin.write("/IC/\n")
             adasin.write(f" &ONE NTAR1={NTAR1} NTAR2={NTAR2} COREX=\'{ion.shell}\' &END\n")
             adasin.write(f" &TWO NECOR={NECOR} ")
