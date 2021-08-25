@@ -27,8 +27,9 @@ from mpl_toolkits import mplot3d
 from lambda_variation import energy_grid, rates_grid,  lambda_distribution, energy_distribution, rates_distribution, energy_optimization
 
 
-def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir):
+def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir,nist_shift=False):
   
+   print('NIST shift=',nist_shift)
    lambdas_file = direc + "lambdas" + file_name_common+".npy"   
    print('Evaluating lambda distribution functions using MCMC')
    lambda_samples, Err, Erg, err_interpolators,y_nist = lambda_distribution(ion,up_dir,cent_pot=cent_pot,x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, 
@@ -41,8 +42,8 @@ def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,
 
     
    rates_file = direc+"rates"+file_name_common+".npy"
-   print('Calculating rate distributions using cent_pot=',cent_pot,'emax=',emax)
-   T, rate_samples = rates_distribution(ion, up_dir,emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=rates_file)
+   print('Calculating rate distributions using cent_pot=',cent_pot,'emax=',emax,'nist_shift=',nist_shift)
+   T, rate_samples = rates_distribution(ion, up_dir,emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=rates_file,nist_shift=nist_shift)
     
 
    rate_avg = np.empty(19)
@@ -60,8 +61,11 @@ def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,
 
    data = {"T": T,
     "nist_vals": y_nist,
+    "Erg":Erg,
+    "X_1D":X_1D,
     "lambda_samples": lambda_samples,
     "E_samples":E_samples,
+    "Err":Err,
     "rate_samples":rate_samples,
     "rate_avg":rate_avg,
     "rate_std":rate_std,
