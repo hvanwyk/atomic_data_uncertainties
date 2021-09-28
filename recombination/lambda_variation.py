@@ -6,7 +6,6 @@ Created on Mon Apr  8 16:20:47 2019
 @author: kyle
 """
 import numpy as np
-import sys
 import matplotlib.pyplot as plt
 import emcee
 import corner 
@@ -32,7 +31,8 @@ def energy_grid(ion, x_ravel, x_res):
         x = x_ravel[i,:]
         if ion.isoelec_seq == "he":
             x=np.r_[1.0,x]
-        potential = np.random.choice([-1, 1])
+        #potential = np.random.choice([-1, 1])
+        potential = 1
         data = structure(ion=ion, lambdas=x, potential=potential)
         
         err[i,:] = data[2]
@@ -302,8 +302,8 @@ if __name__ == "__main__":
     shell = "2-2"
     ion = State(atom, seq, shell)
     
-    lmd_bnd = np.array([[0,3],[0,3]])
-    lmd_res = np.array([20,20])
+    lmd_bnd = np.array([[0.5,2],[0.5,2]])
+    lmd_res = np.array([50,50])
     
     lmd_points_1d, lmd_points_2d = lambdas_grid(lmd_bnd, lmd_res)
     
@@ -314,11 +314,11 @@ if __name__ == "__main__":
     
     
     # Create four polar axes and access them through the returned array
-    fig, axs = plt.subplots(2,5,sharey=True, sharex=True, constrained_layout=True)
+    fig, axs = plt.subplots(5,2,sharey=True, sharex=True, constrained_layout=True)
   
     count = 0
-    for row in range(2):
-        for col in range(5):
+    for row in range(5):
+        for col in range(2):
             # Label Axes
             if col == 0:
                 axs[row,col].set_ylabel('2p')

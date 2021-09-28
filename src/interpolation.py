@@ -23,7 +23,8 @@ class Interpolator:
     """
     """
     def __init__(self, function, domain, n_outputs, output_labels=None, 
-                 input_labels=None, resolution='auto', tol=1e-6):
+                 input_labels=None, interpolation_type='local-polynomial',
+                 resolution='auto', tol=1e-6):
         """
         Constructor
         
@@ -66,6 +67,21 @@ class Interpolator:
         #
         # Construct the interpolant
         # 
+        if interpolation_type=='global-polynomial':
+            #
+            # Global polynomials
+            # 
+            pass
+        elif interpolation_type=='local-polynomial':
+            #
+            # Piecwise polynomials
+            #
+            pass
+        elif interpolation_type=='wavelet':
+            #
+            # Wavelet interpolants
+            # 
+            pass
         if type(resolution) is int:
             # Uniform resolution in all directions. 
             grid = Tasmanian.makeLocalPolynomialGrid()
@@ -82,7 +98,12 @@ class Interpolator:
             assert resolution=='auto', \
                 'Unknown string for variable "resolution" '
         
-    
+        #
+        # Store interpolation grid
+        # 
+        self.__grid = grid
+        
+        
     def add_labels(self, inputs=None, outputs=None):
         """
         Labels for inputs and outputs
@@ -101,7 +122,7 @@ class Interpolator:
         #
         # Add labels for the input variables
         # 
-        if inputs is not None:
+        if inputs is not None: 
             # Check that the dimensions match 
             assert len(inputs)==n_inputs, 'The number of input labels'+\
                 'does not match the number of inputs.'

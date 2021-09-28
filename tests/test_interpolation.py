@@ -17,12 +17,15 @@ import matplotlib.pyplot as plt
 
 def test01():
     """
-    Interpolate the function f(x) = exp(x1)*cos(x2) on [-1,1]^2 and compare 
+    Interpolate the function f(x) = exp(x1)*cos(x2) on [0,1]x[-1,1]
     """
-    f = lambda x: np.array([np.exp(x[0])*np.cos(x[1]), np.sin(x[0])])
+    f = lambda x, tid: np.array([np.exp(x[0])*np.cos(x[1]), np.sin(x[0])])
     domain = np.array([[0,1],[-1,1]])
-    p = Interpolator(domain, f, resolution=5)
-    
+    d = domain.shape[0]
+    grid = Tasmanian.makeLocalPolynomialGrid(d,2,5,8)
+    grid.setDomainTransform(domain)
+    Tasmanian.loadNeededPoints(f, grid, 4)
+    print(grid.getNumNeeded())
     
 def time_grid_interpolators():
     """
@@ -103,5 +106,6 @@ def time_sparse_grid_interpolators():
     
     
 if __name__=='__main__':
+    test01()
     #time_grid_interpolators()
-    time_sparse_grid_interpolators()
+    #time_sparse_grid_interpolators()
