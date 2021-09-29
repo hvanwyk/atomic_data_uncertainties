@@ -76,8 +76,8 @@ def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0,ni
             rates[i, :] = postprocessing_rates(up_dir,ion, E, E_nist, lambdas=x,emax=emax,nist_shift=nist_shift)[1]
     
     
-    Rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
-    return Rates
+    rates = [np.reshape(rates[:,j], x_res) for j in range(n_rates)]
+    return rates
 
 def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2, n_walkers=100, n_steps=1000, 
                       prior_shape="uniform", likelihood_shape="uniform", plot=True, outfile=None,cent_pot=1,emax=2.0):
@@ -185,9 +185,9 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
 
     n_samples = lambda_samples.shape[0]
     
-    Rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
+    rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
     
-    rate_interpolators = interpolators(X_1D, Rates)
+    rate_interpolators = interpolators(X_1D, rates)
     
     rate_samples = np.zeros((n_samples,n_points))
     
@@ -198,7 +198,7 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
 #    if outfile:
 #        np.save(outfile, np.array([T, rate_samples]),allow_pickle=True)
         
-    return T, rate_samples
+    return T, rate_samples,rates
     
 
 def energy_optimization(ion, lambda_samples, x_bnd, x_res,up_dir):    
