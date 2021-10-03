@@ -24,7 +24,7 @@ def experimental_fit(c, E, T):
 
 def graph_rates_from_file(ion, infile, outfile, graph_every=100, x_range=None, y_range=None, err_type="std", experimental=False):
 
-    data = np.load(infile, allow_pickle=True)
+    data = np.load(infile)
     direc = "/".join(outfile.split("/")[:-1])+"/"
     T = data[0]
     rates = data[1]

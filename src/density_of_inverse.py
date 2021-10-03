@@ -4,6 +4,7 @@ Created on Tue Jun 27 13:16:13 2017
 
 @author: hans-werner
 
+NOTE: We no longer use the inverse density estimation in our work.
 """
 
 # ============================================================================
@@ -818,7 +819,7 @@ class GridFunction():
         # 
         V = V.transpose().tocsr()
         row_sums = np.array(V.sum(axis=1)).ravel()
-        ri = V.nonzero()
+        ri, _ = V.nonzero()
         V.data = V.data/row_sums[ri]
         
         #print(V.toarray())

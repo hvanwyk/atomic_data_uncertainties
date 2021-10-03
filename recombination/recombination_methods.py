@@ -13,13 +13,13 @@ if ".." not in sys.path:
 from utilities import create_directories, get_nist_energy, read_levels, compare_to_nist
 from state import State
     
-def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, EMAX=2, E_absolute=False):
+def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, emax=2, E_absolute=False):
     """
     Run the autostructure code and generate LEVELS file with energies.
     
     Inputs:
     
-        method: str, specify uncertainty propagation method ('lambdas', 'combined') 
+        method: str, specify uncertainty propagation method  
         
         lambdas: list, array of lambda parameters
         
@@ -39,42 +39,54 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
             
         
     """
+#    print('Calculating atomic structure for lambda optimization:',' pot=',potential,' lambdas=',lambdas)
     
     # checks if directory exists, creates it if not
     direc = create_directories(ion, method)
-    up_dir = "../../../../../"
+#    up_dir = "../../../../../"
     
     if method == "lambdas" and lambdas != []:
         direc += "_".join([str(x) for x in lambdas])
-        up_dir = "../../../../../../"
+#        up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
-        
+
+#    up_dir = "/Users/lochstu/git/stuart_branch_test/recombination/"
+
+    
     asdeck_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_str"
     os.system(f"cp asdeck/structure/{ion.isoelec_seq}-like_str {direc}/{asdeck_file}")
     os.chdir(direc)
     
     with open(asdeck_file, "a+") as asdeckin:
-        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+        if (potential == 1):
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+        else:
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='FORM' &END\n")
+            
         lam = [str(lambd) for lambd in lambdas]
         asdeckin.write("  " + ' '.join(lam) + "\n")
-        asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} &END\n\n")
+        asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} &END\n\n")
         
-    os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
+    os.system(up_dir + "/asdeck.x < " + asdeck_file)
+#    print(up_dir + "asdeck.x < " + asdeck_file)
 
-    df_comp, ground = read_levels("LEVELS") 
-    
+#    print("ion",ion)
+#    print("potential",potential)
+
+
+    #nist = np.transpose(np.genfromtxt(up_dir +f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist", skip_header=1))
+    #y_nist = nist[-1]
     if method=="lambdas" or method=="combined":
-        df_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
-        y_nist = df_nist["E"].values
+        y_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+    y, ground = read_levels("LEVELS") 
     if E_absolute == True:
-        df_comp["E"] += ground
+        y += ground
         if method == "lambdas" or method=="combined":
-            df_nist["E"] += ion.nist_ground
-    
-    y = df_comp["E"].values
-    y_nist = df_nist["E"].values
-    
+            y_nist += ion.nist_ground
+            
+            
+#    print('EMAX=',EMAX)
     os.remove("oic")
     os.remove("olg")
     os.remove("ols")
@@ -83,13 +95,13 @@ def structure(ion, method="lambdas", lambdas=[], potential=1, MENG=-15, EMIN=0, 
     os.chdir(up_dir)
     
     if method=="lambdas" or method=="combined":
-        y_shift = compare_to_nist(df_comp, df_nist)
+        y_shift = compare_to_nist(y, y_nist)
         return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
     else:
         return np.array([y]).flatten()
 
-def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
-                 MENG=-15, EMIN=0, EMAX=2, ECORIC=0):
+def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
+                 MENG=-15, EMIN=0, emax=2, ECORIC=0):
     """
     Structure run for dielectronic radiation
     
@@ -130,21 +142,27 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
         ECORIC:  
     """
     direc = create_directories(ion, method)
-    up_dir = "../../../../../"
+#    up_dir = "../../../../../"
     ion_name = f"{ion.species}{ion.ion_charge}"
-
+#    print('Calculating DR rates oic file:',' pot=',potential,' lambdas=',lambdas)
+    
     if method == "lambdas" and lambdas != []:
         direc += "_".join([str(x) for x in lambdas])
-        up_dir = "../../../../../../"
+#        up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
     
+#    up_dir = "/Users/lochstu/git/stuart_branch_test/recombination/"
+
     asdeck_file = f"{ion_name}_das_{ion.shell}_n"
 
     os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like.dr {direc}/{asdeck_file}")
     os.chdir(direc)
     
+#    print('number of lambdas',np.shape(lambdas))
+    
     with open(asdeck_file, "a") as asdeckin:       
+
         """
         Write the DRR namelist.
         NMIN, NMAX - n shells used
@@ -160,22 +178,29 @@ def structure_dr(ion, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15
         NLAM - # of lambda parameters used
         """
         lam = [str(lambd) for lambd in lambdas]
-        asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+#        print('lam=',lam)
+        if (potential == 1):
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+        else:
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           
+            
         asdeckin.write("  " + ' '.join(lam) + "\n")
         
-        asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={EMAX} ")
+                
+        asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")
         if ECORIC != 0:
             asdeckin.write(f"ECORIC={ECORIC} ")
         asdeckin.write("&END\n\n")
     
-    os.system("./" + up_dir + "asdeck.x < " + asdeck_file)
+    os.system(up_dir + "/asdeck.x < " + asdeck_file)
     os.system("mv oicu o1u")
 
     os.chdir(up_dir)
     
 
-def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=[], NTAR1=1, 
-                         compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, EMAX=2.0):
+def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[], shift=[], NTAR1=1, 
+                         compute_xsec=False, EWIDTH=0.001, NBIN=1000, EMIN=0.0, emax=2.0,nist_shift=False):
     """
     Write input deck for ADASDR postprocessor and run ADASDR 
     
@@ -218,14 +243,16 @@ def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=
             
             rate: DR rate for each point on the temperature grid 
     """
+#    print('Post-processing:', ' lambdas=',lambdas,'emax=',emax)
+#    print("Lambdas",lambdas)
     direc = create_directories(ion, method)
-    up_dir = "../../../../../"
+#    up_dir = "../../../../../"
 
     levels_file = "LEVELS"
     
     if method == "lambdas" and lambdas != []:
         direc += "_".join([str(x) for x in lambdas])
-        up_dir = "../../../../../../"
+#        up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
     
@@ -235,13 +262,19 @@ def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=
         with open(levels_file, "r") as levels:
             lines = levels.read().splitlines()
             NTAR2 = len(E)
-            NECOR=NTAR2
+            if nist_shift:
+               NECOR=NTAR2
+            else:
+               NECOR=0
+               
+#            print('NIST shifts are set to',nist_shift,NTAR2,NECOR)
+             
             adasin.write("/IC/\n")
             adasin.write(f" &ONE NTAR1={NTAR1} NTAR2={NTAR2} COREX=\'{ion.shell}\' &END\n")
             adasin.write(f" &TWO NECOR={NECOR} ")
             
             if compute_xsec:
-                adasin.write(f"EWIDTH={EWIDTH} NBIN={NBIN} EMIN={EMIN} EMAX={EMAX} ")
+                adasin.write(f"EWIDTH={EWIDTH} NBIN={NBIN} EMIN={EMIN} EMAX={emax} ")
                 
             adasin.write("&END\n")
             
@@ -259,7 +292,7 @@ def postprocessing_rates(ion, E, E_nist=[], method="lambdas", lambdas=[], shift=
             adasin.write(" ".join(E_str))
             adasin.write("\n")
             adasin.write(" ".join(nist_str))
-    os.system("./" + up_dir + "adasdr.x < adasin")
+    os.system(up_dir + "/adasdr.x < adasin")
     if not compute_xsec:
         with open("adasout", "r") as f:
             string = f.read()

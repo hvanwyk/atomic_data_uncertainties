@@ -121,24 +121,22 @@ def rates_dataframe(filename):
     return rates_df
     
 def compare(file_1, file_2):
-    df_1 = rates_dataframe(file_1)
-    df_2 = rates_dataframe(file_2)
-
-    r_1 = np.abs(df_1.values[:,8:])
-    r_2 = np.abs(df_2.values[:,8:])
-    r_1[r_1==0] = 1e-99
-    r_2[r_2==0] = 1e-99
+    lev1, T1, r1 = read_adf04(file_1)
+    lev2, T2, r2 = read_adf04(file_2)
     
-    diff = np.abs((r_1-r_2)/((r_1 + r_2)/2))
+    r1 = r1.ravel()
+    r2 = r2.ravel()
+    
+    r1[r1==0] = 1e-99
+    r2[r2==0] = 1e-99
+    
+    diff = np.abs((r1-r2)/((r1+r2)/2))
+    
     
     max_diff = np.max(diff)
-    
-    print(f"Max % difference for all transitions: {max_diff*100}")
-    
-    df = df_1-df_2
-    df["initial"] = df_1["initial"]
-    df["final"] = df_1["final"]
-    return df
+    print(f"% difference: {max_diff*100}")
+
+    return diff
 
 def compare_ground(file_1, file_2):
     df_1 = rates_dataframe(file_1)
@@ -146,15 +144,16 @@ def compare_ground(file_1, file_2):
     df_2 = rates_dataframe(file_2)
     df_2 = df_2.loc[df_2["final"]==1.0]
 
-    r_1 = np.abs(df_1.values[:,8:])
-    r_2 = np.abs(df_2.values[:,8:])
+    r_1 = df_1.values[:,8:]
+    r_2 = df_2.values[:,8:]
     r_1[r_1==0] = 1e-99
     r_2[r_2==0] = 1e-99
     
     diff = np.abs((r_1-r_2)/((r_1 + r_2)/2))
     
     max_diff = np.max(diff)
-    print(f"Max % difference for transitions to ground: {max_diff*100}")
+    
+    print(f"% difference for up to n=4 transitions to ground: {max_diff*100}")
     return diff
     
     
@@ -187,8 +186,7 @@ if __name__ == "__main__":
     plt.scatter(n, tf.values[:, 2])
     """
     
-    f1 = "isoelectronic/li-like/o5/adf04_40000"
-    f2 = "isoelectronic/li-like/o5/adf04_30000"    
-    
-    diff = compare_ground(f1, f2)
+    levels = read_adf04("graphs/slater.dat")[0]
+    print(levels)
+        
     

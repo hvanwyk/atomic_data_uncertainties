@@ -8,6 +8,7 @@ Created on Fri Nov 30 13:19:15 2018
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
+import multiprocessing as mp
 
 
 def log_prior(x, x_bnd, prior_shape="uniform"):
@@ -47,7 +48,7 @@ def log_prior(x, x_bnd, prior_shape="uniform"):
     
     
 
-def log_likelihood(x, interpolators, y_bnd, likelihood_shape="gaussian"):
+def log_likelihood(x, interpolators, y_bnd, likelihood_shape="uniform"):
     """
     Logarithm of the likelhood function (using uniform bounds on the error).
     
@@ -87,7 +88,7 @@ def log_likelihood(x, interpolators, y_bnd, likelihood_shape="gaussian"):
 
     
     
-def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelihood_shape="gaussian"):
+def log_posterior(x, interpolators, x_bnd, y_bnd, prior_shape="uniform", likelihood_shape="uniform"):
     """
     Compute the log of the posterior density, formed from the logs of the
     likelihood and prior density functions. 
@@ -199,6 +200,3 @@ def sample_from_histogram(H, edges, n_samples):
         i_binsj = i_bins[:,j]
         X[:,j] = edges[j][i_binsj] + V[:,j]*dxj[i_binsj]
     return X
-
-if __name__=='__main__':
-    pass

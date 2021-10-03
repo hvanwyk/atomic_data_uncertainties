@@ -1,32 +1,8 @@
-import re, numpy, pyatomdb, os
+import re, numpy, pyatomdb
 """
 Package for reading in AUTOSTRUCTURE files
 
 Developed as required
-
-usage:
-
-a = autos.read_oic(dirname)
-
-dirname is the directory where the oic file is. Should just be called oic.
-
-
-Returns a dict of information from the file.
-
-first index is NV
-second index in LV
-then there are entries for levels (lev)
-then there are entries for configuration (cfg)
-then there are entries for autoionization transition (aut)
-then there are entries for radiative transition (trn)
-
-which are all arrays which hopefully make sense.
-
-This is easy to develop, I have only tested on a few files so there will be bugs.
-Some of the stuff populating the "setup" doesn't make sense to me any more but
-I'm sure I had my reasons.
-
-
 """
 
 
@@ -39,8 +15,7 @@ def increment_next_letters(let):
 
 def read_oic(directory):
   """
-  Read the oic file. Directory is *either* the filename or the directory with the oic
-  file in it.
+  Read the oic file. Directory is where the file is.
 
   Parameters
   ----------
@@ -53,17 +28,10 @@ def read_oic(directory):
 
   """
 
-  if os.path.isfile(directory)
-    oicfile = directory
-  else:
-    oicfile = "%s/oic"%(directory)
+  oicfile = "%s/oic"%(directory)
+  aut = {}
   mode = 'CFG1'
   nextletters = 'aa'
-
-  aut = {}
-  ret = {}
-
-
   for line in open(oicfile, 'r'):
     if mode=='CFG1':
       if 'NV' in line:
@@ -137,80 +105,6 @@ def read_oic(directory):
                                                  int, int, '|S40', float, \
                                                  float, int]}))
           ilev = 0
-        elif 'AUTO-IONIZATION' in line:
-          mode='AUT1'
-          
-          aut['aut'] = numpy.zeros(10000, dtype=\
-                         numpy.dtype({'names':['cfi','lvi','wi','cfc','lvc',\
-                                              'wc','aa','ec_ryd','ei_ryd'],\
-                                      'formats':[int, int, int, int, int, \
-                                                 int, float, float, float]}))
-          iauto = 0
-          
-    elif mode=='AUT1':
-      mode = 'AUT2'
-    elif mode=='AUT2':
-      if 'NLEVEL' in line:
-        mode='LEV1'
-        aut['aut']=aut['aut'][:iauto]
-        nlev =  int(line[10:18])
-        
-        aut['lev'] = numpy.zeros(nlev, dtype=\
-                       numpy.dtype({'names':['k','lv','t','s2p1','l',\
-                                            'j2','cf','cfgstr','e_ryd',\
-                                            'energy', 'parity'],\
-                                    'formats':[int, int, int, int, int, \
-                                               int, int, '|S40', float, \
-                                               float, int]}))
-        ilev = 0
-        
-        continue
-
-
-
-      l = line.split()
-      if iauto >= len(aut['aut']):
-          aut['aut']=numpy.append(aut['aut'], numpy.zeros(10000, dtype=aut['aut'].dtype))
-
-      if len(l)==1:
-        aut['aut'][iauto]['cfi']= -9999
-        aut['aut'][iauto]['lvi']= -9999
-        aut['aut'][iauto]['wi'] = -9999
-        aut['aut'][iauto]['cfc']= -9999
-        aut['aut'][iauto]['lvc']= -9999
-        aut['aut'][iauto]['wc']=-9999
-        aut['aut'][iauto]['aa']=-9999
-        aut['aut'][iauto]['ec_ryd']=-9999
-        aut['aut'][iauto]['ei_ryd']=float(l[0])
-        
-        
-
-      else:
-        aut['aut'][iauto]['cfi'] = int(l[0])
-        aut['aut'][iauto]['lvi'] = int(l[1])
-        aut['aut'][iauto]['wi']  = int(l[2])
-        aut['aut'][iauto]['cfc'] = int(l[3])
-        aut['aut'][iauto]['lvc'] = int(l[4])
-        try:
-          aut['aut'][iauto]['wc'] = int(l[5])
-        except:
-          if l[5]=='X':
-            aut['aut'][iauto]['wc']=-9999
-          else:
-            raise()
-        aut['aut'][iauto]['aa']    = float(l[6])
-        aut['aut'][iauto]['ec_ryd']= float(l[7])
-        
-        try:
-          aut['aut'][iauto]['ei_ryd']= float(l[8])
-        except:
-          print(line, l)
-          raise()
-          
-      iauto+=1
-      
-      
-            
     elif mode=='LEV1':
 
       if ilev <nlev:
@@ -271,12 +165,6 @@ def read_oic(directory):
       if 'DEL' in line: continue
       if len(line) < 10:
         aut['trn']=aut['trn'][:itrn]
-        
-        if not aut['setup']['NV'] in ret.keys():
-          ret[aut['setup']['NV']]={}
-
-        ret[aut['setup']['NV']][aut['setup']['LV']]=aut
-        mode='CFG1'  
       else:
         l = line.split()
         if itrn >=len(aut['trn']):
@@ -300,9 +188,10 @@ def read_oic(directory):
         itrn+=1
 
 
-  return ret
+  return aut
 
-
+a = read_oic("recombination")
+print(a["K"])
 
 
 

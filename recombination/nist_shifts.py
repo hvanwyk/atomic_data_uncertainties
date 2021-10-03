@@ -76,11 +76,11 @@ def graph_shifts(seq, atom, shifts):
     fig.tight_layout()
     fig.savefig("O4 NIST shifts")
     plt.show()
-
+"""
 seq = "li"
 atom = "c"
 grid_size = 100
 cutoff = 5
 
 gen_shifts(seq, atom, grid_size, cutoff)
-
+"""

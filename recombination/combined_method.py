@@ -36,7 +36,7 @@ def get_them_rates_boi(atom):
     
     n_samples = 50
     
-    if False: #"lambdas.npy" in os.listdir(direc):
+    if "lambdas.npy" in os.listdir(direc):
         lambda_samples = np.load(lambdas_file)
     else:
         lambda_samples = lambda_distribution(ion, x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, prior_shape=prior_shape,
@@ -85,9 +85,9 @@ if __name__ == "__main__":
     
     start = time.time()
     
-    shell = "1-2" #core excitation shells
+    shell = "2-2" #core excitation shells
     atom = "o"
-    seq = "he" #isoelectronic sequence
+    seq = "li" #isoelectronic sequence
     nist_cutoff = 0.01
 
     
