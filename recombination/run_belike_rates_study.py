@@ -119,7 +119,7 @@ n_lambdas=2
 fig2=corner.corner(data['be_like_o_pos']['lambda_samples'], labels=[f"$\lambda_{i+1}$" for i in range(n_lambdas)], truths=[1 for i in range(n_lambdas)])
 
 
-rate_samples_combined=np.concatenate((data['be_like_o_pos']['rate_samples'],data['be_like_fe_neg']['rate_samples']))
+rate_samples_combined=np.concatenate((data['be_like_o_pos']['rate_samples'],data['be_like_o_neg']['rate_samples']))
 
 fig3, axs3 = plt.subplots(1,1)
 title_pos='Rate coefficients'
