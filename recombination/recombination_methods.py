@@ -60,12 +60,12 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
     
     with open(asdeck_file, "a+") as asdeckin:
         if (potential == 1):
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='FORM' &END\n")
         else:
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='FORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='FORM' &END\n")
             
         lam = [str(lambd) for lambd in lambdas]
-        asdeckin.write("  " + ' '.join(lam) + "\n")
+        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} &END\n\n")
         
     os.system(up_dir + "/asdeck.x < " + asdeck_file)
@@ -180,12 +180,12 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
         lam = [str(lambd) for lambd in lambdas]
 #        print('lam=',lam)
         if (potential == 1):
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
         else:
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
            
             
-        asdeckin.write("  " + ' '.join(lam) + "\n")
+        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
         
                 
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")
@@ -293,6 +293,8 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
             adasin.write("\n")
             adasin.write(" ".join(nist_str))
     os.system(up_dir + "/adasdr.x < adasin")
+    os.remove("o1u")
+    os.remove("olsu")
     if not compute_xsec:
         with open("adasout", "r") as f:
             string = f.read()
