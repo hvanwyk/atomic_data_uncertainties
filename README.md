@@ -1,7 +1,10 @@
 
 
 # Uncertainties in Atomic Data (uad)
-Systematic treatment of uncertainties in atomic structure.
+Systematic treatment of uncertainties in atomic structure.The first development code is for Dielectronic recombination (DR) and is in the recombination directory. 
+
+
+For recobination, the method uses a Bayesian analysis Markov-Chain Monte-Carlo approach to determine a distribution function of orbital scaling parameters. This distribtion function is then carried through a DR calculation to produce uncertainties on total DR rate coefficients.
 
 
 ## Structure of the code
