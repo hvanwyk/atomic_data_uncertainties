@@ -185,9 +185,9 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
 
     n_samples = lambda_samples.shape[0]
     
-    Rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
+    rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
     
-    rate_interpolators = interpolators(X_1D, Rates)
+    rate_interpolators = interpolators(X_1D, rates)
     
     rate_samples = np.zeros((n_samples,n_points))
     
@@ -198,7 +198,7 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
 #    if outfile:
 #        np.save(outfile, np.array([T, rate_samples]),allow_pickle=True)
         
-    return T, rate_samples
+    return T, rate_samples,rates
     
 
 def energy_optimization(ion, lambda_samples, x_bnd, x_res,up_dir):    
