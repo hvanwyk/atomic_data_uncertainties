@@ -1,0 +1,10 @@
+A.S. DR of Be-like Atoms (2-2 core excitation, capture into n>2)
+ &SALGEB RUN='DR' CUP='IC' MXVORB=2 MXCONF=3 MXCCF=3 KCOR1=1 KCOR2=1 &END
+ 2 0  2 1
+  2    0
+  1    1
+  0    2
+     
+  2    1
+  1    2
+  0    3
