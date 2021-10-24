@@ -51,7 +51,7 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
 
-#    up_dir = "/Users/lochstu/git/stuart_branch_test/recombination/"
+#    print('Calculating structure in:',' direc=',direc)
 
     
     asdeck_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_str"
@@ -142,21 +142,45 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
         ECORIC:  
     """
     direc = create_directories(ion, method)
-#    up_dir = "../../../../../"
     ion_name = f"{ion.species}{ion.ion_charge}"
-#    print('Calculating DR rates oic file:',' pot=',potential,' lambdas=',lambdas)
     
     if method == "lambdas" and lambdas != []:
         direc += "_".join([str(x) for x in lambdas])
-#        up_dir = "../../../../../../"
         if not os.access(direc, os.F_OK):
             os.mkdir(direc)
     
-#    up_dir = "/Users/lochstu/git/stuart_branch_test/recombination/"
+#    print('Calculating DR rates 22-2 oic file:',' direc=',direc,lambdas)
 
+    asdeck_file = f"{ion_name}_das_{ion.shell}_2"
+#First calculate capture into core
+    os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_2.dr {direc}/{asdeck_file}")
+    os.chdir(direc)
+    """
+    Write the SMINIM namelist, including lambda parameters
+    NZION - Z of recombining atom
+    PRINT - output file formatting
+    NLAM - # of lambda parameters used
+    """
+    with open(asdeck_file, "a") as asdeckin:       
+        lam = [str(lambd) for lambd in lambdas]
+        if (potential == 1):
+            asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
+        else:
+            asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
+ 
+        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
+        asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")
+        if ECORIC != 0:
+            asdeckin.write(f"ECORIC={ECORIC} ")
+        asdeckin.write("&END\n\n")
+
+    os.system(up_dir + "/asdeck.x < " + asdeck_file)
+    os.system("mv oicu o1u")
+    
+#Then calculate capture into Rydberg n
+    os.chdir(up_dir)
     asdeck_file = f"{ion_name}_das_{ion.shell}_n"
-
-    os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like.dr {direc}/{asdeck_file}")
+    os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_n.dr {direc}/{asdeck_file}")
     os.chdir(direc)
     
 #    print('number of lambdas',np.shape(lambdas))
@@ -194,8 +218,8 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
         asdeckin.write("&END\n\n")
     
     os.system(up_dir + "/asdeck.x < " + asdeck_file)
-    os.system("mv oicu o1u")
-
+#    os.system("mv oicu o1u")
+    os.system("mv oicu o2u")
     os.chdir(up_dir)
     
 
@@ -293,8 +317,15 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
             adasin.write("\n")
             adasin.write(" ".join(nist_str))
     os.system(up_dir + "/adasdr.x < adasin")
-    os.remove("o1u")
-    os.remove("olsu")
+    if (os.path.exists("o1u")):
+        os.remove("o1u")
+    if (os.path.exists("o2u")):
+        os.remove("o2u")
+    if (os.path.exists("olsu")):
+        os.remove("olsu")
+    if (os.path.exists("olg")):
+        os.remove("olg")
+    
     if not compute_xsec:
         with open("adasout", "r") as f:
             string = f.read()
