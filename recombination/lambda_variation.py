@@ -121,9 +121,12 @@ def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2,
     #
     sampler.run_mcmc(pos, n_steps);
     print('Completed MCMC calculation:')
-    print("Mean acceptance fraction: {0:.3f}".format(np.mean(sampler.acceptance_fraction)))
-    
-    print("Mean autocorrelation time: {0:.3f} steps".format(np.mean(sampler.get_autocorr_time())))
+    acceptance=np.mean(sampler.acceptance_fraction)
+    print("Mean acceptance fraction: {0:.3f}".format(acceptance))
+    autocorrel=np.mean(sampler.get_autocorr_time())
+    print("Mean autocorrelation time: {0:.3f} steps".format(autocorrel))
+#    acceptance=0.8
+#    autocorrel=0.65
      
     #
     # The sampler.chain has shape (n_walkers, n_steps, n_dim)
@@ -136,7 +139,7 @@ def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2,
 #    if outfile is not None:
 #        np.save(outfile, arr=lambda_samples,allow_pickle=True)
     
-    return lambda_samples, Err, Erg, err_interpolators,y_nist
+    return lambda_samples, Err, Erg, err_interpolators,y_nist,acceptance,autocorrel
     
 def energy_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot, plot=True, outfile=None):
     
