@@ -20,6 +20,8 @@ import time
 from graphing import graph_rates_from_file
 from scipy.optimize import minimize
 import multiprocessing as mp
+import time
+
 
 def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
     #
@@ -49,7 +51,7 @@ def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
 
 def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0,nist_shift=False):
     
-    print('In rates_grid: emax=',emax)
+#    print('In rates_grid: emax=',emax)
     E, E_nist, shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
     structure_dr(ion,up_dir,potential=cent_pot, emax=emax)
     T = postprocessing_rates(up_dir,ion, E, E_nist,emax=emax,nist_shift=nist_shift)[0]
@@ -120,11 +122,11 @@ def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2,
     # Run the MCMC routine
     #
     sampler.run_mcmc(pos, n_steps);
-    print('Completed MCMC calculation:')
+#    print('Completed MCMC calculation:')
     acceptance=np.mean(sampler.acceptance_fraction)
-    print("Mean acceptance fraction: {0:.3f}".format(acceptance))
+#    print("Mean acceptance fraction: {0:.3f}".format(acceptance))
     autocorrel=np.mean(sampler.get_autocorr_time())
-    print("Mean autocorrelation time: {0:.3f} steps".format(autocorrel))
+#    print("Mean autocorrelation time: {0:.3f} steps".format(autocorrel))
 #    acceptance=0.8
 #    autocorrel=0.65
      
@@ -153,7 +155,7 @@ def energy_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_po
     
     n_samples = lambda_samples.shape[0]
     E_samples = np.zeros((n_samples, n_energies))
-    print('nsamples, n_energies',n_samples,n_energies)
+#    print('nsamples, n_energies',n_samples,n_energies)
     for i in range(n_samples):
         for j in range(n_energies):
             E_samples[i,j] = energy_interpolators[j](lambda_samples[i])         
@@ -174,22 +176,24 @@ def xsec_data(lambda_samples):
 
 def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=None,nist_shift=False):
         
-    print('In rates_distribution: emax,nist_shift=',emax,nist_shift)
+#    print('In rates_distribution: emax,nist_shift=',emax,nist_shift)
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
-    print('cent_pot in rates_distribution before structure ',cent_pot,'shape X_1D,x_ravel',np.shape(X_1D),np.shape(x_ravel))
+#    print('cent_pot in rates_distribution before structure ',cent_pot,'shape X_1D,x_ravel',np.shape(X_1D),np.shape(x_ravel))
     E, E_nist, E_shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
 
-    print('cent_pot in rates_distribution before DR',cent_pot)
+#    print('cent_pot in rates_distribution before DR',cent_pot)
     structure_dr(ion,up_dir,potential=cent_pot,emax=emax)
 
     T = postprocessing_rates(up_dir,ion,E, E_nist,emax=emax,nist_shift=nist_shift)[0]
     n_points = T.size
-    print('n_points=',n_points,'lambda_samples',np.shape(lambda_samples),'emax=',emax)
+#    print('n_points=',n_points,'lambda_samples',np.shape(lambda_samples),'emax=',emax)
 
     n_samples = lambda_samples.shape[0]
     
+    start_rates_grid = time.time()
     rates = rates_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax=emax,nist_shift=nist_shift)
     
+    start_interpolators = time.time()
     rate_interpolators = interpolators(X_1D, rates)
     
     rate_samples = np.zeros((n_samples,n_points))
@@ -200,6 +204,8 @@ def rates_distribution(ion, up_dir, emax, lambda_samples, x_bnd, x_res, cent_pot
         
 #    if outfile:
 #        np.save(outfile, np.array([T, rate_samples]),allow_pickle=True)
+    finish = time.time()
+#    print('Time in rates: grid=',start_interpolators-start_rates_grid,'Interpolators=',finish-start_interpolators)
         
     return T, rate_samples,rates
     
