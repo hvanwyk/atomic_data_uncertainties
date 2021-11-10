@@ -16,6 +16,7 @@ if ".." not in sys.path:
 from bayesian_methods import lambdas_grid
 from lambda_variation import energy_grid, rates_grid,  lambda_distribution, energy_distribution, rates_distribution, energy_optimization
 from utilities import get_nist_energy
+import multiprocessing as mp
 
 def run_case_par(seq,shell,nist_cutoff, prior_shape,likelihood_shape, cent_pot,n_walkers,n_steps,up_dir,nist_shift,grid_resolution,x_bnd,egy_dist,atom):
     
@@ -26,7 +27,7 @@ def run_case_par(seq,shell,nist_cutoff, prior_shape,likelihood_shape, cent_pot,n
     X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
 
  
-    print('Evaluating lambda distribution functions using MCMC for',atom)
+    print('Evaluating lambda distribution functions using MCMC for',atom,' on CPU # ',mp.current_process().name)
     lambda_samples, Err, Erg, err_interpolators,y_nist,accept,autocorrel = lambda_distribution(ion,up_dir,cent_pot=cent_pot,x_bnd=x_bnd, x_res=x_res, nist_cutoff=nist_cutoff, 
                       prior_shape=prior_shape, n_walkers=n_walkers, n_steps=n_steps,
                       likelihood_shape=likelihood_shape,emax=emax)
