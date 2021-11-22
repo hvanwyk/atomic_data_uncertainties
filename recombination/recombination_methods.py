@@ -58,6 +58,8 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
     os.system(f"cp asdeck/structure/{ion.isoelec_seq}-like_str {direc}/{asdeck_file}")
     os.chdir(direc)
     
+    print('Now in directory', direc)
+    
     with open(asdeck_file, "a+") as asdeckin:
         if (potential == 1):
            asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
@@ -103,7 +105,7 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
 def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
                  MENG=-15, EMIN=0, emax=2, ECORIC=0):
     """
-    Structure run for dielectronic radiation
+    Structure run for dielectronic recombination
     
     Inputs:
     
@@ -180,12 +182,12 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
         lam = [str(lambd) for lambd in lambdas]
 #        print('lam=',lam)
         if (potential == 1):
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
         else:
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
            
             
-        asdeckin.write("  " + ' '.join(lam) + "\n")
+        asdeckin.write("  " + '1.0 ' + ' '.join(lam) + "\n")
         
                 
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")

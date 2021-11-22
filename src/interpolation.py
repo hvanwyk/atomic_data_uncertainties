@@ -23,7 +23,7 @@ Created on Tue Apr 27 11:00:57 2021
 class Interpolator:
     """
     """
-    def __init__(self, function, domain, n_outputs, output_labels=None, 
+    def __init__(self, function, domain, num_outputs, output_labels=None, 
                  input_labels=None, interpolation_type='local-polynomial',
                  resolution='auto', tol=1e-6):
         """
@@ -42,7 +42,7 @@ class Interpolator:
             function: mapping from domain to R^n used to evaluate the true 
                 function.
             
-            n_outputs: int, number of outputs
+            num_outputs: int, number of outputs
             
             output_labels: str/int, list of n_output output labels
             
@@ -63,7 +63,7 @@ class Interpolator:
         # Input/Output Dimensions
         # 
         self.__n_inputs = domain.shape[0]  # dimension of hypercube
-        self.__n_outputs = n_outputs  # number of outputs
+        self.__num_outputs = num_outputs  # number of outputs
         
         #
         # Construct the interpolant
@@ -114,11 +114,11 @@ class Interpolator:
             inputs: str, list of length n_inputs containing the 
                 labels for the input variables
                 
-            outputs: list of length n_outputs containing the
+            outputs: list of length num_outputs containing the
                 labels for the output variables.
         """
         self.__labels = {}
-        n_inputs,n_outputs = self.shape()  # Number of inputs and outputs
+        n_inputs,num_outputs = self.shape()  # Number of inputs and outputs
         
         #
         # Add labels for the input variables
@@ -136,7 +136,7 @@ class Interpolator:
         # 
         if outputs is not None:
             # Check that dimensions match
-            assert len(outputs)==n_outputs, 'The number of output labels'+\
+            assert len(outputs)==num_outputs, 'The number of output labels'+\
                 'does not match the number of outputs'
         
         # Store output labels
@@ -154,7 +154,7 @@ class Interpolator:
         """
         Returns the number of inputs and outputs
         """
-        return self.__n_inputs, self.__n_outputs
+        return self.__n_inputs, self.__num_outputs
     
     
     def evaluate(self,x):

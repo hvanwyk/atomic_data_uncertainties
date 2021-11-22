@@ -22,7 +22,7 @@ Created on Wed Apr 21 11:09:08 2021
 @author: loch
 """
 import numpy as np
-import sys
+import sys, os
 import matplotlib.pyplot as plt
 
 from recombination_methods import State, structure, structure_dr, postprocessing_rates, get_rate
@@ -33,7 +33,7 @@ if ".." not in sys.path:
 from bayesian_methods import log_posterior, interpolators, lambdas_grid
 import time
 from run_case import run_case
-
+from utilities import get_nist_energy
 
 atom = "o"
 seq = "li"
@@ -58,6 +58,10 @@ x_res = np.array([grid_resolution, grid_resolution])
     
 X_1D, x_ravel = lambdas_grid(x_bnd, x_res)
     
+up_dir=res=os.getcwd()
+
+nist_vals = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+emax=nist_vals[-1]*1.1 
 
 n_walkers=100
 n_steps=3000
@@ -76,10 +80,10 @@ print('number of steps per walker = ', n_steps)
 start = time.time()
 
 cent_pot=1
-data_li_like_o_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
+data_li_like_o_pos = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir)
 
 cent_pot=-1
-data_li_like_o_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps)
+data_li_like_o_neg = run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,file_name_common, x_bnd, x_res, X_1D, grid_resolution, cent_pot,n_walkers,n_steps,emax,up_dir)
 
 end = time.time()
 print(f"Runtime: {int(end-start)}s")

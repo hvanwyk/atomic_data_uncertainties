@@ -43,7 +43,7 @@ def run_case(atom,seq,shell,ion,nist_cutoff, prior_shape,likelihood_shape,direc,
     
    rates_file = direc+"rates"+file_name_common+".npy"
    print('Calculating rate distributions using cent_pot=',cent_pot,'emax=',emax,'nist_shift=',nist_shift)
-   T, rate_samples = rates_distribution(ion, up_dir,emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=rates_file,nist_shift=nist_shift)
+   T, rate_samples, rates = rates_distribution(ion, up_dir,emax, lambda_samples, x_bnd, x_res, cent_pot,outfile=rates_file,nist_shift=nist_shift)
     
 
    rate_avg = np.empty(19)

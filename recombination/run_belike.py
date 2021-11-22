@@ -51,7 +51,7 @@ from run_case import run_case
 
 #atoms=['b','c','n','o','f','ne','na','mg','al','si','k','ti','cr','fe']
 #atoms=['ca','sc','ti','v','cr','mn']
-atoms=['o','fe']
+atoms=['o']
 
 seq = "be"
 shell = "2-2"

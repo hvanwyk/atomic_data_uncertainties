@@ -8,6 +8,14 @@ Created on Wed Oct 16 15:31:24 2019
 
 import os
 import numpy as np
+from pathlib import Path
+
+
+def root_folder() -> Path:
+    """
+    Return 
+    """
+    return Path(__file__).parent
 
 
 def create_directories(ion, method="lambdas"):
