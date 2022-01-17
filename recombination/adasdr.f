@@ -8034,7 +8034,7 @@ C WRITE TOTALS TO UNIT6 AND ADF09
 C
       NMXW=MIN(NBINM,10)
       IF(JTEMP.GT.0)THEN                                          !NBIN0
-        F732='(1PE10.2,1X,(10E10.2))'
+        F732='(1PE10.2,1X,(10E10.3))'
         IF(NBIN0.EQ.0)THEN
           WRITE(6,730)
           DO J=JTW1,JTW2
@@ -8049,7 +8049,7 @@ C
         ENDIF
       ELSE                                                   !NBIN0.LT.0
         WRITE(6,731)
-        F732='(1PE10.3,1X,(10E10.2))'
+        F732='(1PE10.3,1X,(10E10.3))'
         DO J=JTW1,JTW2                  !WRITE RESTRICTED RANGE FOR BINS
           WRITE(6,F732)EBIN(J),(ALF(J,L),L=1,NBINM)
 c     x    ,ebin(j),(sbin(j,l),l=1,nbinm)
