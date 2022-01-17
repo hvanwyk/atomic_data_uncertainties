@@ -55,17 +55,30 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
 
     
     asdeck_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_str"
+    energy_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_energies"
     os.system(f"cp asdeck/structure/{ion.isoelec_seq}-like_str {direc}/{asdeck_file}")
     os.chdir(direc)
     
     with open(asdeck_file, "a+") as asdeckin:
         if (potential == 1):
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='FORM' &END\n")
+           if ion.isoelec_seq == "he":
+               asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='FORM' &END\n")
+           else:
+               asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='FORM' &END\n")
         else:
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='FORM' &END\n")
+           if ion.isoelec_seq == "he":
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='FORM' &END\n")
+           else:
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='FORM' &END\n")
+
             
         lam = [str(lambd) for lambd in lambdas]
-        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
+        if ion.isoelec_seq == "he":
+            asdeckin.write("  "  + ' '.join(lam) + "\n")
+        else:
+            asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")        
+
+#asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} &END\n\n")
         
     os.system(up_dir + "/asdeck.x < " + asdeck_file)
@@ -78,8 +91,8 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
     #nist = np.transpose(np.genfromtxt(up_dir +f"NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist", skip_header=1))
     #y_nist = nist[-1]
     if method=="lambdas" or method=="combined":
-        y_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
-    y, ground = read_levels("LEVELS") 
+        y_nist,all_nist = get_nist_energy(up_dir + f"/NIST/isoelectronic/{ion.isoelec_seq}/{ion.species}{ion.ion_charge}.nist")
+    y, ground, all_levels = read_levels("LEVELS") 
     if E_absolute == True:
         y += ground
         if method == "lambdas" or method=="combined":
@@ -92,12 +105,18 @@ def structure(up_dir, ion, method="lambdas", lambdas=[], potential=1, MENG=-15, 
     os.remove("ols")
     os.remove("TERMS")
 
-    os.chdir(up_dir)
     
     if method=="lambdas" or method=="combined":
-        y_shift = compare_to_nist(y, y_nist)
+        y_shift,nist_reorder = compare_to_nist(y, y_nist, all_nist, all_levels)
+        with open(energy_file, "w") as energies:
+             energies.write(' '.join(str(x) for x in y))
+             energies.write('\n')
+             energies.write(' '.join(str(x) for x in nist_reorder))
+             energies.write('\n')
+        os.chdir(up_dir)
         return np.array([y]).flatten(), np.array([y_nist]).flatten(), np.array([y_shift]).flatten()
     else:
+        os.chdir(up_dir)
         return np.array([y]).flatten()
 
 def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3, NMAX=15, JND=14, LMIN=0, LMAX=7, 
@@ -152,8 +171,13 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
 #    print('Calculating DR rates 22-2 oic file:',' direc=',direc,lambdas)
 
     asdeck_file = f"{ion_name}_das_{ion.shell}_2"
+
 #First calculate capture into core
-    os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_2.dr {direc}/{asdeck_file}")
+    if ion.shell == "2-2":
+       os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_2.dr {direc}/{asdeck_file}")
+    else:
+       os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_12_2.dr {direc}/{asdeck_file}")
+
     os.chdir(direc)
     """
     Write the SMINIM namelist, including lambda parameters
@@ -164,11 +188,22 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
     with open(asdeck_file, "a") as asdeckin:       
         lam = [str(lambd) for lambd in lambdas]
         if (potential == 1):
-            asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
+           if ion.isoelec_seq == "he":
+               asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+           else:
+               asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
         else:
-            asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           if ion.isoelec_seq == "he":
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           else:
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
  
-        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
+        if ion.isoelec_seq == "he":
+            asdeckin.write("  "  + ' '.join(lam) + "\n")
+        else:
+            asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")        
+
+#asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")
         if ECORIC != 0:
             asdeckin.write(f"ECORIC={ECORIC} ")
@@ -180,7 +215,11 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
 #Then calculate capture into Rydberg n
     os.chdir(up_dir)
     asdeck_file = f"{ion_name}_das_{ion.shell}_n"
-    os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_n.dr {direc}/{asdeck_file}")
+    if ion.shell == "2-2":
+       os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_22_n.dr {direc}/{asdeck_file}")
+    else:
+       os.system(f"cp asdeck/dr/{ion.isoelec_seq}-like_12_n.dr {direc}/{asdeck_file}")
+
     os.chdir(direc)
     
 #    print('number of lambdas',np.shape(lambdas))
@@ -204,13 +243,23 @@ def structure_dr(ion, up_dir, method="lambdas", lambdas=[], potential=1, NMIN=3,
         lam = [str(lambd) for lambd in lambdas]
 #        print('lam=',lam)
         if (potential == 1):
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
+           if ion.isoelec_seq == "he":
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} PRINT='UNFORM' &END\n")
+           else:
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} PRINT='UNFORM' &END\n")
         else:
-           asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           if ion.isoelec_seq == "he":
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)} ORTHOG='YES' PRINT='UNFORM' &END\n")
+           else:
+              asdeckin.write(f" &SMINIM  NZION={np.sign(potential)*ion.nuclear_charge} NLAM={len(lambdas)+1} ORTHOG='YES' PRINT='UNFORM' &END\n")
            
             
-        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
+#        asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")
         
+        if ion.isoelec_seq == "he":
+            asdeckin.write("  "  + ' '.join(lam) + "\n")
+        else:
+            asdeckin.write("  " + "1.0 " + ' '.join(lam) + "\n")        
                 
         asdeckin.write(f" &SRADCON  MENG={MENG} EMIN={EMIN} EMAX={emax} ")
         if ECORIC != 0:
@@ -281,6 +330,10 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
             os.mkdir(direc)
     
     os.chdir(direc)
+
+    energy_file = f"{ion.species}{ion.ion_charge}_das_{ion.shell}_energies"
+    with open(energy_file, "r") as energies:
+         Egy = energies.read().splitlines()
     
     with open("adasin", "w") as adasin:
         with open(levels_file, "r") as levels:
@@ -304,7 +357,8 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
             
             for i in range(1, len(lines)-1):
                 line = lines[i].split()
-                adasin.write(" " + " ".join(line[0:4]) + "\n")
+#                adasin.write(" " + "  ".join(line[0:4]) + "\n")
+                adasin.write(lines[i][0:10] + "\n")
             E_str = [str(x) for x in E]
             if method == "lambdas":
                 nist_str = [str(x) for x in E_nist]
@@ -316,6 +370,9 @@ def postprocessing_rates(up_dir, ion, E, E_nist=[], method="lambdas", lambdas=[]
             adasin.write(" ".join(E_str))
             adasin.write("\n")
             adasin.write(" ".join(nist_str))
+            adasin.write("\n")
+#            adasin.write(Egy[0] + "\n")
+#            adasin.write(Egy[1] + "\n")
     os.system(up_dir + "/adasdr.x < adasin")
     if (os.path.exists("o1u")):
         os.remove("o1u")

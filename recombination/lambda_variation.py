@@ -9,7 +9,6 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import emcee
-import corner 
 from recombination_methods import State, structure, structure_dr, postprocessing_rates, get_rate
 if ".." not in sys.path:
     sys.path.append("..")
@@ -17,7 +16,6 @@ if "../src/" not in sys.path:
     sys.path.append("../src/")
 from bayesian_methods import log_posterior, interpolators, lambdas_grid
 import time
-from graphing import graph_rates_from_file
 from scipy.optimize import minimize
 import multiprocessing as mp
 import time
@@ -36,9 +34,9 @@ def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
     potential = cent_pot
     for i in range(n_points):
         x = x_ravel[i,:]
-        if ion.isoelec_seq == "he":
-            x=np.r_[1.0,x]
-#        potential = np.random.choice([-1, 1])
+#        if ion.isoelec_seq == "he":
+#            x=np.r_[1.0,x]
+##        potential = np.random.choice([-1, 1])
 
         data = structure(up_dir,ion,lambdas=x, potential=potential,emax=emax)
         err[i,:] = data[2]
@@ -51,7 +49,6 @@ def energy_grid(ion, up_dir, x_ravel, x_res, cent_pot, emax):
 
 def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0,nist_shift=False):
     
-#    print('In rates_grid: emax=',emax)
     E, E_nist, shift = structure(up_dir,ion,potential=cent_pot,emax=emax)
     structure_dr(ion,up_dir,potential=cent_pot, emax=emax)
     T = postprocessing_rates(up_dir,ion, E, E_nist,emax=emax,nist_shift=nist_shift)[0]
@@ -62,17 +59,18 @@ def rates_grid(ion, up_dir, x_ravel, x_res, cent_pot, parallel=False,emax=2.0,ni
     if parallel:
         n_procs = mp.cpu_count()
         pool = mp.Pool(processes=n_procs)
-        if ion.isoelec_seq == "he":
-            rates = [pool.apply(get_rate, args=(ion, np.r_[1.0,x])) for x in x_ravel]
-        else:
-            rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
+#        if ion.isoelec_seq == "he":
+#            rates = [pool.apply(get_rate, args=(ion, np.r_[1.0,x])) for x in x_ravel]
+#        else:
+#            rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
+        rates = [pool.apply(get_rate, args=(ion, x)) for x in x_ravel]
         rates = np.array(rates)
     
     else:
         for i in range(n_points):
             x = x_ravel[i,:]
-            if ion.isoelec_seq == "he":
-                x=np.r_[1.0,x]
+#            if ion.isoelec_seq == "he":
+#                x=np.r_[1.0,x]
             E, E_nist, delta_E = structure(up_dir,ion,lambdas=x,potential=cent_pot, emax=emax)
             structure_dr(ion, up_dir,lambdas=x,potential=cent_pot, emax=emax)
             rates[i, :] = postprocessing_rates(up_dir,ion, E, E_nist, lambdas=x,emax=emax,nist_shift=nist_shift)[1]
@@ -91,7 +89,7 @@ def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2,
     
     # Construct interpolators
     n_energies = y_nist.size
-    
+
     Err, Erg = energy_grid(ion, up_dir, x_ravel, x_res,cent_pot,emax)
     
     err_interpolators = interpolators(X_1D, Err)
@@ -102,7 +100,9 @@ def lambda_distribution(ion, up_dir,x_bnd, x_res, nist_cutoff=0.05, n_lambdas=2,
     #
     # Likelihood is based on error*100% error in each component 
     # 
-    y_bnd = np.zeros((n_energies, n_lambdas))
+    y_bnd = np.zeros((n_energies, 2))
+#Note I replaced n_lambdas here with just 2; I think it just gives thr bounds on each energy in the MCMC search.
+#    y_bnd = np.zeros((n_energies, n_lambdas))
     for i in range(n_energies):
         y_bnd[i, :] = -1, 1
         
