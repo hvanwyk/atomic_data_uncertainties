@@ -81,8 +81,11 @@ def get_nist_energy(fname):
         E_nist: double, NIST energy
     """
     nist = np.transpose(np.genfromtxt(fname, skip_header=1))
+    all_nist = nist
+
     E_nist = nist[-1]
-    return E_nist
+#    print('NIST energies= ',E_nist,all_nist)
+    return E_nist,all_nist
 
 
 def read_levels(levels_file):
@@ -101,12 +104,13 @@ def read_levels(levels_file):
     """
     data = np.transpose(np.genfromtxt(levels_file, skip_header=1))
     y = data[-1][:len(data[-1])-1]
+    all_levels=data
     ground = data[-1][-1]
-    
-    return y, ground
+#    print('LEVELS CHECK',all_levels)
+    return y, ground,all_levels
 
 
-def compare_to_nist(y_comp, y_nist):
+def compare_to_nist(y_comp, y_nist, all_nist, all_levels):
     """
     Compute signed relative error based on NIST value.
     
@@ -121,6 +125,21 @@ def compare_to_nist(y_comp, y_nist):
     
         err: double, relative error
     """
-    err = ((y_comp - y_nist) / (1+y_nist))
+
+    err=np.zeros(len(y_nist))
+    nist_reorder=np.zeros(len(y_nist))
+    icount=0
+    for i in range(1,len(y_comp)):
+        for j in range(1,len(y_nist)):
+            if (np.array_equal(all_nist[:,j][0:4],all_levels[:,i][0:4])):
+               err[i] = ((y_comp[i] - y_nist[j]) / (1+y_nist[j]))
+               nist_reorder[i] = y_nist[j]
+               icount=icount+1
+               if(i != j):
+                  print('NIST Order changed')
+#               print('NIST MATCH',i,j, y_nist[j], y_comp[i])
+     
+#    print('NIST COMPARE',y_comp, y_nist, nist_reorder)
+    
     err[err==0]=1e-30
-    return err
+    return err,nist_reorder
